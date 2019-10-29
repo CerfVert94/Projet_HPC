@@ -1,11 +1,7 @@
+#ifndef __IMG_H__
+#define __IMG_H__
 
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include "nrutil.h"
+#pragma message("  include  img.h")
 
 #define MOVE 1
 #define STATIC 0

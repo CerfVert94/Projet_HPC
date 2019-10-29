@@ -1,7 +1,7 @@
 #ifndef __MOUVEMENT_H__
 #define __MOUVEMENT_H__
 
-#include "img.h"
+#pragma message("  include  mouvement.h")
 
 #define THRESHOLD 5
 #define N 2
