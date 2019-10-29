@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mymacro.h"
-#include "test_simd1.h"
+// #include "mymacro.h"
+// #include "test_simd1.h"
 
 // ============
 void info(void)

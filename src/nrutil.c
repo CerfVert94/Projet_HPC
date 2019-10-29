@@ -1124,7 +1124,7 @@ void SavePGM_ui8matrix(uint8 **m, long nrl, long nrh, long ncl, long nch, char *
 
   /* enregistrement de l'image au format rpgm */
 
-  sprintf(buffer,"P5\n%d %d\n255\n",ncol, nrow);
+  sprintf(buffer,"P5\n%ld %ld\n255\n",ncol, nrow);
   fwrite(buffer,strlen(buffer),1,file);
   for(i=nrl; i<=nrh; i++)
     WritePGMrow(m[i], ncol, file);
@@ -1218,7 +1218,7 @@ void SavePPM_rgb8matrix(rgb8 **m, long nrl, long nrh, long ncl, long nch, char *
 
   /* enregistrement de l'image au format rpgm */
 
-  sprintf(buffer,"P6\n%d %d\n255\n",ncol, nrow);
+  sprintf(buffer,"P6\n%ld %ld\n255\n",ncol, nrow);
   fwrite(buffer,strlen(buffer),1,file);
   for(i=nrl; i<=nrh; i++)
     WritePNMrow((uint8*)m[i], ncol, file);

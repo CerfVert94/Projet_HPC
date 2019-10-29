@@ -1,3 +1,10 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <assert.h>
+#include "nrdef.h"
+#include "nrutil.h"
 #include "img.h"
 
 void init_pixel(p_pixel pixel, uint8 pixval) {
@@ -16,7 +23,7 @@ p_image create_image(char* filename) {
 	/*alloc in memory for image*/
 	tmp = (p_image)malloc(sizeof(image));
 	if (!tmp)
-		printf("Malloc error of image in create_image\n")
+		printf("Malloc error of image in create_image\n");
 	/*alloc in memory for pixels*/
 	tmp->img = (p_pixel*)malloc((int)h*sizeof(p_pixel));
 	for (i = 0; i < (int)h; i++)
@@ -24,7 +31,7 @@ p_image create_image(char* filename) {
 	/*init pixels and variables for image*/
 	for (i = 0; i < (int)h; i++) {
 		for (j = 0; j < (int)w; j++)
-			init_pixel((tmp->img)[i][j], tmp[i][j]); 
+			init_pixel(&(tmp->img)[i][j], mat[i][j]); 
 	}
 	tmp->height = (int)h;
 	tmp->width = (int)w;
@@ -36,7 +43,7 @@ void free_image(p_image image) {
 
 	int i;
 	for (i = 0; i < image->height; i++)
-		free((image->img[i]))
+		free((image->img[i]));
 	free(image->img);
 	free(image);
 }
