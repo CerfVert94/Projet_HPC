@@ -6,7 +6,7 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE = mouvement.c img.c nrutil.c vnrutil.c mutil.c main.c
+FILE =  img.c main.c mouvement.c nrutil.c vnrutil.c mutil.c
  
 # -- Paths ----------
 SRC_PATH = src
@@ -40,7 +40,7 @@ CFLAGS =  $(C_CC_FLAGS) $(C_DEBUG_FLAGS)        $(C_ARCH_FLAGS) $(C_OS_FLAGS) $(
 LDFLAGS = $(C_CC_FLAGS) $(C_OPTIMISATION_FLAGS) $(C_ARCH_FLAGS) $(C_OS_FLAGS) $(C_CONFIG_FLAGS) $(C_INC_FLAGS)
 
 # -- Final product ----------
-PRODUCT   = tp_SSE.exe
+PRODUCT   = project
 
 # -- src and obj List ----------
 SRC = $(addprefix ${SRC_PATH}/, $(FILE))

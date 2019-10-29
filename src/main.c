@@ -4,9 +4,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "nrdef.h"
+#include "img.h"
+#include "mouvement.h"
 
-#include "mymacro.h"
-#include "test_simd1.h"
+//#include "mymacro.h"
+//#include "test_simd1.h"
 
 // ============
 void info(void)
@@ -29,6 +32,7 @@ int main(void)
 {
     info();
     //test_simd1();
+    test();
     
     return 0;    
 }
