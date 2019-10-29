@@ -1,10 +1,12 @@
-
+#ifndef __IMG_H__
+#define __IMG_H__
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <stdint.h>
 #include "nrutil.h"
 
 #define MOVE 1
