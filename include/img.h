@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -25,3 +27,5 @@ void init_pixel(p_pixel pixel, uint8 pixval);
 p_image create_image(char* filename);
 
 void free_image(p_image image);
+
+#endif // __IMG_H__
