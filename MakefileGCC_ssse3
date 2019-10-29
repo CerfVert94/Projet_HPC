@@ -6,8 +6,8 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE = main.c mouvement.c img.c nrutil.c vnrutil.c mutil.c
-
+FILE = mouvement.c img.c nrutil.c vnrutil.c mutil.c main.c
+ 
 # -- Paths ----------
 SRC_PATH = src
 OBJ_PATH = obj

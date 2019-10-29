@@ -7,6 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
+#include "nrdef.h"
 #include "nrutil.h"
 
 #define MOVE 1
