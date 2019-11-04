@@ -10,7 +10,10 @@ typedef struct image {
 	long nrh;
 	long ncl;
 	long nch;
-	uint8** img;
+	uint8** source;
+	uint8** fond;
+	uint8** diff;
+	uint8** var;
 	uint8** move;
 } image, *p_image;
 
