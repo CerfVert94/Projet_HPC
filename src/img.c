@@ -18,33 +18,32 @@ p_image create_image(char* filename) {
 	/*alloc in memory for image*/
 	tmp = (p_image)malloc(sizeof(image));
 	if (!tmp)
-		printf("Malloc error of image in create_image\n");
-	tmp->img = LoadPGM_ui8matrix(filename, &rl, &rh, &cl, &ch);
+		printf("Malloc error of image in %s\n", __func__);
+	tmp->I = LoadPGM_ui8matrix(filename, &rl, &rh, &cl, &ch);
 	tmp->nrl = rl;
 	tmp->nrh = rh;
 	tmp->ncl = cl;
 	tmp->nch = ch;
 
 	uint8** var = ui8matrix(rl, rh, cl, ch);
-	tmp->source = var;
-	var = ui8matrix(rl, rh, cl, ch);
-    tmp->fond = var;
+    tmp->M = var;
     var = ui8matrix(rl, rh, cl, ch);
-    tmp->diff = var;
+    tmp->O = var;
     var = ui8matrix(rl, rh, cl, ch);
-    tmp->var = var;
+    tmp->V = var;
     var = ui8matrix(rl, rh, cl, ch);
-    tmp->move = var;
+    tmp->E = var;
 
 	return tmp;
 }
 
 void free_image(p_image image) {
+
+	free_ui8matrix(image->I, image->nrl, image->nrh, image->ncl, image->nch);
+	free_ui8matrix(image->M, image->nrl, image->nrh, image->ncl, image->nch);
+	free_ui8matrix(image->O, image->nrl, image->nrh, image->ncl, image->nch);
+	free_ui8matrix(image->V, image->nrl, image->nrh, image->ncl, image->nch);
+	free_ui8matrix(image->E, image->nrl, image->nrh, image->ncl, image->nch);
 	free(image);
-	free_ui8matrix(image->img, image->nrl, image->nrh, image->ncl, image->nch);
-	free_ui8matrix(image->source, image->nrl, image->nrh, image->ncl, image->nch);
-	free_ui8matrix(image->fond, image->nrl, image->nrh, image->ncl, image->nch);
-	free_ui8matrix(image->diff, image->nrl, image->nrh, image->ncl, image->nch);
-	free_ui8matrix(image->var, image->nrl, image->nrh, image->ncl, image->nch);
-	free_ui8matrix(image->move, image->nrl, image->nrh, image->ncl, image->nch);
+
 }
