@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "nrdef.h"
 #include "nrutil.h"
+#include "util.h"
 
 #include "img.h"
 

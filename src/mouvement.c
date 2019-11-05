@@ -2,17 +2,15 @@
 #include <stdio.h>
 #include "nrdef.h"
 #include "nrutil.h"
+#include "util.h"
 #include "img.h"
+
 #include "mouvement.h"
 
-#define Vmin 1
-#define Vmax 254
 
-#define max(a,b) (a >= b ? a : b)
-#define min(a,b) (a <= b ? a : b)
-
+/*-----------------------------------------------*/
 void routine_FrameDifference(p_image t, p_image t1) {
-
+/*-----------------------------------------------*/
 	int i, j;
 	uint8 thresh = THRESHOLD, diff;
 	for (i = 0; i < t->nrh; i++) {
@@ -29,8 +27,9 @@ void routine_FrameDifference(p_image t, p_image t1) {
 
 }
 
+/*-----------------------------*/
 void SigmaDelta_step0(p_image t0) {
-	
+/*-----------------------------*/
 	copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
 	int i, j;
 	for (i = 0; i < t0->nrh; i++) {
@@ -39,9 +38,11 @@ void SigmaDelta_step0(p_image t0) {
 	}
 }
 
+/*-----------------------------------------*/
 void SigmaDelta_step1(p_image t, p_image t_1) {
-
+/*-----------------------------------------*/
 	int i, j;
+
 	// STEP 1 : M Estimation
 	for (i = 0; i < t->nrh; i++) {
 		for (j = 0; j < t->nch; j++) {
@@ -62,7 +63,7 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 
 	// STEP 3 : V Update & Clamping
 	for (i = 0; i < t->nrh; i++) {
-		for (j = 0; j < t->nch; j++) {
+		for (j = 0; j < t->nch; j++) {
 			if (t_1->V[i][j] < (N * t->O[i][j]))
 				t->V[i][j] = t_1->V[i][j] + 1;
 			else if (t_1->V[i][j] > (N * t->O[i][j]))
