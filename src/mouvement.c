@@ -8,6 +8,9 @@
 #define Vmin 1
 #define Vmax 254
 
+#define max(a,b) (a >= b ? a : b)
+#define min(a,b) (a <= b ? a : b)
+
 void routine_FrameDifference(p_image t, p_image t1) {
 
 	int i, j;
@@ -26,7 +29,8 @@ void routine_FrameDifference(p_image t, p_image t1) {
 
 }
 
-void SigDelta_step0(p_image t0) {
+void SigmaDelta_step0(p_image t0) {
+	
 	copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
 	int i, j;
 	for (i = 0; i < t0->nrh; i++) {
@@ -52,19 +56,43 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 
 	// STEP 2 : O Computation
 	for (i = 0; i < t->nrh; i++) {
-		for (j = 0; j < t->nch; j++) {
+		for (j = 0; j < t->nch; j++)
 			t->O[i][j] = abs(t->M[i][j] - t->I[i][j]);
+	}
+
+	// STEP 3 : V Update & Clamping
+	for (i = 0; i < t->nrh; i++) {
+		for (j = 0; j < t->nch; j++) {
+			if (t_1->V[i][j] < (N * t->O[i][j]))
+				t->V[i][j] = t_1->V[i][j] + 1;
+			else if (t_1->V[i][j] > (N * t->O[i][j]))
+				t->V[i][j] = t_1->V[i][j] - 1;
+			else
+				t->V[i][j] = t_1->V[i][j];
+			t->V[i][j] = max(min(t->V[i][j], Vmax), Vmin);
+		}
+	}
+
+	//STEP 4 : E Estimation
+	for (i = 0; i < t->nrh; i++) {
+		for (j = 0; j < t->nch; j++) {
+			if (t->O[i][j] < t->V[i][j] )
+				t->E[i][j] = 0;
+			else
+				t->E[i][j] = 1;
 		}
 	}
 }
 
 void test() {
-	p_image t = create_image("../car3/car_3000.pgm");
-	p_image t1 = create_image("../car3/car_3150.pgm");
+	p_image t_1 = create_image("../car3/car_3000.pgm");
+	p_image t = create_image("../car3/car_3001.pgm");
 
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
-	routine_FrameDifference(t, t1);
+
+	SigmaDelta_step0(t_1);
+	SigmaDelta_step1(t, t_1);
 	for (int i = 150; i < 200; i++) { 
 		for (int j = 150; j < 200; j++) {
 			printf("%d ", t->E[i][j]);
@@ -73,5 +101,5 @@ void test() {
 	}
 
 	free_image(t);
-	free_image(t1);
+	free_image(t_1);
 }

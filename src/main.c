@@ -30,8 +30,7 @@ void info(void)
 int main(void)
 // -----------
 {
-    info();
-    //test_simd1();
+    //info();
     test();
     
     return 0;    
