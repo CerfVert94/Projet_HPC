@@ -45,7 +45,6 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 /*-----------------------------------------*/
 	int i, j;
 
-	// STEP 1 : M Estimation
 	for (i = 0; i < t->nrh; i++) {
 		for (j = 0; j < t->nch; j++) {
 			if (t_1->M[i][j] < t->I[i][j])
@@ -57,13 +56,25 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 		}
 	}
 
-	// STEP 2 : O Computation
+}
+
+/*-----------------------------------------*/
+void SigmaDelta_step2(p_image t) {
+/*-----------------------------------------*/
+	int i, j;
+
 	for (i = 0; i < t->nrh; i++) {
 		for (j = 0; j < t->nch; j++)
 			t->O[i][j] = abs(t->M[i][j] - t->I[i][j]);
 	}
 
-	// STEP 3 : V Update & Clamping
+}
+
+/*-----------------------------------------*/
+void SigmaDelta_step3(p_image t, p_image t_1) {
+/*-----------------------------------------*/
+	int i, j;
+
 	for (i = 0; i < t->nrh; i++) {
 		for (j = 0; j < t->nch; j++) {
 			if (t_1->V[i][j] < (N * t->O[i][j]))
@@ -76,7 +87,13 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 		}
 	}
 
-	//STEP 4 : E Estimation
+}
+
+/*-----------------------------------------*/
+void SigmaDelta_step4(p_image t) {
+/*-----------------------------------------*/
+	int i, j;
+
 	for (i = 0; i < t->nrh; i++) {
 		for (j = 0; j < t->nch; j++) {
 			if (t->O[i][j] < t->V[i][j] )
@@ -85,7 +102,22 @@ void SigmaDelta_step1(p_image t, p_image t_1) {
 				t->E[i][j] = 1;
 		}
 	}
+
 }
+
+
+/*-----------------------------------------*/
+void SigmaDelta(p_image t, p_image t_1) {
+/*-----------------------------------------*/
+	SigmaDelta_step0(t_1);
+	SigmaDelta_step1(t, t_1);
+	SigmaDelta_step2(t);
+	SigmaDelta_step3(t, t_1);
+	SigmaDelta_step4(t);
+
+}
+
+
 
 void test() {
 	p_image t_1 = create_image("../car3/car_3000.pgm");
@@ -94,8 +126,7 @@ void test() {
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
 
-	SigmaDelta_step0(t_1);
-	SigmaDelta_step1(t, t_1);
+	SigmaDelta(t, t_1);
 	for (int i = 150; i < 200; i++) { 
 		for (int j = 150; j < 200; j++) {
 			printf("%d ", t->E[i][j]);
