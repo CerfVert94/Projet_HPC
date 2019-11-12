@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "nrdef.h"
 #include "nrutil.h"
+
 #include "util.h"
 #include "img.h"
 
