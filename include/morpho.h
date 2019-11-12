@@ -12,7 +12,7 @@ typedef struct struct_elem {
 	long nrow;
 	long ncol;
 
-	uint8** m;
+	// uint8** m;
 } struct_elem;
 
 

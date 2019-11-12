@@ -41,7 +41,7 @@ p_struct_elem create_structuring_element(long orix, long oriy, long nrow, long n
 	s = (p_struct_elem) malloc(sizeof(struct_elem));
 
 	// Create a nrow x ncol uint8 matrix.
-	s->m = ui8matrix(0, nrow - 1, 0, ncol - 1);
+	// s->m = ui8matrix(0, nrow - 1, 0, ncol - 1);
 
 	// Define dimension.
 	s->nrow = nrow;
@@ -55,45 +55,90 @@ p_struct_elem create_structuring_element(long orix, long oriy, long nrow, long n
 uint8 **erosion(p_image img, p_struct_elem s) 
 {
 	// bord = border
-	// tv = top vertical / bv = bottom vertical
-	// lh = left horizontal / rh = right horizontal
-    long ntvbord, nlhbord, nbvbord, nrhbord;
+	// th = top horizontal / bv = bottom horizontal
+	// lv = left vertical / rh = right vertical
+    long nthbord, nlvbord, nbhbord, nrvbord;
 	uint8 **input, **output;
+	long col, row, y, x;
+	uint8 pixel;
 
 	// Compute the size of borders (preduplication).
-	ntvbord = s->oriy;
-	nbvbord = (s->nrow - 1) - s->oriy;
-	nlhbord = s->orix;
-	nrhbord = (s->ncol - 1) - s->orix;
+	nthbord = s->oriy;
+	nbhbord = (s->nrow - 1) - s->oriy;
+	nlvbord = s->orix;
+	nrvbord = (s->ncol - 1) - s->orix;
 	
-	// Create input and output matrix.
-	// Add edges to the input matrix.
-	input = ui8matrix(img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord);
-	printf("%ld => %ld /  %ld => %ld\n",img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord);
-	output = ui8matrix(img->nrl, img->nrh, img->ncl, img->nch);
-	display_ui8matrix(input, img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord, "%03u ", "erosion_input_matrix");
-
+	// Create a new matrix with edges 
+	input = ui8matrix(img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
 	// Copy the original image to the input matrix.
 	copy_ui8matrix_ui8matrix(img->I, img->nrl, img->nrh, img->ncl, img->nch, input);	
-	display_ui8matrix(input, img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord, "%03u ", "copy");
-
-
-}
-
-uint8 **dilation(uint8** input, uint8** mask, long orix, long oriy) 
-{
-    
-}
-void test_morpho()
-{		
-	p_struct_elem s = create_structuring_element(1,1,1,3);
-	for (int i = 0; i < s->nrow; i++) {
-		for (int j = 0; j < s->ncol; j++) {
-			s->m[i][j] = mask3x3_plus[i][j];
+	// Erode
+	for (row = img->nrl; row < img->nrh + 1; row++){
+		for (col = img->ncl; col < img->nch + 1; col++) {
+			pixel = input[row][col];
+			for (y = -nthbord; y < nbhbord + 1; y++ ) {
+				for (x = -nlvbord; x < nrvbord + 1; x++ ) {
+					pixel &= input[row + y][col + x];
+				}
+			}
+			img->Omega[row][col] = pixel;
 		}
 	}
-	display_ui8matrix(s->m, 0, s->nrow - 1, 0, s->ncol - 1, "%u ", "mask3x3_plus");
-	
+	// Save the image (debug)
+	SavePGM_ui8matrix(img->Omega, img->nrl, img->nrh, img->ncl, img->nch, "output_erosion.pgm");
+	// Free the input matrix.
+	free_ui8matrix(input, img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	return output;
+}
+uint8 **dilation(p_image img, p_struct_elem s) 
+{
+	// bord = border
+	// th = top horizontal / bv = bottom horizontal
+	// lv = left vertical / rh = right vertical
+    long nthbord, nlvbord, nbhbord, nrvbord;
+	uint8 **input, **output;
+	long col, row, y, x;
+	uint8 pixel;
 
-	erosion(create_image("../car3/8x8.pgm"), s);
+	// Compute the size of borders (preduplication).
+	nthbord = s->oriy;
+	nbhbord = (s->nrow - 1) - s->oriy;
+	nlvbord = s->orix;
+	nrvbord = (s->ncol - 1) - s->orix;
+	
+	// Create a new matrix with edges 
+	input = ui8matrix(img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	// Copy the original image to the input matrix.
+	copy_ui8matrix_ui8matrix(img->I, img->nrl, img->nrh, img->ncl, img->nch, input);	
+	// Erode
+	for (row = img->nrl; row < img->nrh + 1; row++){
+		for (col = img->ncl; col < img->nch + 1; col++) {
+			pixel = input[row][col];
+			for (y = -nthbord; y < nbhbord + 1; y++ ) {
+				for (x = -nlvbord; x < nrvbord + 1; x++ ) {
+					pixel |= input[row + y][col + x];
+				}
+			}
+			img->Omega[row][col] = pixel;
+		}
+	}
+	// Save the image (debug)
+	SavePGM_ui8matrix(img->Omega, img->nrl, img->nrh, img->ncl, img->nch, "output_dilation.pgm");
+	// Free the input matrix.
+	free_ui8matrix(input, img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	return output;
+}
+#define TEST_IMAGE_CX 21
+#define TEST_IMAGE_CY 17
+void test_morpho()
+{
+	p_struct_elem s = create_structuring_element(1,1,3,3);
+	// for (int i = 0; i < s->nrow; i++) {x`
+	// 	for (int j = 0; j < s->ncol; j++) {
+	// 		s->m[i][j] = mask3x3_plus[i][j];
+	// 	}
+	// }
+	// display_ui8matrix(s->m, 0, s->nrow - 1, 0, s->ncol - 1, "%u ", "mask3x3_plus");
+	erosion(create_image("./morpho_test.pgm"), s);
+	dilation(create_image("./morpho_test.pgm"), s);
 }
