@@ -52,7 +52,7 @@ p_struct_elem create_structuring_element(long orix, long oriy, long nrow, long n
 }
 
 // Without optimisation
-uint8 **erosion(p_image img, p_struct_elem s) 
+void erosion(p_image img, p_struct_elem s) 
 {
 	// bord = border
 	// th = top horizontal / bv = bottom horizontal
@@ -90,7 +90,7 @@ uint8 **erosion(p_image img, p_struct_elem s)
 	free_ui8matrix(input, img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
 	return output;
 }
-uint8 **dilation(p_image img, p_struct_elem s) 
+void dilation(p_image img, p_struct_elem s) 
 {
 	// bord = border
 	// th = top horizontal / bv = bottom horizontal
