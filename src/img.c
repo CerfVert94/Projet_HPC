@@ -26,14 +26,11 @@ p_image create_image(char* filename) {
 	tmp->ncl = cl;
 	tmp->nch = ch;
 
-	uint8** var = ui8matrix(rl, rh, cl, ch);
-    tmp->M = var;
-    var = ui8matrix(rl, rh, cl, ch);
-    tmp->O = var;
-    var = ui8matrix(rl, rh, cl, ch);
-    tmp->V = var;
-    var = ui8matrix(rl, rh, cl, ch);
-    tmp->E = var;
+	tmp->M = ui8matrix(rl, rh, cl, ch); 
+    tmp->O = ui8matrix(rl, rh, cl, ch);
+    tmp->V = ui8matrix(rl, rh, cl, ch);
+    tmp->E = ui8matrix(rl, rh, cl, ch);
+	tmp->Omega = ui8matrix(rl, rh, cl, ch);
 
 	return tmp;
 }

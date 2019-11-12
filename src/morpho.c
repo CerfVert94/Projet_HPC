@@ -7,31 +7,31 @@
 #include <morpho.h>
 
 
-	uint8 mask3x3_plus[3][3] = {{0,1,0},
-								{1,1,1},
-								{0,1,0}};
+	// uint8 mask3x3_plus[3][3] = {{0,1,0},
+	// 							{1,1,1},
+	// 							{0,1,0}};
 
 
-	uint8 mask3x3_ltri[3][3] = {{1,0,0},
-								{1,1,0},
-								{1,1,1}};
+	// uint8 mask3x3_ltri[3][3] = {{1,0,0},
+	// 							{1,1,0},
+	// 							{1,1,1}};
 
-	uint8 mask3x3_htri[3][3] = {{1,1,1},
-								{0,1,1},
-								{0,0,0}};
+	// uint8 mask3x3_htri[3][3] = {{1,1,1},
+	// 							{0,1,1},
+	// 							{0,0,0}};
 
-	uint8 mask3x3_flat[3][3] = {{1,1,1},
-								{1,1,1},
-								{1,1,1}};
+	// uint8 mask3x3_flat[3][3] = {{1,1,1},
+	// 							{1,1,1},
+	// 							{1,1,1}};
 
-	uint8 mask2x2_ltri[2][2] = {{1,0},
-								{1,1}};							
+	// uint8 mask2x2_ltri[2][2] = {{1,0},
+	// 							{1,1}};							
 
-	uint8 mask2x2_htri[2][2] = {{1,1},
-								{0,1}};							
+	// uint8 mask2x2_htri[2][2] = {{1,1},
+	// 							{0,1}};							
 
-	uint8 mask2x2_flat[2][2] = {{1,1},
-								{0,1}};							
+	// uint8 mask2x2_flat[2][2] = {{1,1},
+	// 							{0,1}};							
 		
 
 p_struct_elem create_structuring_element(long orix, long oriy, long nrow, long ncol)
@@ -60,7 +60,7 @@ uint8 **erosion(p_image img, p_struct_elem s)
     long ntvbord, nlhbord, nbvbord, nrhbord;
 	uint8 **input, **output;
 
-	// Compute the size of borders.
+	// Compute the size of borders (preduplication).
 	ntvbord = s->oriy;
 	nbvbord = (s->nrow - 1) - s->oriy;
 	nlhbord = s->orix;
@@ -71,10 +71,6 @@ uint8 **erosion(p_image img, p_struct_elem s)
 	input = ui8matrix(img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord);
 	printf("%ld => %ld /  %ld => %ld\n",img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord);
 	output = ui8matrix(img->nrl, img->nrh, img->ncl, img->nch);
-	// input[-1][-1] = 1;
-	// input[8][8] = 1;
-	// input[-1][8] = 1;
-	// input[8][-1] = 1;
 	display_ui8matrix(input, img->nrl - ntvbord, img->nrh + nbvbord, img->ncl - nlhbord, img->nch + nrhbord, "%03u ", "erosion_input_matrix");
 
 	// Copy the original image to the input matrix.
@@ -90,7 +86,7 @@ uint8 **dilation(uint8** input, uint8** mask, long orix, long oriy)
 }
 void test_morpho()
 {		
-	p_struct_elem s = create_structuring_element(2,0,3,3);
+	p_struct_elem s = create_structuring_element(1,1,1,3);
 	for (int i = 0; i < s->nrow; i++) {
 		for (int j = 0; j < s->ncol; j++) {
 			s->m[i][j] = mask3x3_plus[i][j];

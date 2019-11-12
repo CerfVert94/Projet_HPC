@@ -10,11 +10,12 @@ typedef struct image {
 	long nrh;
 	long ncl;
 	long nch;
-	uint8** I;
-	uint8** M;
-	uint8** O;
-	uint8** V;
-	uint8** E;
+	uint8** I;	// Image de source
+	uint8** M;	// Image de fond
+	uint8** O;	// Image de difference
+	uint8** V;	// Image de variance
+	uint8** E;	// Image d'etiquette binaires
+	uint8** Omega; // Image de morphologie
 } image, *p_image;
 
 p_image create_image(char* filename);
