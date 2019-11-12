@@ -1,7 +1,9 @@
 #include "nrdef.h"
 #include "nrutil.h"
 #include <img.h>
-#include <malloc.h>
+#include <stdlib.h>
+#include <stdio.h>
+//#include <malloc.h>
 #include <morpho.h>
 
 
