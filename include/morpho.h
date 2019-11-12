@@ -19,7 +19,10 @@ typedef struct struct_elem {
 #define COPY_MASK2STRUCT_ELEM(mask, s) copy_ui8matrix_ui8matrix(mask, 0, s->nrow, 0, s->ncol, s->m)
 typedef struct struct_elem struct_elem, *p_struct_elem;
 void test_morpho();
-void dilation(p_image img, p_struct_elem s);
-void erosion(p_image img, p_struct_elem s);
+
+uint8** ui8matrix_dilation(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem s);
+uint8** ui8matrix_erosion(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem s);
+void image_dilation(p_image img, p_struct_elem s);
+void image_erosion(p_image img, p_struct_elem s);
 
 #endif /* __MORPHO_H__ */

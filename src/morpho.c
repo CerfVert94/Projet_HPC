@@ -52,13 +52,13 @@ p_struct_elem create_structuring_element(long orix, long oriy, long nrow, long n
 }
 
 // Without optimisation
-void erosion(p_image img, p_struct_elem s) 
+uint8** ui8matrix_dilation(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem s)
 {
 	// bord = border
 	// th = top horizontal / bv = bottom horizontal
 	// lv = left vertical / rh = right vertical
     long nthbord, nlvbord, nbhbord, nrvbord;
-	uint8 **input, **output;
+	uint8 **bord_input, **output;
 	long col, row, y, x;
 	uint8 pixel;
 
@@ -68,35 +68,37 @@ void erosion(p_image img, p_struct_elem s)
 	nlvbord = s->orix;
 	nrvbord = (s->ncol - 1) - s->orix;
 	
-	// Create a new matrix with edges 
-	input = ui8matrix(img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	// Create a new matrix with edges / output matrix
+	bord_input  = ui8matrix(nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord);
+	output 		= ui8matrix(nrl, nrh, ncl, nch);
+
 	// Copy the original image to the input matrix.
-	copy_ui8matrix_ui8matrix(img->I, img->nrl, img->nrh, img->ncl, img->nch, input);	
+	copy_ui8matrix_ui8matrix(bord_input, nrl, nrh, ncl, nch, input);	
 	// Erode
-	for (row = img->nrl; row < img->nrh + 1; row++){
-		for (col = img->ncl; col < img->nch + 1; col++) {
-			pixel = input[row][col];
+	for (row = nrl; row < nrh + 1; row++){
+		for (col = ncl; col < nch + 1; col++) {
+			pixel = bord_input[row][col];
 			for (y = -nthbord; y < nbhbord + 1; y++ ) {
 				for (x = -nlvbord; x < nrvbord + 1; x++ ) {
-					pixel &= input[row + y][col + x];
+					pixel |= bord_input[row + y][col + x];
 				}
 			}
-			img->Omega[row][col] = pixel;
+			output[row][col] = pixel;
 		}
 	}
-	// Save the image (debug)
-	SavePGM_ui8matrix(img->Omega, img->nrl, img->nrh, img->ncl, img->nch, "output_erosion.pgm");
-	// Free the input matrix.
-	free_ui8matrix(input, img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	display_ui8matrix(bord_input, nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord, "%03u ", "input");
+	display_ui8matrix(input, nrl, nrh, ncl, nch, "%03u ", "output");
+	// Free the bordered matrix.
+	free_ui8matrix(bord_input, nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord);
 	return output;
 }
-void dilation(p_image img, p_struct_elem s) 
+uint8** ui8matrix_erosion(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem s)
 {
 	// bord = border
 	// th = top horizontal / bv = bottom horizontal
 	// lv = left vertical / rh = right vertical
     long nthbord, nlvbord, nbhbord, nrvbord;
-	uint8 **input, **output;
+	uint8 **bord_input, **output;
 	long col, row, y, x;
 	uint8 pixel;
 
@@ -106,39 +108,74 @@ void dilation(p_image img, p_struct_elem s)
 	nlvbord = s->orix;
 	nrvbord = (s->ncol - 1) - s->orix;
 	
-	// Create a new matrix with edges 
-	input = ui8matrix(img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	// Create a new matrix with edges / output matrix
+	bord_input  = ui8matrix(nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord);
+	output 		= ui8matrix(nrl, nrh, ncl, nch);
+
 	// Copy the original image to the input matrix.
-	copy_ui8matrix_ui8matrix(img->I, img->nrl, img->nrh, img->ncl, img->nch, input);	
+	copy_ui8matrix_ui8matrix(bord_input, nrl, nrh, ncl, nch, input);	
 	// Erode
-	for (row = img->nrl; row < img->nrh + 1; row++){
-		for (col = img->ncl; col < img->nch + 1; col++) {
-			pixel = input[row][col];
+	for (row = nrl; row < nrh + 1; row++){
+		for (col = ncl; col < nch + 1; col++) {
+			pixel = bord_input[row][col];
 			for (y = -nthbord; y < nbhbord + 1; y++ ) {
 				for (x = -nlvbord; x < nrvbord + 1; x++ ) {
-					pixel |= input[row + y][col + x];
+					pixel &= bord_input[row + y][col + x];
 				}
 			}
-			img->Omega[row][col] = pixel;
+			output[row][col] = pixel;
 		}
 	}
-	// Save the image (debug)
-	SavePGM_ui8matrix(img->Omega, img->nrl, img->nrh, img->ncl, img->nch, "output_dilation.pgm");
-	// Free the input matrix.
-	free_ui8matrix(input, img->nrl - nthbord, img->nrh + nbhbord, img->ncl - nlvbord, img->nch + nrvbord);
+	display_ui8matrix(bord_input, nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord, "%03u ", "input");
+	display_ui8matrix(input, nrl, nrh, ncl, nch, "%03u ", "output");
+	// Free the bordered matrix.
+	free_ui8matrix(bord_input, nrl - nthbord, nrh + nbhbord, ncl - nlvbord, nch + nrvbord);
 	return output;
 }
-#define TEST_IMAGE_CX 21
-#define TEST_IMAGE_CY 17
+
+
+void image_dilation(p_image img, p_struct_elem s)
+{
+	uint8 **output;
+	long nrl, nrh, ncl, nch;
+	
+	nrl = img->nrl; nrh = img->nrh;
+	ncl = img->ncl;	nch = img->nch;
+
+	output = ui8matrix_dilation(img->I, nrl, nrh, ncl, nch, s);
+	copy_ui8matrix_ui8matrix(img->Omega, nrl, nrh, ncl, nch, output);
+	// Save the image (debug)
+	SavePGM_ui8matrix(img->Omega, nrl, nrh, ncl, nch,"output_erosion.pgm");
+	free_ui8matrix(output, nrl, nrh, ncl, nch);
+}
+void image_erosion(p_image img, p_struct_elem s)
+{
+	uint8 **output;
+	long nrl, nrh, ncl, nch;
+	
+	nrl = img->nrl; nrh = img->nrh;
+	ncl = img->ncl;	nch = img->nch;
+
+	output = ui8matrix_erosion(img->I, nrl, nrh, ncl, nch, s);
+	copy_ui8matrix_ui8matrix(img->Omega, nrl, nrh, ncl, nch, output);
+	SavePGM_ui8matrix(img->Omega, nrl, nrh, ncl, nch,"output_erosion.pgm");
+	free_ui8matrix(output, nrl, nrh, ncl, nch);
+}
 void test_morpho()
 {
+	// const int TEST_CX = 3;
+	// const int TEST_CY = 3;
+	// long y, x;
 	p_struct_elem s = create_structuring_element(1,1,3,3);
-	// for (int i = 0; i < s->nrow; i++) {x`
-	// 	for (int j = 0; j < s->ncol; j++) {
-	// 		s->m[i][j] = mask3x3_plus[i][j];
-	// 	}
-	// }
-	// display_ui8matrix(s->m, 0, s->nrow - 1, 0, s->ncol - 1, "%u ", "mask3x3_plus");
-	erosion(create_image("./morpho_test.pgm"), s);
-	dilation(create_image("./morpho_test.pgm"), s);
+	// const uint8 input3x3[3][3]  = {{1,1,1},
+	// 							   {1,1,1},
+	// 							   {1,1,1}};
+	// const uint8 output3x3[3][3] = {{0,0,0},
+	// 							   {0,1,0},
+	// 							   {0,0,0}};
+	// uint8 **res;
+	// res = erosion(input3x3, s);
+
+	// image_erosion(create_image("morpho_test.pgm"), s);
+	image_dilation(create_image("morpho_test.pgm"), s);
 }
