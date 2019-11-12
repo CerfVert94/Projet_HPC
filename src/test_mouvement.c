@@ -9,41 +9,20 @@
 #include "mouvement.h"
 #include "test_mouvement.h"
 
-void test_corps_boucle1_SigmaDelta_step1() {
+uint8 test_corps_SigmaDelta_step1(uint8 t_1M, uint8 tI) {
 
 	int pass = 1;
-	uint8 test;
-	uint8 t_1M = 132; // t_1->M[i][j]
-	uint8 tI = 86; // t->I[i][j]
-	uint8 tM = 131; // t->M[i][j]
-
-	if (t_1M > tI)
-		test = t_1M - 1;
-	if (tM != test) pass = 0;
-
-
-	t_1M = 86; // t_1->M[i][j]
-	tI = 132; // t->I[i][j]
-	tM = 87; // t->M[i][j]
 
 	if (t_1M < tI)
-		test = t_1M + 1;
-	if (tM != test) pass = 0;
-
-	t_1M = 86; // t_1->M[i][j]
-	tI = 86; // t->I[i][j]
-	tM = 86; // t->M[i][j]
-
-	if (t_1M == tI)
-		test = t_1M;
-	if (tM != test) pass = 0;
-
-	if (pass) PASS();
-	else FAIL();
+		return t_1M + 1;
+	else if (t_1M > tI)
+		return t_1M - 1;
+	else
+		return t_1M;
 
 }
 
-void test_corps_boucle2_SigmaDelta_Step1() {
+void test_corps_SigmaDelta_step2() {
 
 	int pass = 1;
 
@@ -63,23 +42,37 @@ void test_corps_boucle2_SigmaDelta_Step1() {
 
 }
 
-void test_corps_boucle3_SigmaDelta_Step1() {
+void test_corps_SigmaDelta_step3() {
 
 	int pass = 1;
 
 	uint8 test;
 	uint8 t_1V = 132;
 	uint8 t0 = 86;
-	uint8 tV 133;
+	uint8 tV = 133;
 
 	/* N = 2 dans mouvement.h */
-	if (t_1V < (N * ))
+	// if (t_1V < (N * )) 
 
 }
 
 void all_test() {
 
-	test_corps_boucle1_SigmaDelta_step1();
-	test_corps_boucle2_SigmaDelta_Step1();
+	uint8 test;
+
+	test = test_corps_SigmaDelta_step1(132, 86);
+	if (test == 131) PASS();
+	else {FAIL();}
+
+	test = test_corps_SigmaDelta_step1(86, 132);
+	if (test == 87) PASS();
+	else {FAIL();}
+
+	test = test_corps_SigmaDelta_step1(86, 86);
+	if (test == 86) PASS();
+	else {FAIL();}
 
 }
+
+
+

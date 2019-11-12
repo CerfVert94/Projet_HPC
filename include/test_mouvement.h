@@ -3,9 +3,9 @@
 /* ------------------------ */
 
 
-void test_corps_boucle1_SigmaDelta_step1();
-void test_corps_boucle2_SigmaDelta_Step1();
-void test_corps_boucle3_SigmaDelta_Step1();
-void test_corps_boucle4_SigmaDelta_Step1();
+uint8 test_corps_SigmaDelta_step1(uint8 t_1M, uint8 tI);
+void test_corps_SigmaDelta_step2();
+void test_corps_SigmaDelta_step3();
+void test_corps_SigmaDelta_step4();
 
 void all_test();

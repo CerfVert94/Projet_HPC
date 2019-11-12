@@ -16,4 +16,10 @@
 #include "mymacro.h"
 #include "simd_macro.h"
 
+/*-----------------------------------------*/
+void SigmaDelta_step1(p_image t, p_image t_1) {
+/*-----------------------------------------*/
+	
+
+
 

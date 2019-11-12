@@ -11,7 +11,7 @@
 #define max(a,b) (a >= b ? a : b)
 #define min(a,b) (a <= b ? a : b)
 
-#define PASS() printf("%s\t=\t----- PASS -----\n", __func__)
-#define FAIL() printf("%s\t=\txxxxx FAIL xxxxx\n", __func__)
+#define PASS() fprintf(stderr, "%s\t=\t----- PASS -----\n", __func__)
+#define FAIL() fprintf(stderr, "%s\t=\txxxxx FAIL xxxxx\n", __func__); exit(EXIT_FAILURE)
 
 #endif // __UTIL_H__
