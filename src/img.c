@@ -12,14 +12,12 @@
 
 p_image create_image(char* filename) {
 
-	int i, j;
 	long rl, rh, cl, ch;
 	p_image tmp;
 
 	/*alloc in memory for image*/
 	tmp = (p_image)malloc(sizeof(image));
-	if (!tmp)
-		printf("Malloc error of image in %s\n", __func__);
+	if (!tmp) {error("Malloc error of image in");}
 	tmp->I = LoadPGM_ui8matrix(filename, &rl, &rh, &cl, &ch);
 	tmp->nrl = rl;
 	tmp->nrh = rh;
@@ -42,6 +40,7 @@ void free_image(p_image image) {
 	free_ui8matrix(image->O, image->nrl, image->nrh, image->ncl, image->nch);
 	free_ui8matrix(image->V, image->nrl, image->nrh, image->ncl, image->nch);
 	free_ui8matrix(image->E, image->nrl, image->nrh, image->ncl, image->nch);
+	free_ui8matrix(image->Omega, image->nrl, image->nrh, image->ncl, image->nch);	
 	free(image);
 
 }

@@ -16,9 +16,13 @@
 #include "mymacro.h"
 #include "simd_macro.h"
 
+void convuint8
+
+
 /*-----------------------------------------*/
-void SigmaDelta_step1(p_image t, p_image t_1) {
+void SigmaDelta_step0_SSE(p_image t, p_image t_1) {
 /*-----------------------------------------*/
+
 	
 
 

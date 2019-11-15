@@ -1583,6 +1583,8 @@ void display_vuint8(vuint8 x, char *format, char *name)
     
     for(i=0; i<16; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ------------------------------------------------- */
 void display_vsint8(vsint8 x, char *format, char *name)
@@ -1599,6 +1601,8 @@ void display_vsint8(vsint8 x, char *format, char *name)
     
     for(i=0; i<16; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* --------------------------------------------------- */
 void display_vuint16(vuint16 x, char *format, char *name)
@@ -1615,6 +1619,8 @@ void display_vuint16(vuint16 x, char *format, char *name)
     
     for(i=0; i<8; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* --------------------------------------------------- */
 void display_vsint16(vsint16 x, char *format, char *name)
@@ -1649,6 +1655,8 @@ void display_vuint32(vuint32 x, char *format, char *name)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* --------------------------------------------------- */
 void display_vsint32(vsint32 x, char *format, char *name)
@@ -1665,6 +1673,8 @@ void display_vsint32(vsint32 x, char *format, char *name)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ----------------------------------------------------- */
 void display_vfloat32(vfloat32 x, char *format, char *name)
@@ -1681,6 +1691,8 @@ void display_vfloat32(vfloat32 x, char *format, char *name)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ---------------------------------------------------------- */
 void display_vuint8_k(vuint8 x, char *format, char *name, int k)
@@ -1697,6 +1709,8 @@ void display_vuint8_k(vuint8 x, char *format, char *name, int k)
     
     for(i=0; i<16; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ---------------------------------------------------------- */
 void display_vsint8_k(vsint8 x, char *format, char *name, int k)
@@ -1713,6 +1727,8 @@ void display_vsint8_k(vsint8 x, char *format, char *name, int k)
     
     for(i=0; i<16; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ------------------------------------------------------------ */
 void display_vuint16_k(vuint16 x, char *format, char *name, int k)
@@ -1729,6 +1745,8 @@ void display_vuint16_k(vuint16 x, char *format, char *name, int k)
     
     for(i=0; i<8; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ------------------------------------------------------------ */
 void display_vsint16_k(vsint16 x, char *format, char *name, int k)
@@ -1763,6 +1781,8 @@ void display_vuint32_k(vuint32 x, char *format, char *name, int k)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* ------------------------------------------------------------ */
 void display_vsint32_k(vsint32 x, char *format, char *name, int k)
@@ -1779,6 +1799,8 @@ void display_vsint32_k(vsint32 x, char *format, char *name, int k)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 /* -------------------------------------------------------------- */
 void display_vfloat32_k(vfloat32 x, char *format, char *name, int k)
@@ -1796,6 +1818,8 @@ void display_vfloat32_k(vfloat32 x, char *format, char *name, int k)
     
     for(i=0; i<4; i++)
         printf(format, p[i]);
+
+    printf("\n");
 }
 
 /* ------------------ */

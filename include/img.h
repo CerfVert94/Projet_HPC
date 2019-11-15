@@ -6,10 +6,8 @@
 
 
 typedef struct image {
-	long nrl;
-	long nrh;
-	long ncl;
-	long nch;
+	long nrl, nrh;
+	long ncl, nch;
 	uint8** I;	// Image de source
 	uint8** M;	// Image de fond
 	uint8** O;	// Image de difference

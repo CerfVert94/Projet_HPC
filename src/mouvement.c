@@ -118,8 +118,9 @@ void SigmaDelta(p_image t, p_image t_1) {
 }
 
 
-
+/*-------*/
 void test() {
+/*-------*/
 	p_image t_1 = create_image("../car3/car_3000.pgm");
 	p_image t = create_image("../car3/car_3001.pgm");
 
