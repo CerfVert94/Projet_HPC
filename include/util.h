@@ -11,13 +11,13 @@
 #define max(a,b) (a >= b ? a : b)
 #define min(a,b) (a <= b ? a : b)
 
-extern char *nom_func;
+// extern const char *nom_func;
 
-#define PASS(nom, test) fprintf(stderr, "%s%s    \t----- PASS -----\n", nom, test)
-#define FAIL(nom, test) fprintf(stderr, "%s%s    \txxxxx FAIL xxxxx\n", nom, test); exit(EXIT_FAILURE)
+#define PASS(func, test) fprintf(stderr, "%s%s   \t----- PASS -----\n", func, test)
+#define FAIL(func, test) fprintf(stderr, "%s%s   \txxxxx FAIL xxxxx\n", func, test); exit(EXIT_FAILURE)
 
 #define error(msg) fprintf(stderr, "%s%s\n", msg, __func__); exit(EXIT_FAILURE)
 
-#define UTEST(cond, test) if (cond) PASS(nom_func, test); else {FAIL(nom_func, test);}
+#define UNIT_TEST(cond, func, test) if (cond) PASS(func, test); else {FAIL(func, test);}
 
 #endif // __UTIL_H__
