@@ -9,7 +9,7 @@
 #include "mouvement.h"
 #include "test_mouvement.h"
 
-char *nom_func;
+const char *nom_func;
 
 /*---------------------------------------------------*/
 uint8 test_corps_SigmaDelta_step1(uint8 t_1M, uint8 tI) {
@@ -68,79 +68,79 @@ uint8 test_corps_SigmaDelta_step4(uint8 tO, uint8 tV) {
 }
 
 /*---------------------*/
-void all_test_mouvement() { /* UTEST dans util.h */
+void all_test_mouvement() { /* UNIT_TEST dans util.h */
 /*---------------------*/
 	uint8 test;
 
 	printf("\n==== test_corps_SigmaDelta_step1 ====\n");
 	/* t_1M < tI */
 	test = test_corps_SigmaDelta_step1(15, 30);
-	UTEST(test == 16, "_lt");
+	UNIT_TEST(test == 16, nom_func, "_lt");
 	/* t_1M > tI */
 	test = test_corps_SigmaDelta_step1(30, 15);
-	UTEST(test == 29, "_ht");
+	UNIT_TEST(test == 29, nom_func, "_gt");
 	/* t_1M = tI */
 	test = test_corps_SigmaDelta_step1(0, 0);
 	/* t_1M > */
-	UTEST(test == 0, "_eq");
+	UNIT_TEST(test == 0, nom_func, "_eq");
 	/* t_1M < tI compare signe */
 	test = test_corps_SigmaDelta_step1(125, 130);
-	UTEST(test == 126, "_msblt");
+	UNIT_TEST(test == 126, nom_func, "_msblt");
 	/* t_1M > tI compare signe */
 	test = test_corps_SigmaDelta_step1(130, 127);
-	UTEST(test == 129, "_msbgt");
+	UNIT_TEST(test == 129, nom_func, "_msbgt");
 	printf("=====================================\n\n");
 
 	printf("==== test_corps_SigmaDelta_step2 ====\n");
 	/* tM < tI */
 	test = test_corps_SigmaDelta_step2(15, 30);
-	UTEST(test == 15, "_lt");
+	UNIT_TEST(test == 15, nom_func, "_lt");
 	/* tM > tI */
 	test = test_corps_SigmaDelta_step2(30, 15);
-	UTEST(test == 15, "_gt");
+	UNIT_TEST(test == 15, nom_func, "_gt");
 	/* tM = tI */
 	test = test_corps_SigmaDelta_step2(0, 0);
-	UTEST(test == 0, "_eq");
+	UNIT_TEST(test == 0, nom_func, "_eq");
 	/* tM < tI compare signe */
 	test = test_corps_SigmaDelta_step2(125, 130);
-	UTEST(test == 5, "_msblt");
+	UNIT_TEST(test == 5, nom_func, "_msblt");
 	/* tM > tI compare signe */
 	test = test_corps_SigmaDelta_step2(130, 125);
-	UTEST(test == 5, "_msbgt");
+	UNIT_TEST(test == 5, nom_func, "_msbgt");
 	printf("=====================================\n\n");
 
 	printf("==== test_corps_SigmaDelta_step3 ====\n");
 	/* t_1V < tI */
 	test = test_corps_SigmaDelta_step3(14, 30);
-	UTEST(test == 15, "_lt");
+	UNIT_TEST(test == 15, nom_func, "_lt");
 	/* t_1V > tI */
 	test = test_corps_SigmaDelta_step3(30, 14);
-	UTEST(test == 29, "_ht");
+	UNIT_TEST(test == 29, nom_func, "_ht");
 	/* t_1V = tI */
 	test = test_corps_SigmaDelta_step3(0, 0);
-	UTEST(test == 1, "_eq");
+	UNIT_TEST(test == 1, nom_func, "_eq");
 	/* t_1V < tI compare signe */
 	test = test_corps_SigmaDelta_step3(61, 130);
-	UTEST(test == 62, "_msblt");
+	UNIT_TEST(test == 62, nom_func, "_msblt");
 	test = test_corps_SigmaDelta_step3(130, 61);
-	UTEST(test == 129, "_msbgt");
+	UNIT_TEST(test == 129, nom_func, "_msbgt");
 	printf("=====================================\n\n");
 
 	printf("==== test_corps_SigmaDelta_step4 ====\n");
 	/* t_0 < tV */
 	test = test_corps_SigmaDelta_step3(14, 30);
-	UTEST(test == 15, "_lt");
+	UNIT_TEST(test == 15, nom_func, "_lt");
 	/* t_1V > tI */
 	test = test_corps_SigmaDelta_step3(30, 14);
-	UTEST(test == 29, "_ht");
+	UNIT_TEST(test == 29, nom_func, "_ht");
 	/* t_1V = tI */
 	test = test_corps_SigmaDelta_step3(0, 0);
-	UTEST(test == 1, "_eq");
+	UNIT_TEST(test == 1, nom_func, "_eq");
 	/* t_1V < tI compare signe */
 	test = test_corps_SigmaDelta_step3(61, 130);
-	UTEST(test == 62, "_msblt");
+	UNIT_TEST(test == 62, nom_func, "_msblt");
 	test = test_corps_SigmaDelta_step3(130, 61);
-	UTEST(test == 129, "_msbgt");
+	UNIT_TEST(test == 129, nom_func, "_msbgt");
 	printf("=====================================\n\n");
 
 
