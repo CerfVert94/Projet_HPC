@@ -99,7 +99,7 @@ void SigmaDelta_step4(p_image t) {
 			if (t->O[i][j] < t->V[i][j] )
 				t->E[i][j] = 0;
 			else
-				t->E[i][j] = t->I[i][j];
+				t->E[i][j] = 1;
 		}
 	}
 
@@ -130,8 +130,8 @@ void test() {
 
 	SigmaDelta(t, t_1);
 	SigmaDelta(t1, t);
-	for (int i = 150; i < 200; i++) { 
-		for (int j = 150; j < 200; j++) {
+	for (int i = t->nrl; i < 50; i++) { 
+		for (int j = t->ncl; j < 50; j++) {
 			printf("%d ", t->E[i][j]);
 		}
 		printf("\n");
