@@ -99,7 +99,7 @@ void SigmaDelta_step4(p_image t) {
 			if (t->O[i][j] < t->V[i][j] )
 				t->E[i][j] = 0;
 			else
-				t->E[i][j] = 1;
+				t->E[i][j] = t->I[i][j];
 		}
 	}
 
@@ -123,11 +123,13 @@ void test() {
 /*-------*/
 	p_image t_1 = create_image("../car3/car_3000.pgm");
 	p_image t = create_image("../car3/car_3001.pgm");
+	p_image t1 = create_image("../car3/car_3002.pgm");
 
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
 
 	SigmaDelta(t, t_1);
+	SigmaDelta(t1, t);
 	for (int i = 150; i < 200; i++) { 
 		for (int j = 150; j < 200; j++) {
 			printf("%d ", t->E[i][j]);

@@ -83,10 +83,10 @@ void all_test_mouvement() { /* UNIT_TEST dans util.h */
 	test = test_corps_SigmaDelta_step1(0, 0);
 	/* t_1M > */
 	UNIT_TEST(test == 0, nom_func, "_eq");
-	/* t_1M < tI compare signe */
+	/* t_1M < tI compare signe bit -1*/
 	test = test_corps_SigmaDelta_step1(125, 130);
 	UNIT_TEST(test == 126, nom_func, "_msblt");
-	/* t_1M > tI compare signe */
+	/* t_1M > tI compare signe bit -1*/
 	test = test_corps_SigmaDelta_step1(130, 127);
 	UNIT_TEST(test == 129, nom_func, "_msbgt");
 	printf("=====================================\n\n");
@@ -101,10 +101,10 @@ void all_test_mouvement() { /* UNIT_TEST dans util.h */
 	/* tM = tI */
 	test = test_corps_SigmaDelta_step2(0, 0);
 	UNIT_TEST(test == 0, nom_func, "_eq");
-	/* tM < tI compare signe */
+	/* tM < tI compare signe bit -1*/
 	test = test_corps_SigmaDelta_step2(125, 130);
 	UNIT_TEST(test == 5, nom_func, "_msblt");
-	/* tM > tI compare signe */
+	/* tM > tI compare signe bit -1*/
 	test = test_corps_SigmaDelta_step2(130, 125);
 	UNIT_TEST(test == 5, nom_func, "_msbgt");
 	printf("=====================================\n\n");

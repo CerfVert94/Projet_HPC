@@ -20,6 +20,7 @@ p_vimage create_vimage(char* filename) {
 	int v0, v1;
 	int m0, v1;
 	p_vimage tmp;
+	vuint8;
 
 	/*alloc in memory for image*/
 	tmp = (p_vimage)malloc(sizeof(vimage));
@@ -40,10 +41,11 @@ p_vimage create_vimage(char* filename) {
     tmp->m0 = m0;
     tmp->m1 = m1;
 
+    tmp->I = vui8matrix(rl, rh, v0, v1);
+
     for (i = rl; i < rh; i++) {
-        for (j = v1; j <= v2; j++) {
-            //x = init_vuint8(11);
-            l = j*16;
+        for (j = v0; j <= v1; j++) {
+            l = j*card;
             x = init_vuint8_all(img[i][j], img[i][l+1], img[i][l+2], img[i][l+3], img[i][l+4], img[i][l+5], img[i][l+6], img[i][l+7], img[i][l+8], img[i][l+9], img[i][l+10], img[i][l+11], img[i][l+12], img[i][l+13], img[i][l+14], img[i][l+15]);
             _mm_store_si128(&tmp->I[i][j], x);
         }
