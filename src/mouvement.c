@@ -121,9 +121,15 @@ void SigmaDelta(p_image t, p_image t_1) {
 /*-------*/
 void test() {
 /*-------*/
-	p_image t_1 = create_image("../car3/car_3000.pgm");
-	p_image t = create_image("../car3/car_3001.pgm");
-	p_image t1 = create_image("../car3/car_3002.pgm");
+	
+	p_image* imgs = (p_image*)malloc(200*sizeof(img));
+	char* pathname;
+	int k;
+	int idx = 3000;
+	for(k = 0; k < 200; k++) {
+		sprintf(pathname, "../car3/car_3")
+	}
+
 
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
