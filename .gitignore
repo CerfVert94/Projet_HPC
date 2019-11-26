@@ -1,3 +1,4 @@
 obj/*.o
 exe/*
 src/main.c
+Makefile
