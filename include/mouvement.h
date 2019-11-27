@@ -1,10 +1,9 @@
 /* ------------------------ */
-/* --- mouvement.h --- */
+/* ----- mouvement.h ------ */
 /* ------------------------ */
 
 #ifndef __MOUVEMENT_H__
 #define __MOUVEMENT_H__
-
 
 #define THRESHOLD 20
 #define N 2

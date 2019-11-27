@@ -50,6 +50,9 @@
 #define vec_avg3(x0,x1,x2) x0
 #define vec_avg5(x0,x1,x2,x3,x4) x0
 
+// abs
+//#define vec_subabs(a, b) _mm_sub_epi8(_mm_max)
+
 
 
 #endif // __SIMD_MACRO_H__

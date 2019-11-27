@@ -6,7 +6,7 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE =  img.c main.c mouvement.c nrutil.c  test_morpho.c  vnrutil.c mutil.c test_mouvement.c morpho.c
+FILE =  img.c main.c mouvement.c nrutil.c  test_morpho.c vnrutil.c mutil.c test_mouvement.c morpho.c img_SSE2.c mouvement_SSE2.c
  
 # -- Paths ----------
 SRC_PATH = src
@@ -49,7 +49,7 @@ OBJ = $(addprefix ${OBJ_PATH}/, $(addsuffix .o, $(basename $(FILE))))
 # -- Base rules ----------
 $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
-   
+
 #-----Main rule ----------
 $(EXE_PATH)/$(PRODUCT): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS) $(OPTFLAGS) $(CFG) $(INC) $(LIB) -lm

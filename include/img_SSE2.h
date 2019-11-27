@@ -1,9 +1,15 @@
+/* ------------------------ */
+/* ------ img_SSE2.h ------ */
+/* ------------------------ */
+
+#ifndef __IMG_SSE2_H__
+#define __IMG_SSE2_H__
+
 #ifndef __IMG_H__
 #define __IMG_H__
-
 #define MOVE 1
 #define STATIC 0
-
+#endif // __IMG_H__
 
 typedef struct vimage {
 	int  v0, v1;
@@ -22,4 +28,4 @@ p_vimage create_vimage(char* filename);
 
 void free_vimage(p_vimage image);
 
-#endif // __IMG_H__
+#endif // __IMG_SSE2_H__

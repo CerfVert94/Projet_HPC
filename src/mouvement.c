@@ -1,3 +1,7 @@
+/* ------------------------ */
+/* ----- mouvement.c ------ */
+/* ------------------------ */
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -109,7 +113,6 @@ void SigmaDelta_step4(p_image t) {
 /*-----------------------------------------*/
 void SigmaDelta(p_image t, p_image t_1) {
 /*-----------------------------------------*/
-	SigmaDelta_step0(t_1);
 	SigmaDelta_step1(t, t_1);
 	SigmaDelta_step2(t);
 	SigmaDelta_step3(t, t_1);
@@ -122,20 +125,14 @@ void SigmaDelta(p_image t, p_image t_1) {
 void test() {
 /*-------*/
 	
-	p_image* imgs = (p_image*)malloc(200*sizeof(img));
-	char* pathname;
-	int k;
-	int idx = 3000;
-	for(k = 0; k < 200; k++) {
-		sprintf(pathname, "../car3/car_3")
-	}
-
+	p_image t_1 = create_image("../car3/car_3000.pgm");
+	p_image t = create_image("../car3/car_3001.pgm");
 
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
 
+	SigmaDelta_step0(t_1);
 	SigmaDelta(t, t_1);
-	SigmaDelta(t1, t);
 	for (int i = t->nrl; i < 50; i++) { 
 		for (int j = t->ncl; j < 50; j++) {
 			printf("%d ", t->E[i][j]);

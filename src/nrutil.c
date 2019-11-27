@@ -788,6 +788,8 @@ void display_ui8vector(uint8 *v,long nl,long nh, char *format, char *name)
   if(name != NULL) printf("%s", name);
 
   for(i=nl; i<=nh; i++) {
+    if(i%16 == 0)
+      putchar('\n');
     printf(format, v[i]);
   }
   putchar('\n');

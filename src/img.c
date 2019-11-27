@@ -1,9 +1,14 @@
+/* ------------ */
+/* ---img.c --- */
+/* ------------ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
+
 #include "nrdef.h"
 #include "nrutil.h"
 #include "util.h"
@@ -21,11 +26,10 @@ p_image create_image(char* filename) {
 	tmp = (p_image)malloc(sizeof(image));
 	if (!tmp) {error("Malloc error of image in");}
 	img = LoadPGM_ui8matrix(filename, &rl, &rh, &cl, &ch);
-	nrl = rl - 2;
-	nrh = rh + 2;
-	ncl = cl - 2;
-	nch = ch + 2;
-
+	nrl = rl - BORD;
+	nrh = rh + BORD;
+	ncl = cl - BORD;
+	nch = ch + BORD;
 
 	tmp->nrl = nrl;
 	tmp->nrh = nrh;

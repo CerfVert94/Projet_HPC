@@ -8,6 +8,8 @@
 #define Vmin 1
 #define Vmax 254
 
+#define BORD 2
+
 #define max(a,b) (a >= b ? a : b)
 #define min(a,b) (a <= b ? a : b)
 
@@ -20,6 +22,7 @@
 
 #define UNIT_TEST(cond, func, test) if (cond) PASS(func, test); else {FAIL(func, test);}
 
+#define TIME(v)   
 
 
 #endif // __UTIL_H__
