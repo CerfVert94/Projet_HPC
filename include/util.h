@@ -24,5 +24,9 @@
 
 #define TIME(v)   
 
-
+static inline void exit_on_error(const char *msg){
+    perror(msg);
+    exit(EXIT_FAILURE);
+}
+static void exit_on_error(const char *msg);
 #endif // __UTIL_H__
