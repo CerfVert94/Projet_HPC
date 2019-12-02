@@ -14,6 +14,10 @@ p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol
 	p_struct_elem_dim s;
 
 	s = (p_struct_elem_dim) malloc(sizeof(struct_elem_dim));
+	if (!s) {
+		perror("malloc failed");
+		exit(EXIT_FAILURE);
+	}
 	// Define dimension.
 	s->nrow = nrow; s->ncol = ncol;
 	// Define origin.
@@ -21,6 +25,7 @@ p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol
 	// Compute the size of borders
 	s->nrl = -y0; s->nrh = (nrow - 1) - y0;
 	s->ncl = -x0; s->nch = (ncol - 1) - x0;
+	return s;
 }
 void free_structuring_element(p_struct_elem_dim s)
 {
