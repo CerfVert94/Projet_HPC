@@ -14,17 +14,19 @@ p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol
 	p_struct_elem_dim s;
 
 	s = (p_struct_elem_dim) malloc(sizeof(struct_elem_dim));
-	if (!s) {
-		perror("malloc failed");
-		exit(EXIT_FAILURE);
-	}
-	// Define dimension.
+	
+	if (!s) 
+		exit_on_error("malloc failed");
+		
+	// Define the dimension.
 	s->nrow = nrow; s->ncol = ncol;
-	// Define origin.
+	// Define the origin.
 	s->x0= x0;  s->y0= y0;
-	// Compute the size of borders
-	s->nrl = -y0; s->nrh = (nrow - 1) - y0;
-	s->ncl = -x0; s->nch = (ncol - 1) - x0;
+	// Compute the lower / upper limits
+	s->nrl =  y0 - (nrow - 1); 
+	s->nrh = -y0 + (nrow - 1);
+	s->ncl =  x0 - (ncol - 1); 
+	s->nch = -x0 + (ncol - 1);
 	return s;
 }
 void free_structuring_element(p_struct_elem_dim s)
@@ -99,24 +101,6 @@ void image_chain_processing(p_image img, p_struct_elem_dim s, int idx)
 	free_ui8matrix(ppOutput, img->nrl, img->nrh, img->ncl, img->nch);
 }
 
-
-/*
-Test for morpho
-	A. Erosion (3x3 / 5x5)
-		a. Produce 1
-			i. Full rectangle 
-		b. Produce 0
-			i.  Empty rectangle
-			ii. Test corners
-			iii. Test edges
-	B. Dilation
-		a. Produce 1
-			i. Full rectangle 
-			ii. Test corners
-			iii. Test edges
-		b. Produce 0
-			i.  Empty rectangle
-*/
 
 // Without optimisation
 uint8 dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s)
