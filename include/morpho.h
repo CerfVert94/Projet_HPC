@@ -8,8 +8,8 @@
 
 typedef struct struct_elem_dim {
 	//ori = origin
-	long orix;
-	long oriy;
+	long x0;
+	long y0;
 	long nrow;
 	long ncol;
 
@@ -20,7 +20,7 @@ typedef struct struct_elem_dim {
 } struct_elem_dim;
 
 typedef struct struct_elem_dim struct_elem_dim, *p_struct_elem_dim;
-p_struct_elem_dim compute_struct_elem_dim(long orix, long oriy, long nrow, long ncol);
+p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol);
 void free_structuring_element(p_struct_elem_dim s);
 
 

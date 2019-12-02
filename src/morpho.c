@@ -9,7 +9,7 @@
 #include <util.h>
 
 extern const char * nom_func;
-p_struct_elem_dim compute_struct_elem_dim(long orix, long oriy, long nrow, long ncol)
+p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol)
 {
 	p_struct_elem_dim s;
 
@@ -17,10 +17,10 @@ p_struct_elem_dim compute_struct_elem_dim(long orix, long oriy, long nrow, long 
 	// Define dimension.
 	s->nrow = nrow; s->ncol = ncol;
 	// Define origin.
-	s->orix= orix;  s->oriy= oriy;
+	s->x0= x0;  s->y0= y0;
 	// Compute the size of borders
-	s->nrl = -oriy; s->nrh = (nrow - 1) - oriy;
-	s->ncl = -orix; s->nch = (ncol - 1) - orix;
+	s->nrl = -y0; s->nrh = (nrow - 1) - y0;
+	s->ncl = -x0; s->nch = (ncol - 1) - x0;
 }
 void free_structuring_element(p_struct_elem_dim s)
 {
