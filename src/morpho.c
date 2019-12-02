@@ -19,103 +19,82 @@ p_struct_elem_dim compute_struct_elem_dim(long orix, long oriy, long nrow, long 
 	// Define origin.
 	s->orix= orix;  s->oriy= oriy;
 	// Compute the size of borders
-	s->nthbord = oriy; s->nbhbord = (nrow - 1) - oriy;
-	s->nlvbord = orix; s->nrvbord = (ncol - 1) - orix;
+	s->nrl = -oriy; s->nrh = (nrow - 1) - oriy;
+	s->ncl = -orix; s->nch = (ncol - 1) - orix;
 }
 void free_structuring_element(p_struct_elem_dim s)
 {
 	free(s);
 }
 
-// Without optimisation
-uint8** ui8matrix_dilation(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s)
+void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
-	uint8 **bord_input, **output;
-	long col, row, y, x;
-	uint8 pixel;
-	
-	// Create a new matrix with edges / output matrix
-	bord_input  = ui8matrix(nrl - s->nthbord, nrh + s->nbhbord, ncl - s->nlvbord, nch + s->nrvbord);
-	output 		= ui8matrix(nrl, nrh, ncl, nch);
-	
-	// Copy the original image to the input matrix.
-	copy_ui8matrix_ui8matrix(input, nrl, nrh, ncl, nch, bord_input);
-	
+	long row, col, x, y;
 	// Erode
 	for (row = nrl; row < nrh + 1; row++){
 		for (col = ncl; col < nch + 1; col++) {
-			pixel = bord_input[row][col];
-			for (y = -s->nthbord; y < s->nbhbord + 1; y++ ) {
-				for (x = -s->nlvbord; x < s->nrvbord + 1; x++ ) {
-					pixel |= bord_input[row + y][col + x];
-				}
-			}
-			output[row][col] = pixel;
+			// Copy the input to the output
+			ppOutput[row][col] = ppInput[row][col];
+
+			// Apply morpho to the output
+			for (y = s->nrl; y < s->nrh + 1; y++ ) 
+				for (x = s->ncl; x < s->nch + 1; x++ ) 
+					ppOutput[row][col] &= ppInput[row + y][col + x];
 		}
 	}
-	
-	// Free the bordered matrix.
-	free_ui8matrix(bord_input, nrl - s->nthbord, nrh + s->nbhbord, ncl - s->nlvbord, nch + s->nrvbord);
-	return output;
 }
-uint8** ui8matrix_erosion(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s)
+void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
-	uint8 **bord_input, **output;
-	long col, row, y, x;
-	uint8 pixel;
-	
-	// Create a new matrix with edges / output matrix
-	bord_input  = ui8matrix(nrl - s->nthbord, nrh + s->nbhbord, ncl - s->nlvbord, nch + s->nrvbord);
-	output 		= ui8matrix(nrl, nrh, ncl, nch);
-
-	// Copy the original image to the input matrix.
-	copy_ui8matrix_ui8matrix(input, nrl, nrh, ncl, nch, bord_input);	
-	// Dilate
+	long row, col, x, y;
+	// dilate
 	for (row = nrl; row < nrh + 1; row++){
 		for (col = ncl; col < nch + 1; col++) {
-			pixel = bord_input[row][col];
-			for (y = -s->nthbord; y < s->nbhbord + 1; y++ ) {
-				for (x = -s->nlvbord; x < s->nrvbord + 1; x++ ) {
-					pixel &= bord_input[row + y][col + x];
-				}
-			}
-			output[row][col] = pixel;
+			// Copy the input to the output
+			ppOutput[row][col] = ppInput[row][col];
+			
+			// Apply morpho to the output
+			for (y = s->nrl; y < s->nrh + 1; y++ ) 
+				for (x = s->ncl; x < s->nch + 1; x++ ) 
+					ppOutput[row][col] |= ppInput[row + y][col + x];
 		}
 	}
-	// Free the bordered matrix.
-	free_ui8matrix(bord_input, nrl - s->nthbord, nrh + s->nbhbord, ncl - s->nlvbord, nch + s->nrvbord);
-	return output;
 }
 
 
-void image_dilation(p_image img, p_struct_elem_dim s)
+
+#define _IMG_DIMENSION(img, s) img->nrl - s->nrl, img->nrh - s->nrh, img->ncl - s->ncl, img->nch - s->nch
+// #define _IMG_DIMENSION(img) img->nrl, img->nrh, img->ncl, img->nch
+void image_chain_processing(p_image img, p_struct_elem_dim s, int idx)
 {
-	uint8 **output;
+	uint8 **ppOutput;
+	char filename[128];
 	long nrl, nrh, ncl, nch;
-	
-	nrl = img->nrl; nrh = img->nrh;
-	ncl = img->ncl;	nch = img->nch;
 
-	output = ui8matrix_dilation(img->I, nrl, nrh, ncl, nch, s);	
-	copy_ui8matrix_ui8matrix(output, nrl, nrh, ncl, nch, img->Omega);
-	// Save the image (debug)
-	SavePGM_ui8matrix(img->Omega, nrl, nrh, ncl, nch,"output_dilation.pgm");
-	free_ui8matrix(output, nrl, nrh, ncl, nch);
-}
-void image_erosion(p_image img, p_struct_elem_dim s)
-{
-	uint8 **output;
-	long nrl, nrh, ncl, nch;
-	
-	nrl = img->nrl; nrh = img->nrh;
-	ncl = img->ncl;	nch = img->nch;
+	ppOutput = ui8matrix(img->nrl, img->nrh, img->ncl, img->nch);
+	nrl = img->nrl + BORD;//s->nrl;
+	nrh = img->nrh - BORD;//s->nrh;
+	ncl = img->ncl + BORD;//s->ncl;
+	nch = img->nch - BORD;//s->nch;
 
-	output = ui8matrix_erosion(img->I, nrl, nrh, ncl, nch, s);
-	copy_ui8matrix_ui8matrix(output, nrl, nrh, ncl, nch, img->Omega);
-	// Save the image (debug)
-	SavePGM_ui8matrix(img->Omega, nrl, nrh, ncl, nch,"output_erosion.pgm");
-	free_ui8matrix(output, nrl, nrh, ncl, nch);
+	ui8matrix_erosion_naive (img->E, nrl, nrh, ncl, nch, s, ppOutput);	
+	ui8matrix_dilation_naive(ppOutput,  nrl, nrh, ncl, nch, s, img->Omega);	
+	ui8matrix_dilation_naive(img->Omega, nrl, nrh, ncl, nch, s, ppOutput);	
+	ui8matrix_erosion_naive (ppOutput, nrl, nrh, ncl, nch, s, img->Omega);	
+
+	for (int i = img->nrl; i < img->nrh; i++) {
+		for (int j = img->ncl; j < img->nch; j++) {
+			// printf("%d", img->E[i][j]);
+			img->Omega[i][j] *= 255;
+		}
+		// putchar('\n');
+	}
+	// // Save the image (debug)
+	sprintf(filename, "../car3_sigma/car_%d.pgm", idx);
+	SavePGM_ui8matrix(img->Omega, nrl, nrh, ncl, nch, filename);
+	free_ui8matrix(ppOutput, img->nrl, img->nrh, img->ncl, img->nch);
 }
+
+
 /*
 Test for morpho
 	A. Erosion (3x3 / 5x5)
@@ -133,3 +112,27 @@ Test for morpho
 		b. Produce 0
 			i.  Empty rectangle
 */
+
+// Without optimisation
+uint8 dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s)
+{
+	uint8 pixel = ppInput[row][col];
+	// Dilate
+	for (long y = s->nrl; y < s->nrh + 1; y++ ) {
+		for (long x = s->ncl; x < s->nch + 1; x++ ) {
+			pixel |= ppInput[row + y][col + x];
+		}
+	}
+	return pixel;
+}
+uint8 erosion_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s)
+{
+	uint8 pixel = ppInput[row][col];
+	// Erode
+	for (long y = s->nrl; y < s->nrh + 1; y++ ) {
+		for (long x = s->ncl; x < s->nch + 1; x++ ) {
+			pixel &= ppInput[row + y][col + x];
+		}
+	}
+	return pixel;
+}

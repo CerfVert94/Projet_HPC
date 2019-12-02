@@ -13,22 +13,30 @@ typedef struct struct_elem_dim {
 	long nrow;
 	long ncol;
 
-	// th = top horizontal / bv = bottom horizontal
-	// lv = left vertical / rh = right vertical
-	// bord = border
-	long nthbord;
-	long nbhbord;
-	long nlvbord;
-	long nrvbord;
+	long nrl;
+	long nrh;
+	long ncl;
+	long nch;
 } struct_elem_dim;
 
 typedef struct struct_elem_dim struct_elem_dim, *p_struct_elem_dim;
 p_struct_elem_dim compute_struct_elem_dim(long orix, long oriy, long nrow, long ncol);
 void free_structuring_element(p_struct_elem_dim s);
 
-uint8** ui8matrix_dilation(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s);
-uint8** ui8matrix_erosion(uint8** input, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s);
-void image_dilation(p_image img, p_struct_elem_dim s);
-void image_erosion(p_image img, p_struct_elem_dim s);
 
+typedef void (*morpho_func_t)(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_naive (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+
+uint8  erosion_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s);
+uint8 dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s);
+
+
+
+// void ui8matrix_lambda_morpho(morpho_func_t morpho, long order, uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+// void dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s, uint8 **ppOutput);
+// void  erosion_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s, uint8 **ppOutput);
+
+
+void image_chain_processing(p_image img, p_struct_elem_dim s, int idx);
 #endif /* __MORPHO_H__ */
