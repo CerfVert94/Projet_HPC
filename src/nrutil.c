@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <ctype.h> 
 #include <string.h>
 #include <math.h> /* fabs */
@@ -25,12 +26,15 @@
 long nr_end = NR_END;
 
 /* ------------------------- */
-void nrerror(char error_text[])
+void nrerror(char error_text[], ...)
 /* ------------------------- */
 /* Numerical Recipes standard error handler */
 {
+  va_list args;
+  va_start (args, error_text);
   fprintf(stderr,"Numerical Recipes run-time error...\n");
-  fprintf(stderr,"%s\n",error_text);
+  vfprintf(stderr, error_text, args);
+  va_end (args);
   fprintf(stderr,"...now exiting to system...\n");
   exit(1);
 }
@@ -1041,15 +1045,15 @@ uint8** LoadPGM_ui8matrix(char *filename, long *nrl, long *nrh, long *ncl, long 
   /* ouverture du fichier */
   file = fopen(filename,"rb");
   if (file==NULL)
-    nrerror("ouverture du fichier impossible\n");
-    //nrerror("ouverture du fichier %s impossible\n", filename);
+    // nrerror("ouverture du fichier impossible\n");
+    nrerror("ouverture du fichier %s impossible\n", filename);
 
   /* lecture de l'entete du fichier pgm */
   readitem(file, buffer);
   /*fscanf(fichier, "%s", buffer);*/
   if(strcmp(buffer, "P5") != 0)
-    nrerror("entete du fichier %s invalide\n");
-    //nrerror("entete du fichier %s invalide\n", filename);
+    // nrerror("entete du fichier %s invalide\n");
+    nrerror("entete du fichier %s invalide\n", filename);
 
   width  = atoi(readitem(file, buffer));
   height = atoi(readitem(file, buffer));
@@ -1086,15 +1090,15 @@ void MLoadPGM_ui8matrix(char *filename, int nrl, int nrh, int ncl, int nch, uint
     /* ouverture du fichier */
     file = fopen(filename,"rb");
     if (file==NULL)
-        nrerror("ouverture du fichier impossible\n");
-    //nrerror("ouverture du fichier %s impossible\n", filename);
+        // nrerror("ouverture du fichier impossible\n");
+    nrerror("ouverture du fichier %s impossible\n", filename);
     
     /* lecture de l'entete du fichier pgm */
     readitem(file, buffer);
     /*fscanf(fichier, "%s", buffer);*/
     if(strcmp(buffer, "P5") != 0)
-        nrerror("entete du fichier %s invalide\n");
-    //nrerror("entete du fichier %s invalide\n", filename);
+        // nrerror("entete du fichier %s invalide\n");
+    nrerror("entete du fichier %s invalide\n", filename);
     
     width  = atoi(readitem(file, buffer));
     height = atoi(readitem(file, buffer));
@@ -1172,15 +1176,15 @@ rgb8** LoadPPM_rgb8matrix(char *filename, long *nrl, long *nrh, long *ncl, long 
   /* ouverture du fichier */
   file = fopen(filename,"rb");
   if (file==NULL)
-    nrerror("ouverture du fichier impossible\n");
-    //nrerror("ouverture du fichier %s impossible\n", filename);
+    // nrerror("ouverture du fichier impossible\n");
+    nrerror("ouverture du fichier %s impossible\n", filename);
 
   /* lecture de l'entete du fichier pgm */
   readitem(file, buffer);
   /*fscanf(fichier, "%s", buffer);*/
   if(strcmp(buffer, "P6") != 0)
-    nrerror("entete du fichier %s invalide\n");
-    //nrerror("entete du fichier %s invalide\n", filename);
+    // nrerror("entete du fichier %s invalide\n");
+    nrerror("entete du fichier %s invalide\n", filename);
 
   width  = atoi(readitem(file, buffer));
   height = atoi(readitem(file, buffer));
