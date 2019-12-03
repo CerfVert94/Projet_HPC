@@ -21,14 +21,14 @@ unsigned long long get_cpu_cycles(morpho_func_t morpho, uint8 **ppInput,  long n
 	end = __rdtsc();
 	return end - begin;
 }
-double **benchmark_results(long nb_funcs, long sample_size)
+double **init_benchmark_results(long nb_funcs, long size)
 {
 	double **results;
 	results = (double **) malloc(sizeof(double *) * nb_funcs);
 	if (!results)    
 		exit_on_error("malloc failed");
 
-	results[0] = (double *) malloc(sizeof(double) * nb_funcs * sample_size);
+	results[0] = (double *) malloc(sizeof(double) * nb_funcs * size);
 	if (!results[0]) 
 		exit_on_error("malloc failed");
 	return results;
@@ -41,13 +41,13 @@ void free_benchmark_results(double **results, long nb_funcs)
 }
 uint8 **rand_ui8matrix(long size, p_struct_elem_dim s)
 {
-	uint8** matrix;
+	uint8** matrix, rand;
 	long nrl, nrh, ncl, nch;
-	matrix = ui8matrix(0 - s->nrl, size + s->nrh, 0 - s->ncl, size + s->nch);
-
+	matrix = ui8matrix(0 + s->nrl, size + s->nrh, 0 + s->ncl, size + s->nch);
+	// printf("%ld %ld %ld %ld\n",  0 + s->nrl, size + s->nrh, 0 + s->ncl, size + s->nch);
 	for (long i = 0; i < size; i++)
-		for (long j = 0; j < size; i++) {
-			matrix[i][j] = ui8rand() % 2;
+		for (long j = 0; j < size; j++) {
+			matrix[i][j] =  ui8rand() % 2;
 		}
 
 	return matrix;
@@ -73,34 +73,38 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, l
 
 	const long nb_tests   = 1000;
 	const long packet_size = 3;
-	const long sample_size = (max_size - min_size)  + 1;
 	unsigned long long  *cycles;
 	unsigned long long   min_cycle_sum;
 	uint8 **ppInput, **ppOutput;
 	double **results;
 
-	long i = 0, j = 0, k =0, l = 0, cnt = 0;
+	long i = 0, size = 0, k =0, l = 0, cnt = 0;
 	long nrl, nrh, ncl, nch;
+	long nb_elements = 0;
 
 
-	results = benchmark_results(nb_funcs, sample_size);
+	results = init_benchmark_results(nb_funcs, (max_size - min_size)  + 1);
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
 
 	
 	cnt = 0;
-	for (j = min_size; j < max_size + 1; j++) {
-		ppInput = rand_ui8matrix(j, s);
+	for (size = min_size; size < max_size + 1; size++) {
+		ppInput = rand_ui8matrix(size, s);
+		ppOutput = ui8matrix(0, size, 0, size);
+		nb_elements = (size * size);
 		for (i = 0; i < nb_funcs; i++)  {
 			min_cycle_sum = 0;
 			for (k = 0; k < nb_tests; k++) {
-				for (l = 0; l < packet_size; l++) {
+
+				for (l = 0; l < packet_size; l++) 
 					cycles[l] = get_cpu_cycles(morphos[i], ppInput, nrl, nrh, ncl, nch, s, ppOutput);
-				}
 				min_cycle_sum += get_min_cycle(cycles, packet_size);
 			}
-			results[i][cnt] = min_cycle_sum / nb_tests;
+			results[i][cnt] = (double)(min_cycle_sum / nb_tests) ;
+			printf("%ld : %1.2lf\n", size, results[i][cnt]);
 		}
-		free(ppInput);
+		free_ui8matrix(ppOutput, 0, size, 0, size);
+		free_ui8matrix(ppInput, 0 + s->nrl, size + s->nrh, 0 + s->ncl, size + s->nch);
 		cnt++;
 	}
 	free(cycles);
