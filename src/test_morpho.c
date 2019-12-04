@@ -11,7 +11,30 @@
 #include <assert.h>
 #include <x86intrin.h>
 #include <time.h>
-
+uint8 **ui8matrix_test_input(long size, const uint8 xor_mask, p_struct_elem_dim s)
+{
+	uint8** ppOutput, cell = 255, first_cell;
+	const uint8 CELL = 1;
+	long nrl, nrh, ncl, nch;
+	nrl = 0 + s->nrl;
+	nrh = size + s->nrh - 1;
+	ncl = 0 + s->ncl;
+	nch = size + s->nch - 1;
+	ppOutput = ui8matrix(nrl, nrh, ncl, nch);
+	memset(&ppOutput[nrl][ncl], 0, NROW(nrh, nrl) * NCOL(nch, ncl) * sizeof(ppOutput[0][0]));
+	first_cell = xor_mask;
+	for (long i = 0; i < size; i++) {
+		if (i % 3 == 0 && i > 0)
+			first_cell ^= xor_mask;    
+		cell = first_cell;
+		for (long j = 0; j < size; j++) {
+			if (j % 3 == 0 && j > 0)
+				cell ^= xor_mask;
+			ppOutput[i][j] = cell;
+		}
+	}
+	return ppOutput;
+}
 unsigned long long get_cpu_cycles(morpho_func_t morpho, uint8 **ppInput,  long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
@@ -31,13 +54,14 @@ double **init_benchmark_results(long nb_funcs, long size)
 	results[0] = (double *) malloc(sizeof(double) * nb_funcs * size);
 	if (!results[0]) 
 		exit_on_error("malloc failed");
+	for (long i = 1; i < nb_funcs; i++) results[i] = results[i - 1] + size;
 	return results;
 
 }
 void free_benchmark_results(double **results, long nb_funcs)
 {
-	free(results[0]);
-	free(results);
+	free((char *)results[0]);
+	free((char **)results);
 }
 uint8 **rand_ui8matrix(long size, p_struct_elem_dim s)
 {
@@ -68,10 +92,9 @@ unsigned long long get_min_cycle(unsigned long long *cycles, long packet_size)
 	return min_cycle;
 }
 
-double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, long min_size, long max_size)
+double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, const long nb_tests, long min_size, long max_size, long step, const char *filename_prefix, int save_output)
 {	
-
-	const long nb_tests   = 1000;
+	// const long nb_tests    = 100;
 	const long packet_size = 3;
 	unsigned long long  *cycles;
 	unsigned long long   min_cycle_sum;
@@ -81,6 +104,7 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, l
 	long i = 0, size = 0, k =0, l = 0, cnt = 0;
 	long nrl, nrh, ncl, nch;
 	long nb_elements = 0;
+	char filename[128];
 
 
 	results = init_benchmark_results(nb_funcs, (max_size - min_size)  + 1);
@@ -88,9 +112,11 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, l
 
 	
 	cnt = 0;
-	for (size = min_size; size < max_size + 1; size++) {
-		ppInput = rand_ui8matrix(size, s);
-		ppOutput = ui8matrix(0, size, 0, size);
+	for (size = min_size; size < max_size + 1; size += step) {
+		ppInput = ui8matrix_test_input(size, 1, s);
+		ppOutput = ui8matrix(0, size - 1, 0, size - 1);
+		ncl = nrl = 0; 
+		nch = nrh = size - 1;
 		nb_elements = (size * size);
 		for (i = 0; i < nb_funcs; i++)  {
 			min_cycle_sum = 0;
@@ -99,12 +125,20 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, l
 				for (l = 0; l < packet_size; l++) 
 					cycles[l] = get_cpu_cycles(morphos[i], ppInput, nrl, nrh, ncl, nch, s, ppOutput);
 				min_cycle_sum += get_min_cycle(cycles, packet_size);
+			} 
+			results[i][cnt] = (double)(min_cycle_sum / (nb_tests * nb_elements)) ;
+			printf("%ld (%ld) : %1.2lf\n", size, results[i][cnt], nb_elements);
+
+			if (save_output) {
+				printf("%p", filename);
+				getchar();
+				binary_to_octal_ui8matrix(ppOutput, 0, size - 1, 0, size - 1);
+				snprintf(filename, 128, "%s_%ldx%ld.pgm", filename_prefix, size, size);
+				SavePGM_ui8matrix(ppOutput, 0, size - 1, 0, size - 1, filename);
 			}
-			results[i][cnt] = (double)(min_cycle_sum / nb_tests) ;
-			printf("%ld : %1.2lf\n", size, results[i][cnt]);
 		}
-		free_ui8matrix(ppOutput, 0, size, 0, size);
-		free_ui8matrix(ppInput, 0 + s->nrl, size + s->nrh, 0 + s->ncl, size + s->nch);
+		free_ui8matrix(ppOutput, 0         , size - 1     , 0         , size - 1);
+		free_ui8matrix(ppInput , 0 + s->nrl, size + s->nrh, 0 + s->ncl, size + s->nch);
 		cnt++;
 	}
 	free(cycles);
