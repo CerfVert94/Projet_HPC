@@ -127,7 +127,7 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, c
 				min_cycle_sum += get_min_cycle(cycles, packet_size);
 			} 
 			results[i][cnt] = (double)(min_cycle_sum / (nb_tests * nb_elements)) ;
-			printf("%ld (%ld) : %1.2lf\n", size, results[i][cnt], nb_elements);
+			// printf("%ld (%ld) : %1.2lf\n", size, nb_elements, results[i][cnt]);
 
 			if (save_output) {
 				printf("%p", filename);
