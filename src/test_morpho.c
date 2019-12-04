@@ -148,7 +148,7 @@ double **benchmark(morpho_func_t morphos[], p_struct_elem_dim s,long nb_funcs, c
 #define PERM_TO_ROW(perm, irow, ncol) ((perm >> irow * ncol) & 0x1FF) 
 #define  ROW_TO_COL(row, icol)        ((row >> (icol)) & 0x1)
 
-void test_morpho(morpho_func_t erosion, morpho_func_t dilation)
+void test_morpho5x5(morpho_func_t erosion, morpho_func_t dilation)
 {
 	const long TEST_SE_NROW     = 5L;
 	const long TEST_SE_NCOL     = 5L;
@@ -210,16 +210,87 @@ void test_morpho(morpho_func_t erosion, morpho_func_t dilation)
 		if (perm % print_cnt == 0) 
 			printf("%8dth test finished (%08d / %8d).\n", perm, perm, max);
 		
-		if (perm == max)	assert(Morpho_Test_5x5_Rect( erosion, ppInput, s) == 1 /*perm == 0x1FFFFFF */);
-		else				assert(Morpho_Test_5x5_Rect( erosion, ppInput, s) == 0 /*perm <  0x1FFFFFF */);
-		if (perm == min)	assert(Morpho_Test_5x5_Rect(dilation, ppInput, s) == 0 /*perm == 0x0000000 */);
-		else 				assert(Morpho_Test_5x5_Rect(dilation, ppInput, s) == 1 /*perm >  0x0000000 */);
+		if (perm == max)	assert(Morpho_Test( erosion, ppInput, s) == 1 /*perm == 0x1FFFFFF */);
+		else				assert(Morpho_Test( erosion, ppInput, s) == 0 /*perm <  0x1FFFFFF */);
+		if (perm == min)	assert(Morpho_Test(dilation, ppInput, s) == 0 /*perm == 0x0000000 */);
+		else 				assert(Morpho_Test(dilation, ppInput, s) == 1 /*perm >  0x0000000 */);
 	}
 	puts("Morpho : Passed all tests.");
 	free_ui8matrix(ppInput, nrl, nrh, ncl, nch);
 	free_structuring_element(s);
 }
-uint8 Morpho_Test_5x5_Rect(morpho_func_t morpho, uint8 **ppInput, p_struct_elem_dim s)
+
+void test_morpho3x3(morpho_func_t erosion, morpho_func_t dilation)
+{
+	const long TEST_SE_NROW     = 3L;
+	const long TEST_SE_NCOL     = 3L;
+	const long TEST_SE_ORIGIN_X = 1L;
+	const long TEST_SE_ORIGIN_Y = 1L;
+	const long nrl =  TEST_SE_ORIGIN_Y - (TEST_SE_NROW - 1);
+	const long nrh = -TEST_SE_ORIGIN_Y + (TEST_SE_NROW - 1);
+	const long ncl =  TEST_SE_ORIGIN_X - (TEST_SE_NCOL - 1);
+	const long nch = -TEST_SE_ORIGIN_X + (TEST_SE_NCOL - 1);
+
+	p_struct_elem_dim s = compute_struct_elem_dim(TEST_SE_ORIGIN_X, TEST_SE_ORIGIN_Y, 
+	 											  TEST_SE_NROW    , TEST_SE_NCOL    );
+											   
+	puts("Checking the structuring element used for unit tests.");
+	assert(s->nrow == 3 /* Structuring Element : Height  = 5 */);
+	assert(s->ncol == 3 /* Structuring Element : Width   = 5 */);
+	assert(s->y0 == 1 /* Structuring Element : originY = 2 */);
+	assert(s->x0 == 1 /* Structuring Element : originX = 2 */);
+	assert(nrl == -1    /* Test input rect : nrl == -2*/);
+	assert(nrh ==  1    /* Test input rect : nrh ==  2*/);
+	assert(ncl == -1    /* Test input rect : ncl == -2*/);
+	assert(nch ==  1    /* Test input rect : nch ==  2*/);
+	puts("The structuring element has the correct dimension for tests.");
+	// uint8 rect[TEST_SE_NROW][TEST_SE_NCOL];
+
+	uint8 **ppInput = ui8matrix(nrl, nrh, ncl, nch);
+	
+	// A binary 3x3 rectangle has 2^9-1 combinations
+	// [0 ~ 1FF]
+	uint32 min = 0, max = 0x1FF; // 2^25
+	uint32 perm = 0, row = 0;
+	const uint32 print_cnt = 0xFF;
+
+	/**
+	 * Convert the permutation to matrix format.
+	 * 
+	 * For example: 
+	 * perm = 0b111000111
+	 * =>
+	 * ppInput = {1,1,1,
+	 *            0,0,0,
+	 *            1,1,1};
+	 **/
+
+	// Loop 1: Get permutations :
+	for (perm = 0; perm < max + 1; perm++) {
+		// Loop 2 ~ 3 : Tranform the binary permutation to 5x5 rectangle.
+		for (int i = nrl; i < nrh + 1; i++) {
+			// Get the i-th row from the permutation.
+			row = PERM_TO_ROW(perm, (i - nrl), TEST_SE_NCOL); 
+			for (int j = ncl; j < nch + 1; j++) {
+				// Get the j-th column from the row.
+				ppInput[i][j] = ROW_TO_COL(row, (j - ncl));
+			}
+		}
+
+		if (perm % print_cnt == 0) 
+			printf("%8dth test finished (%08d / %8d).\n", perm, perm, max);
+		
+		if (perm == max)	assert(Morpho_Test( erosion, ppInput, s) == 1 /*perm == 0x1FFFFFF */);
+		else				assert(Morpho_Test( erosion, ppInput, s) == 0 /*perm <  0x1FFFFFF */);
+		if (perm == min)	assert(Morpho_Test(dilation, ppInput, s) == 0 /*perm == 0x0000000 */);
+		else 				assert(Morpho_Test(dilation, ppInput, s) == 1 /*perm >  0x0000000 */);
+	}
+	puts("Morpho : Passed all tests.");
+	free_ui8matrix(ppInput, nrl, nrh, ncl, nch);
+	free_structuring_element(s);
+}
+
+uint8 Morpho_Test(morpho_func_t morpho, uint8 **ppInput, p_struct_elem_dim s)
 {
 	uint8     output = -1;
 	uint8  * pOutput = &output;

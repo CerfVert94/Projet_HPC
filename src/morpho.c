@@ -34,9 +34,23 @@ void free_structuring_element(p_struct_elem_dim s)
 	free(s);
 }
 
+inline void ui8matrix_sequence_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	uint8 **ppPreOutput0, **ppPreOutput1;
+	ppPreOutput0 = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	ppPreOutput1 = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	ui8matrix_erosion_naive (ppInput     , nrl, nrh, ncl, nch, s, ppPreOutput0);
+	ui8matrix_dilation_naive(ppPreOutput0, nrl, nrh, ncl, nch, s, ppPreOutput1);
+	ui8matrix_dilation_naive(ppPreOutput1, nrl, nrh, ncl, nch, s, ppPreOutput0);
+	ui8matrix_erosion_naive (ppPreOutput0, nrl, nrh, ncl, nch, s, ppOutput);
+	free_ui8matrix(ppPreOutput0, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	free_ui8matrix(ppPreOutput1, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+}
 void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	long row, col, x, y;
+	long snrl = s->nrl, snrh = s->nrh, sncl = s->ncl, snch = s->nch;
+
 	// Erode
 	for (row = nrl; row < nrh + 1; row++){
 		for (col = ncl; col < nch + 1; col++) {
@@ -44,8 +58,8 @@ void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long
 			ppOutput[row][col] = ppInput[row][col];
 
 			// Apply morpho to the output
-			for (y = s->nrl; y < s->nrh + 1; y++ ) 
-				for (x = s->ncl; x < s->nch + 1; x++ ) 
+			for (y = snrl; y < snrh + 1; y++ ) 
+				for (x = sncl; x < snch + 1; x++ ) 
 					ppOutput[row][col] &= ppInput[row + y][col + x];
 		}
 	}
@@ -53,6 +67,7 @@ void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long
 void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	long row, col, x, y;
+	long snrl = s->nrl, snrh = s->nrh, sncl = s->ncl, snch = s->nch;
 	// dilate
 	for (row = nrl; row < nrh + 1; row++){
 		for (col = ncl; col < nch + 1; col++) {
@@ -60,8 +75,8 @@ void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, lon
 			ppOutput[row][col] = ppInput[row][col];
 			
 			// Apply morpho to the output
-			for (y = s->nrl; y < s->nrh + 1; y++ ) 
-				for (x = s->ncl; x < s->nch + 1; x++ ) 
+			for (y = snrl; y < snrh + 1; y++ ) 
+				for (x = sncl; x < snch + 1; x++ ) 
 					ppOutput[row][col] |= ppInput[row + y][col + x];
 		}
 	}
