@@ -29,4 +29,10 @@ static inline void exit_on_error(const char *msg){
     exit(EXIT_FAILURE);
 }
 static void exit_on_error(const char *msg);
+
+void binary_to_octal_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
+void octal_to_binary_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
+
+#define NROW(nrl, nrh)  (nrh - nrl + 1)
+#define NCOL(ncl, nch)  (nch - ncl + 1)
 #endif // __UTIL_H__
