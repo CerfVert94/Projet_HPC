@@ -15,8 +15,6 @@
 
 #include "img.h"
 
-#define NROW(nrl, nrh)  (nrh - nrl + 1)
-#define NCOL(ncl, nch)  (nch - ncl + 1)
 p_image create_image(char* filename) {
 
 	long rl, rh, cl, ch;
@@ -39,7 +37,7 @@ p_image create_image(char* filename) {
 	tmp->nch = nch;
 
 	tmp->I = ui8matrix(nrl, nrh, ncl, nch);
-	printf("%ld %ld\n", nrh, nrl);
+	// printf("%ld %ld\n", nrh, nrl);
 	memset(&tmp->I[nrl][ncl], 0, NROW(nrh, nrl) * NCOL(nch, ncl) * sizeof(tmp->I[0][0]));
 	
 	copy_ui8matrix_ui8matrix(img, rl, rh, cl, ch, tmp->I);
