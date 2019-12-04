@@ -1,4 +1,5 @@
 #include <nrdef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <util.h>
 void binary_to_octal_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch)
