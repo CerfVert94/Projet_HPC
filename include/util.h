@@ -24,6 +24,17 @@
 
 #define TIME(v)   
 
+#define RALIGNED_STR     "%40s"
+#define RALIGNED_SINT    "%40d"
+#define RALIGNED_UINT    "%40u"
+#define RALIGNED_SLONG   "%40ld"
+#define RALIGNED_ULONG   "%40lu"
+#define RALIGNED_SLLONG  "%40lld"
+#define RALIGNED_ULLONG  "%40llu"
+#define RALIGNED_FLOAT   "%40.2f"
+#define RALIGNED_DOUBLE  "%40.2lf"
+
+
 static inline void exit_on_error(const char *msg){
     perror(msg);
     exit(EXIT_FAILURE);
