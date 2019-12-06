@@ -5,7 +5,7 @@
 #include <stdio.h>
 //#include <malloc.h>
 #include <morpho.h>
-#include <test_morpho.h>
+
 #include <util.h>
 
 extern const char * nom_func;
@@ -59,7 +59,7 @@ void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long
 
 			// Apply morpho to the output
 			for (y = snrl; y < snrh + 1; y++ ) 
-				for (x = sncl; x < snch + 1; x++ ) 
+				for (x = sncl; x < snch + 1; x++ )  
 					ppOutput[row][col] &= ppInput[row + y][col + x];
 		}
 	}
@@ -75,7 +75,7 @@ void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, lon
 			ppOutput[row][col] = ppInput[row][col];
 			
 			// Apply morpho to the output
-			for (y = snrl; y < snrh + 1; y++ ) 
+			for (y = snrl; y < snrh + 1; y++ )
 				for (x = sncl; x < snch + 1; x++ ) 
 					ppOutput[row][col] |= ppInput[row + y][col + x];
 		}
