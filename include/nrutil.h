@@ -54,6 +54,7 @@ void free_ui32matrix(uint32 **m, long nrl, long nrh, long ncl, long nch);
 void free_si32matrix(sint32 **m, long nrl, long nrh, long ncl, long nch);
 void free_f32matrix(float32 **m, long nrl, long nrh, long ncl, long nch);
 
+
 uint8**   ui8matrix_map(long nrl, long nrh, long ncl, long nch);
 sint8**   si8matrix_map(long nrl, long nrh, long ncl, long nch);
 uint16** ui16matrix_map(long nrl, long nrh, long ncl, long nch);
@@ -76,6 +77,12 @@ void free_ui16matrix_map(uint16 **m, long nrl, long nrh, long ncl, long nch);
 void free_si16matrix_map(sint16 **m, long nrl, long nrh, long ncl, long nch);
 void free_ui32matrix_map(uint32 **m, long nrl, long nrh, long ncl, long nch);
 void free_si32matrix_map(sint32 **m, long nrl, long nrh, long ncl, long nch);
+
+/* ------------ */
+/* -- memset -- */
+/* ------------ */
+void memset_ui8matrix(uint8 **X, uint8 value, long nrl, long nrh, long ncl, long nch);
+
 
 /* ------------ */
 /* --- copy --- */

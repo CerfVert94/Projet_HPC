@@ -709,6 +709,13 @@ void free_f32matrix_map(float32 **m, long nrl, long nrh, long ncl, long nch)
 {
     free((FREE_ARG)(m+nrl));
 }
+/* ------------------------------------------------------------------------- */
+void memset_ui8matrix(uint8 **X, uint8 value, long nrl, long nrh, long ncl, long nch)
+/* ------------------------------------------------------------------------- */
+{ 
+      memset((uint8*)(&X[nrl][ncl]- NR_END), value, sizeof(**X) * (nrh - nrl + 1) * (nch - ncl + 1));
+}
+
 /* ----------------------------------------------------------------------------- */
 void copy_ui8matrix_ui8matrix(uint8 **X, int i0, int i1, int j0, int j1, uint8 **Y)
 /* ----------------------------------------------------------------------------- */
