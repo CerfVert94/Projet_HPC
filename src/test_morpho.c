@@ -60,7 +60,7 @@ double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, lon
 	nrl = ncl = 0;
 	nrh = nch = hs - 1;
 	// Find the largest margins.
-	for (idx_set = 1; idx_set < nb_sets; idx_set++) {
+	for (idx_set = 0; idx_set < nb_sets; idx_set++) {
 		nrl = min(msets[idx_set].s->nrl, nrl);
 		ncl = min(msets[idx_set].s->ncl, ncl);
 		nrh = max(msets[idx_set].s->nrh + hs - 1, nrh);
@@ -72,7 +72,6 @@ double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, lon
 	// the least largest 3x3 checkered square matrix as an input / output matrix.
 	ppInput  = ui8matrix_checker(nrl, nrh, ncl, nch, 3, 1); 
 	ppOutput = ui8matrix(nrl, nrh, ncl, nch);
-	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
@@ -83,9 +82,9 @@ double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, lon
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
 				min_cycles_sum += get_min_cpu_cycles(&msets[idx_set], packet_size, ppInput, 0, size, 0, size, ppOutput);
 			
-			results[idx_set][cnt] = (double)(min_cycles_sum / (nb_tests * packet_size * (size + 1) * (size + 1)));
+			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * packet_size * (size + 1) * (size + 1)));
 			end = __rdtsc();
-			printf("\t["RALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin) / (nb_tests * 3));			
+			printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin) / (nb_tests * 3));			
 		}
 
 		cnt++;
@@ -311,6 +310,9 @@ void test_integration_erosion_3x3(struct morpho_set *erosion_set)
 							 		  erosion_set->s,
 							 		  ppOutput);
 	assert(!memcmp(ppOutput[0], erosion3x3_test_output, SIZE_EVAL_OUT_SET_3X3 * sizeof(**ppOutput)));
+
+	
+						 	  	
 	epilogue_test_integration_3x3(erosion_set, ppInput, ppOutput);
 
 }
@@ -327,6 +329,7 @@ void test_integration_erosion_5x5(struct morpho_set *erosion_set)
 									  0, NCOL_EVAL_OUT_SET_5X5 - 1, 
 							 		  erosion_set->s,
 							 		  ppOutput);
+									   
 	assert(!memcmp(ppOutput[0], erosion5x5_test_output, SIZE_EVAL_OUT_SET_5X5 * sizeof(**ppOutput)));
 	epilogue_test_integration_5x5(erosion_set, ppInput, ppOutput);
 }
@@ -343,7 +346,10 @@ void test_integration_dilation_3x3(struct morpho_set *dilation_set)
 									   0, NCOL_EVAL_OUT_SET_3X3 - 1, 
 							 		   dilation_set->s,
 							 		   ppOutput);
+	display_ui8matrix(ppOutput, 0, NROW_EVAL_OUT_SET_3X3 - 1, 
+						 		0, NCOL_EVAL_OUT_SET_3X3 - 1, "%u", "Check");
 	assert(!memcmp(ppOutput[0], dilation3x3_test_output, SIZE_EVAL_OUT_SET_3X3 * sizeof(**ppOutput)));
+
 	epilogue_test_integration_3x3(dilation_set, ppInput, ppOutput);
 }
 void test_integration_dilation_5x5(struct morpho_set *dilation_set)
