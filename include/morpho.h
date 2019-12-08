@@ -27,19 +27,24 @@ void free_structuring_element(p_struct_elem_dim s);
 typedef void (*morpho_func_t)(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_naive (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O1xO1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
-void ui8matrix_dilation_LU3x3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3_RRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3_CRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU5x5_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_LU5x5 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU5x5 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_order3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_order3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_order3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_order3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
-void ui8matrix_dilation_LU5x5_order3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU5x5_order3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+
+void ui8matrix_erosion_naive (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_LU3x3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_LU5x5 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_LU3x3_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_LU3x3_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_erosion_LU5x5_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 
 void ui8matrix_sequence_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
