@@ -24,6 +24,8 @@
 
 #define TIME(v)   
 
+
+#define LALIGNED_STR     "%-40s"
 #define RALIGNED_STR     "%40s"
 #define RALIGNED_SINT    "%40d"
 #define RALIGNED_UINT    "%40u"
@@ -43,6 +45,7 @@ static void exit_on_error(const char *msg);
 
 void binary_to_octal_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
 void octal_to_binary_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
+
 
 #define NROW(nrl, nrh)  (nrh - nrl + 1)
 #define NCOL(ncl, nch)  (nch - ncl + 1)
