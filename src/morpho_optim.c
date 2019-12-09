@@ -545,7 +545,38 @@ void ui8matrix_dilation_LU3x3_O3xO1_RR(uint8** ppInput, long nrl, long nrh, long
 }
 
 
-
+void ui8matrix_dilation_Pipeline3x3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	long row = nrl, col = ncl, x, y;
+	
+	// Prologue
+	// ppOutput[row - 1][col];
+	for (col = ncl; col < nch + 1; col++) {
+        ppOutput[nrl - 1][col] = scalar_or3(ppInput[nrl - 1], col);
+		ppOutput[nrl + 0][col] = scalar_or3(ppInput[nrl + 0], col);
+		ppOutput[nrl + 1][col] = scalar_or3(ppInput[nrl + 1], col);
+		ppOutput[nrl + 2][col] = scalar_or3(ppInput[nrl + 2], col);
+	}
+	/**
+	 * OR3(pRow[-1])
+	 * OR3(pRow[ 0])
+	 * OR3(pRow[ 1])
+	 * Iter 1 :
+	 * pRow[0] = pRow[-1] | pRow[0] | pRow[1]
+	 * pRow[3] = OR3(pRow[3])
+	 * Iter 2 :
+	 * pRow[1] = pRow[0] | pRow[1] | pRow[2]
+	 * pRow[4] = OR3(pRow[2])
+	 **/
+	for (row = nrl; row < nrh + 1; row++){
+		for (col = ncl; col < nch + 1; col++) {
+			ppOutput[row + 0][col] = ppOutput[row - 1][col] |
+			 						 ppOutput[row + 0][col] |
+									 ppOutput[row + 1][col];
+            ppOutput[row + 2][col] = scalar_or3(ppInput[row], col);
+		}
+	}
+}
 // void ui8matrix_erosion_LU3x3(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 // {
 	

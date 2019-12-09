@@ -51,7 +51,7 @@ unsigned long long get_min_cpu_cycles(struct morpho_set *ptr_mset, long packet_s
 
 double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests)
 {
-	const int packet_size = 3;
+	const int packet_size = 10;
 	unsigned long long  min_cycles_sum, begin, end;
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
 	double **results;
