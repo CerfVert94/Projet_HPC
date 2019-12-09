@@ -50,9 +50,13 @@
 #define vec_avg3(x0,x1,x2) x0
 #define vec_avg5(x0,x1,x2,x3,x4) x0
 
-// abs
-//#define vec_subabs(a, b) _mm_sub_epi8(_mm_max)
+// subs a with b with abs output
+#define vec_subabs(a, b) _mm_subs_epu8(_mm_max_epu8(a,b), _mm_min_epu8(a,b))
 
-
-
+// vec compare 
+#define vec_cmplsb(a, b, c, d) a = _mm_sub_epi8(a, d);\
+							   b = _mm_sub_epi8(b, d);\
+							   c = _mm_cmpgt_epi8(a, b);\
+							   a = _mm_add_epi8(a, d);\
+							   b = _mm_add_epi8(b, d)
 #endif // __SIMD_MACRO_H__

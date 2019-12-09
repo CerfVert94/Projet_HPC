@@ -6,7 +6,6 @@
 #define __MOUVEMENT_SSE2_H__
 
 #ifndef __MOUVEMENT_H__
-#define THRESHOLD 20
 #define N 2
 #endif // __MOUVEMENT_H__
 
