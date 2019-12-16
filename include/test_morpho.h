@@ -31,7 +31,7 @@ void test_integration_erosion_5x5 (struct morpho_set *erosion_set);
 void test_integration_dilation_3x3(struct morpho_set *dilation_set);
 void test_integration_dilation_5x5(struct morpho_set *dilation_set);
 
-bool morpho_produces_one(struct morpho_set *dilation_set, uint8** ppInput);
+bool morpho_produces_one(struct morpho_set *mset, uint8** ppInput);
 
 bool check_dimension_of_square_structuring_element(p_struct_elem_dim s,  long size);
 
