@@ -51,7 +51,7 @@ unsigned long long get_min_cpu_cycles(struct morpho_set *ptr_mset, long packet_s
 
 double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests)
 {
-	const int packet_size = 10;
+	const int packet_size = 3;
 	unsigned long long  min_cycles_sum, begin, end;
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
 	double **results;
@@ -82,7 +82,7 @@ double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, lon
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
 				min_cycles_sum += get_min_cpu_cycles(&msets[idx_set], packet_size, ppInput, 0, size, 0, size, ppOutput);
 			
-			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * packet_size * (size + 1) * (size + 1)));
+			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			end = __rdtsc();
 			printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin) / (nb_tests * 3));			
 		}
@@ -225,45 +225,43 @@ void test_implementation_dilation_5x5(struct morpho_set *dilation_set)
 	puts("Passed all tests.\n");
 	free_ui8matrix(ppInput, STRUCTURING_ELEMENT_DIM(dilation_set->s));
 }
-bool morpho_produces_one(struct morpho_set *dilation_set, uint8** ppInput)
+bool morpho_produces_one(struct morpho_set *mset, uint8** ppInput)
 {
-	uint8     output = -1;
-	uint8  * pOutput = &output;
-	uint8 **ppOutput = &pOutput;
+	uint8 X[5][5]={{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
+	uint8 *Y[5] = {X[0] + 2, X[1] + 2, X[2] + 2, X[3] + 2, X[4] + 2};
+	uint8 **Z = Y + 2;
 
-	dilation_set->morpho_func(ppInput, 0, 0, 0, 0, dilation_set->s, ppOutput);
-	return output == 1;
+	mset->morpho_func(ppInput, 0, 0, 0, 0, mset->s, Z);
+	return Z[0][0];
 }
 
 uint8** prologue_test_integration_3x3(struct morpho_set *mset, uint8** ppInput, uint8** ppOutput)
 {
-	long nrl = mset->s->nrl;
-	long nrh = mset->s->nrh + NROW_EVAL_OUT_SET_3X3 - 1;
-	long ncl = mset->s->ncl;
-	long nch = mset->s->nch + NCOL_EVAL_OUT_SET_3X3 - 1;
+	long nrl = NRL_EVAL_IN_SET_3X3;
+	long nrh = NRH_EVAL_IN_SET_3X3;
+	long ncl = NCL_EVAL_IN_SET_3X3;
+	long nch = NCH_EVAL_IN_SET_3X3;
 
 	ppInput = ui8matrix(nrl, nrh, 
 					    ncl, nch);
-
-	ppOutput = ui8matrix(0, NROW_EVAL_OUT_SET_3X3 - 1, 
-						 0, NCOL_EVAL_OUT_SET_3X3 - 1);
 
 	memset_ui8matrix(ppInput, 0, nrl, nrh, 
 								 ncl, nch);
 
 	memcpy(&ppInput[nrl][ncl], morpho3x3_test_input, SIZE_EVAL_IN_SET_3X3 * sizeof(ppInput[nrl][ncl]));
+
+	display_ui8matrix(ppInput , nrl, nrh, 
+						 		ncl, nch, "%u", "Input");
 	printf("Integration test : %s\n", mset->func_name);
 	return ppInput;
 }
 
 uint8** prologue_test_integration_5x5(struct morpho_set *mset, uint8** ppInput, uint8** ppOutput)
 {
-	long nrl, nrh, ncl, nch;
-	
-	nrl = mset->s->nrl; 
-	nrh = mset->s->nrh + NROW_EVAL_OUT_SET_5X5 - 1; 
-	ncl = mset->s->ncl; 
-	nch = mset->s->nch + NCOL_EVAL_OUT_SET_5X5 - 1;
+	long nrl = NRL_EVAL_IN_SET_5X5;
+	long nrh = NRH_EVAL_IN_SET_5X5;
+	long ncl = NCL_EVAL_IN_SET_5X5;
+	long nch = NCH_EVAL_IN_SET_5X5;
 	
 	ppInput = ui8matrix(nrl, nrh, 
 						ncl, nch);
@@ -279,19 +277,19 @@ uint8** prologue_test_integration_5x5(struct morpho_set *mset, uint8** ppInput, 
 void epilogue_test_integration_3x3(struct morpho_set *mset, uint8** ppInput, uint8** ppOutput)
 {
 	puts("Passed the integration test.\n");
-	free_ui8matrix(ppInput , mset->s->nrl, mset->s->nrh + NROW_EVAL_OUT_SET_3X3 - 1, 
-					    	 mset->s->ncl, mset->s->nch + NCOL_EVAL_OUT_SET_3X3 - 1);
-	free_ui8matrix(ppOutput, 0, NROW_EVAL_OUT_SET_3X3 - 1, 
-						     0, NCOL_EVAL_OUT_SET_3X3 - 1);
+	free_ui8matrix(ppInput , NRL_EVAL_IN_SET_3X3, NRH_EVAL_IN_SET_3X3, 
+					    	 NCL_EVAL_IN_SET_3X3, NCH_EVAL_IN_SET_3X3);
+	free_ui8matrix(ppOutput, NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+						     NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3);
 }
 
 void epilogue_test_integration_5x5(struct morpho_set *mset, uint8** ppInput, uint8** ppOutput)
 {
 	puts("Passed the integration test.\n");
-	free_ui8matrix(ppInput , mset->s->nrl, mset->s->nrh + NROW_EVAL_OUT_SET_5X5 - 1, 
-					    	 mset->s->ncl, mset->s->nch + NCOL_EVAL_OUT_SET_5X5 - 1);
-	free_ui8matrix(ppOutput, 0, NROW_EVAL_OUT_SET_5X5 - 1, 
-						     0, NCOL_EVAL_OUT_SET_5X5 - 1);
+	free_ui8matrix(ppInput , NRL_EVAL_IN_SET_5X5, NRH_EVAL_IN_SET_5X5, 
+							 NCL_EVAL_IN_SET_5X5, NCH_EVAL_IN_SET_5X5);
+	free_ui8matrix(ppOutput, NRL_EVAL_OUT_SET_5X5, NRH_EVAL_OUT_SET_5X5, 
+							 NCL_EVAL_OUT_SET_5X5, NCH_EVAL_OUT_SET_5X5);
 }
 
 
@@ -299,20 +297,25 @@ void test_integration_erosion_3x3(struct morpho_set *erosion_set)
 {
 	check_dimension_of_square_structuring_element(erosion_set->s, 3);
 	uint8 **ppInput, **ppOutput;
-
+	struct struct_elem_dim *s = erosion_set->s;
+	
 	ppInput  = prologue_test_integration_3x3(erosion_set, ppInput, ppOutput);
-	ppOutput = ui8matrix(0, NROW_EVAL_OUT_SET_3X3 - 1, 
-						 0, NCOL_EVAL_OUT_SET_3X3 - 1);
+	ppOutput = ui8matrix(NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+						 NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3);
+	memset_ui8matrix(ppOutput, 0, NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+								  NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3);
 
-
-	erosion_set->morpho_func(ppInput, 0, NROW_EVAL_OUT_SET_3X3 - 1, 
-									  0, NCOL_EVAL_OUT_SET_3X3 - 1, 
+	erosion_set->morpho_func(ppInput, 0, NRH_EVAL_OUT_SET_3X3 - s->nrh, 
+									  0, NCH_EVAL_OUT_SET_3X3 - s->nch, 
 							 		  erosion_set->s,
 							 		  ppOutput);
-	assert(!memcmp(ppOutput[0], erosion3x3_test_output, SIZE_EVAL_OUT_SET_3X3 * sizeof(**ppOutput)));
+	display_ui8matrix(ppOutput, NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+						 		NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3, "%u", "Ouput");
 
-	
-						 	  	
+	assert(!memcmp(ppOutput[NRL_EVAL_OUT_SET_3X3] + NCL_EVAL_OUT_SET_3X3, 
+				   erosion3x3_test_output, 
+				   SIZE_EVAL_OUT_SET_3X3 * sizeof(**ppOutput)));
+
 	epilogue_test_integration_3x3(erosion_set, ppInput, ppOutput);
 
 }
@@ -320,35 +323,48 @@ void test_integration_erosion_5x5(struct morpho_set *erosion_set)
 {
 	check_dimension_of_square_structuring_element(erosion_set->s, 5);
 	uint8 **ppInput, **ppOutput;
-
+	struct struct_elem_dim *s = erosion_set->s;
+	
 	ppInput  = prologue_test_integration_5x5(erosion_set, ppInput, ppOutput);
-	ppOutput = ui8matrix(0, NROW_EVAL_OUT_SET_5X5 - 1, 
-						 0, NCOL_EVAL_OUT_SET_5X5 - 1);
 
-	erosion_set->morpho_func(ppInput, 0, NROW_EVAL_OUT_SET_5X5 - 1, 
-									  0, NCOL_EVAL_OUT_SET_5X5 - 1, 
+	ppOutput = ui8matrix(NRL_EVAL_OUT_SET_5X5, NRH_EVAL_OUT_SET_5X5, 
+						 NCL_EVAL_OUT_SET_5X5, NCH_EVAL_OUT_SET_5X5);
+
+	memset_ui8matrix(ppOutput, 0, NRL_EVAL_OUT_SET_5X5, NRH_EVAL_OUT_SET_5X5, 
+								  NCL_EVAL_OUT_SET_5X5, NCH_EVAL_OUT_SET_5X5);
+
+	erosion_set->morpho_func(ppInput, 0, NRH_EVAL_OUT_SET_5X5 - s->nrh, 
+									  0, NCH_EVAL_OUT_SET_5X5 - s->nch, 
 							 		  erosion_set->s,
 							 		  ppOutput);
 									   
-	assert(!memcmp(ppOutput[0], erosion5x5_test_output, SIZE_EVAL_OUT_SET_5X5 * sizeof(**ppOutput)));
+	assert(!memcmp(ppOutput[NRL_EVAL_OUT_SET_5X5] + NCL_EVAL_OUT_SET_5X5, 
+				   erosion5x5_test_output, 
+				   SIZE_EVAL_OUT_SET_5X5 * sizeof(**ppOutput)));
+
 	epilogue_test_integration_5x5(erosion_set, ppInput, ppOutput);
 }
 void test_integration_dilation_3x3(struct morpho_set *dilation_set)
 {
 	check_dimension_of_square_structuring_element(dilation_set->s, 3);
 	uint8 **ppInput, **ppOutput;
+	struct struct_elem_dim *s = dilation_set->s;
 	
 	ppInput  = prologue_test_integration_3x3(dilation_set, ppInput, ppOutput);
-	ppOutput = ui8matrix(0, NROW_EVAL_OUT_SET_3X3 - 1, 
-						 0, NCOL_EVAL_OUT_SET_3X3 - 1);
+	ppOutput = ui8matrix(NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+						 NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3);
+	memset_ui8matrix(ppOutput, 0, NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+								  NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3);
 
-	dilation_set->morpho_func(ppInput, 0, NROW_EVAL_OUT_SET_3X3 - 1, 
-									   0, NCOL_EVAL_OUT_SET_3X3 - 1, 
+	dilation_set->morpho_func(ppInput, 0, NRH_EVAL_OUT_SET_3X3 - s->nrh, 
+									   0, NCH_EVAL_OUT_SET_3X3 - s->nch, 
 							 		   dilation_set->s,
 							 		   ppOutput);
-	display_ui8matrix(ppOutput, 0, NROW_EVAL_OUT_SET_3X3 - 1, 
-						 		0, NCOL_EVAL_OUT_SET_3X3 - 1, "%u", "Check");
-	assert(!memcmp(ppOutput[0], dilation3x3_test_output, SIZE_EVAL_OUT_SET_3X3 * sizeof(**ppOutput)));
+	display_ui8matrix(ppOutput, NRL_EVAL_OUT_SET_3X3, NRH_EVAL_OUT_SET_3X3, 
+						 		NCL_EVAL_OUT_SET_3X3, NCH_EVAL_OUT_SET_3X3, "%u", "Ouput");
+	assert(!memcmp(ppOutput[NRL_EVAL_OUT_SET_3X3 + s->nrh] + NCL_EVAL_OUT_SET_3X3, 
+				   &dilation3x3_test_output[NCOL_EVAL_OUT_SET_3X3], 
+				   (SIZE_EVAL_OUT_SET_3X3 - NCOL_EVAL_OUT_SET_3X3) * sizeof(**ppOutput)));
 
 	epilogue_test_integration_3x3(dilation_set, ppInput, ppOutput);
 }
@@ -356,16 +372,21 @@ void test_integration_dilation_5x5(struct morpho_set *dilation_set)
 {
 	check_dimension_of_square_structuring_element(dilation_set->s, 5);
 	uint8 **ppInput, **ppOutput;
+	struct struct_elem_dim *s = dilation_set->s;
 	
 	ppInput  = prologue_test_integration_5x5(dilation_set, ppInput, ppOutput);
-	ppOutput = ui8matrix(0, NROW_EVAL_OUT_SET_5X5 - 1, 
-						 0, NCOL_EVAL_OUT_SET_5X5 - 1);
+	ppOutput = ui8matrix(NRL_EVAL_OUT_SET_5X5, NRH_EVAL_OUT_SET_5X5, 
+						 NCL_EVAL_OUT_SET_5X5, NCH_EVAL_OUT_SET_5X5);
 
-	dilation_set->morpho_func(ppInput, 0, NROW_EVAL_OUT_SET_5X5 - 1, 
-									   0, NCOL_EVAL_OUT_SET_5X5 - 1, 
+	memset_ui8matrix(ppOutput, 0, NRL_EVAL_OUT_SET_5X5, NRH_EVAL_OUT_SET_5X5, 
+								  NCL_EVAL_OUT_SET_5X5, NCH_EVAL_OUT_SET_5X5);
+	dilation_set->morpho_func(ppInput, 0, NRH_EVAL_OUT_SET_5X5 - s->nrh, 
+									   0, NCH_EVAL_OUT_SET_5X5 - s->nch, 
 							 		   dilation_set->s,
 							 		   ppOutput);
-	assert(!memcmp(ppOutput[0], dilation5x5_test_output, SIZE_EVAL_OUT_SET_5X5 * sizeof(**ppOutput)));
+	assert(!memcmp(ppOutput[NRL_EVAL_OUT_SET_5X5] + NCL_EVAL_OUT_SET_5X5, 
+				   dilation5x5_test_output, 
+				   SIZE_EVAL_OUT_SET_5X5 * sizeof(**ppOutput)));
 	epilogue_test_integration_5x5(dilation_set, ppInput, ppOutput);
 }
 
