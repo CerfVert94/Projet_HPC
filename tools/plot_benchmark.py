@@ -24,7 +24,7 @@ if __name__ == "__main__":
     while len(buffer[0]) > 0 :
         labels.append(buffer[0].split(' ')[0])
         buffer[0] = buffer[0][len(labels[-1]):].strip()
-        print(labels[-1], ";")
+        # print(labels[-1], ";")
 
     size = np.zeros(len(buffer) - 1, dtype=int)
     data = np.zeros([len(buffer) - 1, len(labels) - 1])
@@ -34,13 +34,13 @@ if __name__ == "__main__":
         size_str = buffer[i].split(' ')[0]
         buffer[i] = buffer[i][len(size_str) :].strip()
         size[i] = int(size_str)
-        print(size[i], end = ' ')
+        # print(size[i], end = ' ')
         for j in range(0, len(labels) - 1):
             cycles_str = buffer[i].split(' ')[0]
             buffer[i] = buffer[i][len(cycles_str) :].strip()
             data[i, j] = float(cycles_str)
-            print(data[i, j], end = ' ')
-        print(end ='\n')
+            # print(data[i, j], end = ' ')
+        # print(end ='\n')
         # input()
     
     fig = plt.figure()

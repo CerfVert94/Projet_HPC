@@ -1,4 +1,11 @@
 #!/bin/bash
 make --file=Makefile
-exe/project
-./tools/plot_benchmark.py output/benchmark_dilation.dat
+echo $?
+if [ $? ]
+then
+    exe/project
+    if [ $? ]
+    then
+        ./tools/plot_benchmark.py output/benchmark_dilation.dat
+    fi
+fi
