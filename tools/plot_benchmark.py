@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-import matplotlib.pyplot as plt, sys, os, numpy as np
+import matplotlib, matplotlib.pyplot as plt, sys, os, numpy as np
 
+# matplotlib.use('')
 
 if __name__ == "__main__":
     # print(sys.argv[1])
@@ -49,6 +50,11 @@ if __name__ == "__main__":
             plt.plot(size, data[ :, i])
             plt.xlabel("Size (N x N)")
             plt.ylabel("Cycles per Point")
+            print(labels[1 + i],":")
+            
+            print("\tAvg : ", np.average(data[ 1:, i]))
+            print("\tMin : ", np.min(data[ 1:, i]))
+            print("\tMax : ", np.max(data[ 1:, i]))
     plt.legend(labels[1:])
     plt.show()
             
