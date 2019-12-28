@@ -44,18 +44,19 @@ if __name__ == "__main__":
         # print(end ='\n')
         # input()
     
+    best_labels = []
     fig = plt.figure()
     for i in range(0, len(labels) - 1):
-        if i >= 0:
+        if i >= 0 and np.average(data[ 1:, i]) < 2.5:
             plt.plot(size, data[ :, i])
             plt.xlabel("Size (N x N)")
             plt.ylabel("Cycles per Point")
             print(labels[1 + i],":")
-            
+            best_labels.append(labels[1 + i])
             print("\tAvg : ", np.average(data[ 1:, i]))
             print("\tMin : ", np.min(data[ 1:, i]))
             print("\tMax : ", np.max(data[ 1:, i]))
-    plt.legend(labels[1:])
+    plt.legend(best_labels)
     plt.show()
             
         # print(buffer[i])
