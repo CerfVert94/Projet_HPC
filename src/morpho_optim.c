@@ -742,6 +742,107 @@ void ui8matrix_dilation_LU3x3_O3xO1_AddrRR(uint8** ppInput, long nrl, long nrh, 
 			break;
 	}
 }
+void ui8matrix_dilation_LU3x3_O3xO3_AddrRR(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, rr, cr;
+	// uint8 y00, y10, y20, y30, y40, y01, y11, y21, y31, y41, y02, y12, y22, y32, y42;
+	uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
+	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25;
+	uint8 r0c0, r1c0, r2c0, r0c1,r1c1, r2c1, r0c2, r1c2, r2c2;
+	uint8 *row0, *row1, *row2, *row3, *row4;
+	uint8 *out_row0, *out_row1, *out_row2;
+
+	rr = (nrh + 1) % order;
+	cr = (nch + 1) % order;
+	
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+
+	for (row = nrl; row < nrh + 1 - rr; row += order) {
+		row2 = ppInput[row + 1];
+		row3 = ppInput[row + 2];
+		row4 = ppInput[row + 3];
+		out_row0 = ppOutput[row + 0];
+		out_row1 = ppOutput[row + 1];
+		out_row2 = ppOutput[row + 2];
+
+
+
+		for (col = ncl; col < nch + 1 - cr; col += order) {
+			x0  = row0[col - 1]; x1  = row0[col + 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
+			x5  = row1[col - 1]; x6  = row1[col + 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
+			x10 = row2[col - 1]; x11 = row2[col + 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
+			x15 = row3[col - 1]; x16 = row3[col + 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
+			x20 = row4[col - 1]; x21 = row4[col + 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
+
+
+			y0  = x0  | x5  | x10; y1  = x1  | x6  | x11; y2  = x2  | x7  | x12; y3  = x3  | x8  | x13; y4  = x4  | x9  | x14; 
+			y5  = x5  | x10 | x15; y6  = x6  | x11 | x16; y7  = x7  | x12 | x17; y8  = x8  | x13 | x18; y9  = x9  | x14 | x19; 
+			y10 = x10 | x15 | x20; y11 = x11 | x16 | x21; y12 = x12 | x17 | x22; y13 = x13 | x18 | x23; y14 = x14 | x19 | x24; 
+ 
+			out_row0[col + 0] = y0 | y1 | y2; 
+			out_row0[col + 1] = y1 | y2 | y3; 
+			out_row0[col + 2] = y2 | y3 | y4;
+
+			out_row1[col + 0] = y5 | y6 | y7;
+			out_row1[col + 1] = y6 | y7 | y8;
+			out_row1[col + 2] = y7 | y8 | y9;
+			
+			out_row2[col + 0] = y10 | y11 | y12;
+			out_row2[col + 1] = y11 | y12 | y13;
+			out_row2[col + 2] = y12 | y13 | y14;
+		}
+		row0 = row3;
+		row1 = row4;
+	}
+	switch (rr) {
+		case 2 :
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);	
+				break;
+				default :
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+				break;
+			}
+			break;
+		case 1:
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);	
+					// display_ui8matrix(ppOutput, nrl, nrh, ncl, nch, "%u", "rr=1; cr=1");
+				break;
+				default :
+					ui8matrix_dilation_LU3x3_O1xO3_AddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+				break;
+			}
+		break;
+		default:
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_AddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
+				break;
+				default :
+				break;
+			}
+		break;
+	}
+		
+}
 /************************************************************************************/
 /******** End of optimisation : Loop Unroll + Register Rotation of Addresses ********/
 /************************************************************************************/
@@ -891,6 +992,460 @@ void ui8matrix_dilation_pipeline_LU3x3_O3xO1 (uint8** ppInput, long nrl, long nr
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
+	uint8 **temp = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl, nch);
+	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4;
+	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
+	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
+	
+	r = (nrh + 1) % order;
+	// Prologue	
+	for (row = nrl - 1; row < nrh - r + 1; row += order){
+		row0 = ppInput[row + 0];
+		row1 = ppInput[row + 1];
+		temp_row1 = temp[row + 0];
+		temp_row2 = temp[row + 1];
+		for (col = ncl; col < nch + 1; col++) {
+			temp_row1[col] = scalar_or3(row0, col);
+			temp_row2[col] = scalar_or3(row1, col);
+		}
+	}
+
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+	row2 = ppInput[row + 1];
+	
+	temp_row2 = temp[row - 1];
+	temp_row3 = temp[row + 0];
+	temp_row4 = temp[row + 1];
+	
+
+	for (row = nrl; row < nrh + 1 - r; row += order){
+		// row0 = ppInput[row - 1];   //  0 : b0 b1 b2 ...
+		row1 = ppInput[row + 1];   //  1 : c0 c1 c2 ...
+		// row2 = ppInput[row + 1];   //  2 : d0 d1 d2 ...
+		// row3 = ppInput[row + 2];   //  3 : e0 e1 e2 ...
+
+		temp_row0 = temp[row - 1]; // -1 : A    <= (a0 a1 a2 ...) Prologued
+		temp_row1 = temp[row + 0]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[row + 1]; //  1 : NULL <= (c0 c1 c2 ...)
+		temp_row3 = temp[row + 2]; //  2 : D	<= (d0 d1 d2 ...) Prologued
+		temp_row4 = temp[row + 3]; //  3 : E	<= (e0 e1 e2 ...) Prologued
+
+		out_row0 = ppOutput[row + 0]; 
+		out_row1 = ppOutput[row + 1];
+		out_row2 = ppOutput[row + 2];
+
+		for (col = ncl; col < nch + 1; col++) {
+			x0 = temp_row0[col];		// LOAD => A										
+			x1 = temp_row1[col];		// LOAD => B
+			x2 = scalar_or3(row1, col); // OR3  => C
+			x3 = temp_row3[col]; 		// LOAD => D
+			x4 = temp_row4[col]; 		// LOAD => E
+			
+			out_row0[col] = x0 | x1 | x2; // A | B | C
+			out_row1[col] = x1 | x2 | x3; // B | C | D
+			out_row2[col] = x2 | x3 | x4; // C | D | E
+
+			temp_row2[col] = x2;		// STORE => C 
+										// NEXT  :  F 
+										// NEXT  :  G 
+										// NEXT  :  H
+		}
+	}
+	// epilogue	
+	for (row = nrh - r; row < nrh + 1; row++){
+		row0 = ppInput[row + 0];
+		temp_row3 = temp[row + 0];
+		for (col = ncl; col < nch + 1; col++) 
+			temp_row3[col] = scalar_or3(row0, col);
+	}
+
+	switch(r) {
+		case 1: 
+		temp_row1 = temp[nrh - 1]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[nrh + 0]; //  1 : NULL <= (c0 c1 c2 ...)
+		// temp_row3 = temp[nrh + 1]; //  2 : D	<= (d0 d1 d2 ...) Prologued
+		row3 = ppInput[nrh + 1];
+		out_row1 = ppOutput[nrh + 0];
+		
+		for (col = ncl; col < nch + 1; col++) {											
+			out_row1[col] = temp_row1[col] | temp_row2[col] | scalar_or3(row3, col); 		
+		}
+		
+		break;
+		case 2: 
+		temp_row0 = temp[nrh - 2]; // -1 : A    <= (a0 a1 a2 ...) Prologued
+		temp_row1 = temp[nrh - 1]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[nrh - 0]; //  1 : NULL <= (c0 c1 c2 ...)
+		row3 = ppInput[nrh + 1];
+		
+		out_row0 = ppOutput[nrh - 1]; 
+		out_row1 = ppOutput[nrh + 0];
+		out_row2 = ppOutput[nrh + 1];
+
+		for (col = ncl; col < nch + 1; col++) {									
+			out_row0[col] = temp_row0[col] | temp_row1[col] | temp_row2[col]; 		
+			out_row1[col] = temp_row1[col] | temp_row2[col] | scalar_or3(row3, col); 	
+		}
+		break;
+		default:
+		break;
+
+	}
+	// display_ui8matrix(ppInput,nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch, "%u", "In");
+	// display_ui8matrix(ppOutput,nrl, nrh , ncl, nch , "%03u ", "Out");
+	// display_ui8matrix(temp,nrl + s->nrl, nrh + s->nrh, ncl, nch, "%u ", "Out");
+	free_ui8matrix(temp,nrl + s->nrl, nrh + s->nrh, ncl, nch);
+}
+void ui8matrix_dilation_pipeline_LU3x3_O1xO3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, r = 0;
+	uint8 **temp = ui8matrix(nrl, nrh, ncl + s->ncl, nch + s->nch);
+	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
+	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
+	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
+	
+	r = (nch + 1) % order;
+	// Prologue	
+		
+	for (row = nrl; row < nrh + 1; row++) {
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+
+		temp_row1 = temp[row + 0];
+		for (col = ncl - 1; col < nch - r + 1 ; col += order) {
+			temp_row1[col + 0] = row0[col + 0] | row1[col + 0] | row2[col + 0];
+			temp_row1[col + 1] = row0[col + 1] | row1[col + 1] | row2[col + 1];
+			
+		}
+	}
+
+	for (row = nrl; row < nrh + 1; row ++){
+		temp_row1 = temp[row + 0];
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+
+		out_row1 = ppOutput[row]; 
+
+		for (col = ncl; col < nch + 1 - r; col += order) {
+			x0 = temp_row1[col - 1];
+			x1 = temp_row1[col + 0];
+			x2 = row0[col + 1] | row1[col + 1] | row2[col + 1];
+			x3 = temp_row1[col + 2];
+			x4 = temp_row1[col + 3];
+			
+			out_row1 [col + 0] = x0 | x1 | x2; // A | B | C
+			out_row1 [col + 1] = x1 | x2 | x3; // B | C | D
+			out_row1 [col + 2] = x2 | x3 | x4; // C | D | E
+			temp_row1[col] = x2;
+
+		}
+	}
+	// epilogue	
+	for (row = nrl; row < nrh + 1; row++){
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+		temp_row3 = temp[row + 0];
+		for (col = nch - r; col < nch + 1; col++) 
+			temp_row3[col] = row0[col] | row1[col] | row2[col];
+	}
+
+	switch(r){
+		case 2:
+		for (row = nrl; row < nrh + 1; row++) {											
+			temp_row0 = temp[row];
+			row0 = ppInput[row - 1];
+			row1 = ppInput[row + 0];
+			row2 = ppInput[row + 1];
+			out_row0 = ppOutput[row];
+			out_row0[nch - 1] = temp_row0[nch - 2] | 
+								temp_row0[nch - 1] | 
+								temp_row0[nch - 0] ;
+
+			out_row0[nch + 0] = temp_row0[nch - 1] | 
+								temp_row0[nch - 0] |
+								     row0[nch + 1] | 	
+									 row1[nch + 1] | 	
+									 row2[nch + 1]; 	
+		}
+		break;
+		case 1:
+		
+		for (row = nrl; row < nrh + 1; row++) {											
+			temp_row0 = temp[row];
+			row0 = ppInput[row - 1];
+			row1 = ppInput[row + 0];
+			row2 = ppInput[row + 1];
+			out_row0 = ppOutput[row];
+			out_row0[nch + 0] = temp_row0[nch - 1] | 
+								temp_row0[nch - 0] |
+								     row0[nch + 1] | 	
+									 row1[nch + 1] | 	
+									 row2[nch + 1]; 	
+		}
+		break;
+		default:
+		break;
+	}
+	// display_ui8matrix(ppInput,nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch, "%u", "In");
+	// display_ui8matrix(ppOutput,nrl, nrh, ncl, nch , "%03u ", "Out");
+	// display_ui8matrix(temp,nrl, nrh, ncl + s->ncl, nch + s->nch, "%u ", "Temp");
+
+	// ui8matrix_dilation_LU3x3_O1xO1(ppInput, nrl, nrh, ncl, nch, s, ppOutput);
+	free_ui8matrix(temp, nrl, nrh, ncl + s->ncl, nch + s->nch);
+	
+}
+
+/***************************************************************/
+/******* End of optimisation : Loop Unroll + Pipelining ********/
+/***************************************************************/
+
+/****************************************************************************/
+/******* Optimisation : Loop Unroll + Register Rotation + Pipelining ********/
+/****************************************************************************/
+
+void ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, r = 0;
+	uint8 **temp = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl, nch);
+	uint8 *row0, *row1, *row2, *row3;
+	uint8 y0, y1, y2, y3, y4, x0, x1, x2, x3, x4, x5;
+	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
+	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
+	
+	r = (nrh + 1) % order;
+	// Prologue	
+	for (row = nrl - 1; row < nrh - r + 1; row += order){
+		row0 = ppInput[row + 0];
+		row1 = ppInput[row + 1];
+		temp_row1 = temp[row + 0];
+		temp_row2 = temp[row + 1];
+		x0  = row0[ncl - 1]; x1 = row0[ncl + 0];
+		x3  = row1[ncl - 1]; x4 = row1[ncl + 0];
+		for (col = ncl; col < nch + 1; col++) {
+			x2  = row0[col + 1];
+			x5  = row1[col + 1];
+			temp_row1[col] = scalar_or3(row0, col);
+			temp_row2[col] = scalar_or3(row1, col);
+			x0 = x1; x1 = x2;
+			x3 = x4; x4 = x5;
+		}
+	}
+
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+	row2 = ppInput[row + 1];
+	
+	temp_row2 = temp[row - 1];
+	temp_row3 = temp[row + 0];
+	temp_row4 = temp[row + 1];
+	
+
+	for (row = nrl; row < nrh + 1 - r; row += order){
+		// row0 = ppInput[row - 1];   //  0 : b0 b1 b2 ...
+		row1 = ppInput[row + 1];   //  1 : c0 c1 c2 ...
+		// row2 = ppInput[row + 1];   //  2 : d0 d1 d2 ...
+		// row3 = ppInput[row + 2];   //  3 : e0 e1 e2 ...
+
+		temp_row0 = temp[row - 1]; // -1 : A    <= (a0 a1 a2 ...) Prologued
+		temp_row1 = temp[row + 0]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[row + 1]; //  1 : NULL <= (c0 c1 c2 ...)
+		temp_row3 = temp[row + 2]; //  2 : D	<= (d0 d1 d2 ...) Prologued
+		temp_row4 = temp[row + 3]; //  3 : E	<= (e0 e1 e2 ...) Prologued
+
+		out_row0 = ppOutput[row + 0]; 
+		out_row1 = ppOutput[row + 1];
+		out_row2 = ppOutput[row + 2];
+
+		x3  = row1[ncl - 1]; x4  = row1[ncl + 0]; 
+		for (col = ncl; col < nch + 1; col++) {
+			x5  = row1[col + 1];
+			y0 = temp_row0[col];		// LOAD => A										
+			y1 = temp_row1[col];		// LOAD => B
+			y2 = x3 | x4 | x5;
+			y3 = temp_row3[col]; 		// LOAD => D
+			y4 = temp_row4[col]; 		// LOAD => E
+			
+
+			out_row0[col] = y0 | y1 | y2; // A | B | C
+			out_row1[col] = y1 | y2 | y3; // B | C | D
+			out_row2[col] = y2 | y3 | y4; // C | D | E
+
+			temp_row2[col] = y2;		// STORE => C 
+										// NEXT  :  F 
+										// NEXT  :  G 
+										// NEXT  :  H
+			x3 = x4; x4 = x5;
+		}
+	}
+	// epilogue	
+	for (row = nrh - r; row < nrh + 1; row++){
+		row0 = ppInput[row + 0];
+		temp_row3 = temp[row + 0];
+		for (col = ncl; col < nch + 1; col++) 
+			temp_row3[col] = scalar_or3(row0, col);
+	}
+
+	switch(r) {
+		case 1: 
+		temp_row1 = temp[nrh - 1]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[nrh + 0]; //  1 : NULL <= (c0 c1 c2 ...)
+		// temp_row3 = temp[nrh + 1]; //  2 : D	<= (d0 d1 d2 ...) Prologued
+		row3 = ppInput[nrh + 1];
+		out_row1 = ppOutput[nrh + 0];
+		
+		for (col = ncl; col < nch + 1; col++) {											
+			out_row1[col] = temp_row1[col] | temp_row2[col] | scalar_or3(row3, col); 		
+		}
+		
+		break;
+		case 2: 
+		temp_row0 = temp[nrh - 2]; // -1 : A    <= (a0 a1 a2 ...) Prologued
+		temp_row1 = temp[nrh - 1]; //  0 : B    <= (b0 b1 b2 ...) Prologued
+		temp_row2 = temp[nrh - 0]; //  1 : NULL <= (c0 c1 c2 ...)
+		row3 = ppInput[nrh + 1];
+		
+		out_row0 = ppOutput[nrh - 1]; 
+		out_row1 = ppOutput[nrh + 0];
+		out_row2 = ppOutput[nrh + 1];
+
+		for (col = ncl; col < nch + 1; col++) {									
+			out_row0[col] = temp_row0[col] | temp_row1[col] | temp_row2[col]; 		
+			out_row1[col] = temp_row1[col] | temp_row2[col] | scalar_or3(row3, col); 	
+		}
+		break;
+		default:
+		break;
+
+	}
+	free_ui8matrix(temp,nrl + s->nrl, nrh + s->nrh, ncl, nch);
+}
+void ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, r = 0;
+	uint8 **temp = ui8matrix(nrl, nrh, ncl + s->ncl, nch + s->nch);
+	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
+	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
+	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
+	
+	r = (nch + 1) % order;
+	// Prologue	
+		
+	row0 = ppInput[nrl - 1];
+	row1 = ppInput[nrl + 0];
+	for (row = nrl; row < nrh + 1; row++) {
+		row2 = ppInput[row + 1];
+
+		temp_row1 = temp[row + 0];
+		for (col = ncl - 1; col < nch - r + 1 ; col += order) {
+			temp_row1[col + 0] = row0[col + 0] | row1[col + 0] | row2[col + 0];
+			temp_row1[col + 1] = row0[col + 1] | row1[col + 1] | row2[col + 1];
+			
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+
+	row0 = ppInput[nrl - 1];
+	row1 = ppInput[nrl + 0];
+	for (row = nrl; row < nrh + 1; row ++){
+		temp_row1 = temp[row + 0];
+		row2 = ppInput[row + 1];
+
+		out_row1 = ppOutput[row]; 
+
+		x0 = temp_row1[ncl - 1];
+		x1 = temp_row1[ncl + 0];
+		for (col = ncl; col < nch + 1 - r; col += order) {
+			x2 = row0[col + 1] | row1[col + 1] | row2[col + 1];
+			x3 = temp_row1[col + 2];
+			x4 = temp_row1[col + 3];
+			
+			out_row1 [col + 0] = x0 | x1 | x2; // A | B | C
+			out_row1 [col + 1] = x1 | x2 | x3; // B | C | D
+			out_row1 [col + 2] = x2 | x3 | x4; // C | D | E
+			temp_row1[col] = x2;
+
+			x0 = x3;
+			x1 = x4;
+
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+	// epilogue	
+	for (row = nrl; row < nrh + 1; row++){
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+		temp_row3 = temp[row + 0];
+		for (col = nch - r; col < nch + 1; col++) 
+			temp_row3[col] = row0[col] | row1[col] | row2[col];
+	}
+
+	switch(r){
+		case 2:
+		row0 = ppInput[nrl - 1];
+		row1 = ppInput[nrl + 0];
+		for (row = nrl; row < nrh + 1; row++) {											
+			temp_row0 = temp[row];
+			row2 = ppInput[row + 1];
+			out_row0 = ppOutput[row];
+			out_row0[nch - 1] = temp_row0[nch - 2] | 
+								temp_row0[nch - 1] | 
+								temp_row0[nch - 0] ;
+
+			out_row0[nch + 0] = temp_row0[nch - 1] | 
+								temp_row0[nch - 0] |
+								     row0[nch + 1] | 	
+									 row1[nch + 1] | 	
+									 row2[nch + 1]; 
+			row0 = row1;
+			row1 = row2;	
+		}
+		break;
+		case 1:
+		
+		row0 = ppInput[nrl - 1];
+		row1 = ppInput[nrl + 0];
+		for (row = nrl; row < nrh + 1; row++) {											
+			temp_row0 = temp[row];
+			row0 = ppInput[row - 1];
+			row1 = ppInput[row + 0];
+			row2 = ppInput[row + 1];
+			out_row0 = ppOutput[row];
+			out_row0[nch + 0] = temp_row0[nch - 1] | 
+								temp_row0[nch - 0] |
+								     row0[nch + 1] | 	
+									 row1[nch + 1] | 	
+									 row2[nch + 1]; 	
+			row0 = row1;
+			row1 = row2;
+		}
+		break;
+		default:
+		break;
+	}
+	// display_ui8matrix(ppInput,nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch, "%u", "In");
+	// display_ui8matrix(ppOutput,nrl, nrh, ncl, nch , "%03u ", "Out");
+	// display_ui8matrix(temp,nrl, nrh, ncl + s->ncl, nch + s->nch, "%u ", "Temp");
+
+	// ui8matrix_dilation_LU3x3_O1xO1(ppInput, nrl, nrh, ncl, nch, s, ppOutput);
+	free_ui8matrix(temp, nrl, nrh, ncl + s->ncl, nch + s->nch);
+	
+}
+
+
+void ui8matrix_dilation_LU3x3_O3xO1_UJ (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, r = 0;
 	uint8 **temp = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
@@ -974,7 +1529,7 @@ void ui8matrix_dilation_pipeline_LU3x3_O3xO1 (uint8** ppInput, long nrl, long nr
 	}
 	free_ui8matrix(temp, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 }
-void ui8matrix_dilation_pipeline_LU3x3_O1xO3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O1xO3_UJ (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
@@ -1091,113 +1646,8 @@ void ui8matrix_dilation_pipeline_LU3x3_O1xO3 (uint8** ppInput, long nrl, long nr
 	
 }
 
-/***************************************************************/
-/******* End of optimisation : Loop Unroll + Pipelining ********/
-/***************************************************************/
 
-/****************************************************************************/
-/******* Optimisation : Loop Unroll + Register Rotation + Pipelining ********/
-/****************************************************************************/
-
-void ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
-{
-	const long order = 3;
-	long row = nrl, col = ncl, x, y, r = 0;
-	uint8 **temp = ui8matrix(nrl, nrh, ncl + s->ncl, nch + s->nch);
-	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
-	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
-	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
-	
-	r = (nch + 1) % order;
-	// Prologue	
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	for (row = nrl; row < nrh + 1; row++) {
-		row2 = ppInput[row + 1];
-		temp_row1 = temp[row + 0];
-		for (col = ncl; col < nch + 1; col += order) {
-			temp_row1[col - 1] = row0[col - 1] | row1[col - 1] | row2[col - 1];
-			temp_row1[col + 0] = row0[col + 0] | row1[col + 0] | row2[col + 0];
-		}
-		
-		for (col = nch - r; col < nch + 1; col++) 
-			temp_row1[col + 0] = row0[col + 0] | row1[col + 0] | row2[col + 0];
-		row0 = row1;
-		row1 = row2;
-	}
-
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	for (row = nrl; row < nrh + 1; row ++){
-		temp_row1 = temp[row + 0];
-		row2 = ppInput[row + 1];
-
-		out_row1 = ppOutput[row]; 
-
-		for (col = ncl + 1; col < nch + 1 - r; col += order) {
-			x0 = temp_row1[col - 2];
-			x1 = temp_row1[col - 1];
-			x2 = row0[col] | row1[col] | row2[col];
-			x3 = temp_row1[col + 1];
-			x4 = temp_row1[col + 2];
-			
-			out_row1 [col -  1] = x0 | x1 | x2; // A | B | C
-			out_row1 [col +  0] = x1 | x2 | x3; // B | C | D
-			out_row1 [col +  1] = x2 | x3 | x4; // C | D | E
-			temp_row1[col] = x2;
-
-		}
-		row0 = row1;
-		row1 = row2;
-	}
-
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	switch(r){
-		case 2:
-		for (row = nrl; row < nrh + 1; row ++){
-			temp_row1 = temp[row + 0];
-			row2 = ppInput[row + 1];
-
-			out_row1 = ppOutput[row]; 
-
-			x0 = temp_row1[nch - 2];
-			x1 = temp_row1[nch - 1];
-			x2 = row0[nch] | row1[nch] | row2[nch];
-			x3 = temp_row1[nch + 1];
-				
-			out_row1 [nch -  1] = x0 | x1 | x2; // A | B | C
-			out_row1 [nch +  0] = x1 | x2 | x3; // B | C | D
-			temp_row1[col] = x2;
-
-			row0 = row1;
-			row1 = row2;
-		}
-		break;
-		case 1:
-		for (row = nrl; row < nrh + 1; row ++){
-			temp_row1 = temp[row + 0];
-			row2 = ppInput[row + 1];
-
-			out_row1 = ppOutput[row]; 
-			
-			out_row1 [nch +  0] = temp_row1[nch - 1] | row0[nch] | row1[nch] | row2[nch] | row0[nch+1] | row1[nch+1] | row2[nch + 1]; // B | C | D
-			temp_row1[col] = x2;
-
-			row0 = row1;
-			row1 = row2;
-		}
-		break;
-		default:
-		break;
-	}
-	
-	
-	free_ui8matrix(temp, nrl, nrh, ncl + s->ncl, nch + s->nch);
-	
-}
-
-void ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O3xO1_UJ_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, r = 0;
@@ -1328,6 +1778,93 @@ void ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long
 	}
 	free_ui8matrix(temp, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 }
+void ui8matrix_dilation_LU3x3_O1xO3_UJ_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+	const long order = 3;
+	long row = nrl, col = ncl, x, y, r = 0;
+	uint8 **temp = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
+	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
+	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
+	
+	r = (nch + 1) % order;
+	// Prologue	
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+	row2 = ppInput[row + 1];
+	
+	// temp_row1 = temp[row - 1];
+	// temp_row2 = temp[row + 0];
+	// temp_row3 = temp[row + 1];
+	for (row = nrl; row < nrh + 1; row++) {
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+		temp_row1 = temp[row + 0];
+
+		temp_row1[ncl - 1] = row0[ncl - 1] | row1[ncl - 1] | row2[ncl - 1];
+		temp_row1[ncl + 0] = row0[ncl + 0] | row1[ncl + 0] | row2[ncl + 0];
+	}
+
+	for (row = nrl; row < nrh + 1; row ++){
+		temp_row1 = temp[row + 0];
+		
+		row0 = ppInput[row - 1];
+		row1 = ppInput[row + 0];
+		row2 = ppInput[row + 1];
+
+		out_row1 = ppOutput[row]; 
+		
+		x0 = temp_row1[ncl - 1];		// LOAD => A
+		x1 = temp_row1[ncl - 0];		// LOAD => B
+		for (col = ncl; col < nch + 1 - r; col += order) {
+			x2 = row0[col + 1] | row1[col + 1] | row2[col + 1];
+			x3 = row0[col + 2] | row1[col + 2] | row2[col + 2];
+			x4 = row0[col + 3] | row1[col + 3] | row2[col + 3];
+			// x5 = row0[col + 3] | row1[col + 3] | row2[col + 3];
+			
+			out_row1 [col + 0] = x0 | x1 | x2; // A | B | C
+			out_row1 [col + 1] = x1 | x2 | x3; // B | C | D
+			out_row1 [col + 2] = x2 | x3 | x4; // C | D | E
+
+			x0 = x3; x1 = x4;
+		}
+	}
+	switch (r) {
+		case 2: 
+			row0 = ppInput[nrl - 1];
+			row1 = ppInput[nrl + 0];
+			for (row = nrl; row < nrh + 1; row++) {
+				row2 = ppInput[row + 1];
+				temp_row1 = temp[row + 0];
+				out_row1 = ppOutput[row]; 
+
+				x1 = row0[nch - 1] | row1[nch - 1] | row2[nch - 1]|row0[nch + 0] | row1[nch + 0] | row2[nch + 0];
+				out_row1 [nch - 1] = row0[nch - 2] | row1[nch - 2] | row2[nch - 2] | x1 ; // A | B | C
+				out_row1 [nch + 0] = x1 | row0[nch + 1] | row1[nch + 0] | row2[nch + 0]; // B | C | D
+				row0 = row1;
+				row1 = row2;
+			}
+			break;
+		case 1: 
+			row0 = ppInput[nrl - 1];
+			row1 = ppInput[nrl + 0];
+			for (row = nrl; row < nrh + 1; row++) {
+				row2 = ppInput[row + 1];
+				// temp_row1 = temp[row + 0];
+				ppOutput[row][nch] = row0[nch - 1] | row1[nch - 1] | row2[nch - 1] | row0[nch - 0] | row1[nch - 0] | row2[nch - 0] | row0[nch + 1] | row1[nch + 1] | row2[nch + 1]; // A | B | C
+				// out_row1 [nch + 0] = x1 | x2 | row0[nch + 1] | row1[nch + 0] | row2[nch + 0]; // B | C | D
+				row0 = row1;
+				row1 = row2;
+			}
+			break;
+		default:
+			break;
+	}
+	// display_ui8matrix(ppOutput, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
+	free_ui8matrix(temp, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	
+}
 /***********************************************************************************/
 /******* End of optimisation : Loop Unroll + Register Rotation + Pipelining ********/
 /***********************************************************************************/
@@ -1342,43 +1879,31 @@ void ui8matrix_dilation_LU3x3_O3xO1_NS (uint8** ppInput, long nrl, long nrh, lon
 	r = (nrh + 1)  % order;
 	
 	for (row = nrl; row < nrh + 1 - r; row += order) {
-		row0 = ppInput[row - 1];
-		row1 = ppInput[row + 0];
-		row2 = ppInput[row + 1];
-		row3 = ppInput[row + 2];
-		row4 = ppInput[row + 3];
 		for (col = ncl; col < nch + 1; col++) {
-			x0 = scalar_or3(row1, col);
-			x1 = scalar_or3(row2, col);
-			x2 = scalar_or3(row3, col);
+			x0 = scalar_or3(ppInput[row + 0], col);
+			x1 = scalar_or3(ppInput[row + 1], col);
+			x2 = scalar_or3(ppInput[row + 2], col);
 
-			ppOutput[row + 0][col] = scalar_or3(row0, col) | x0 | x1;
-			ppOutput[row + 1][col] = 				     x0 | x1 | x2;
-			ppOutput[row + 2][col] = 				     x1 | x2 | scalar_or3(row4, col);
+			ppOutput[row + 0][col] = scalar_or3(ppInput[row - 1], col) | x0 | x1;
+			ppOutput[row + 1][col] = 				     			x0 | x1 | x2;
+			ppOutput[row + 2][col] = 				     			x1 | x2 | scalar_or3(ppInput[row + 3], col);
 		}
 	}
 	
 	switch(r) {
 		case 2:
-			row0 = ppInput[row - 1];
-			row1 = ppInput[row + 0];
-			row2 = ppInput[row + 1];
-			row3 = ppInput[row + 2];
 			for (col = ncl; col < nch + 1; col++) {
-				x0 = scalar_or3(row1, col);
-				x1 = scalar_or3(row2, col);
-				ppOutput[row + 0][col] = scalar_or3(row0, col) | x0 | x1;
-				ppOutput[row + 1][col] = 				     x0 | x1 | scalar_or3(row3, col);
+				x0 = scalar_or3(ppInput[row + 0], col);
+				x1 = scalar_or3(ppInput[row + 1], col);
+				ppOutput[row + 0][col] = scalar_or3(ppInput[row - 1], col) | x0 | x1;
+				ppOutput[row + 1][col] = 				     		    x0 | x1 | scalar_or3(ppInput[row + 2], col);
 			}
 			break;
 		case 1:
-			row0 = ppInput[row - 1];
-			row1 = ppInput[row + 0];
-			row2 = ppInput[row + 1];
 			for (col = ncl; col < nch + 1; col++) {
-				ppOutput[row + 0][col] = scalar_or3(row0, col) | 
-										 scalar_or3(row1, col) |
-										 scalar_or3(row2, col);
+				ppOutput[row + 0][col] = scalar_or3(ppInput[row - 1], col) | 
+										 scalar_or3(ppInput[row + 0], col) |
+										 scalar_or3(ppInput[row + 1], col);
 				
 			}
 			break;
@@ -1386,7 +1911,7 @@ void ui8matrix_dilation_LU3x3_O3xO1_NS (uint8** ppInput, long nrl, long nrh, lon
 			break;
 	}
 }
-void ui8matrix_dilation_LU3x3_O1xO3_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O1xO3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r;
@@ -1442,7 +1967,7 @@ void ui8matrix_dilation_LU3x3_O1xO3_ver1 (uint8** ppInput, long nrl, long nrh, l
 			break;
 	}
 }
-void ui8matrix_dilation_LU3x3_O3xO3_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O3xO3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y;
@@ -1454,29 +1979,24 @@ void ui8matrix_dilation_LU3x3_O3xO3_ver1 (uint8** ppInput, long nrl, long nrh, l
 	cr = (nch + 1) % order;
 	
 	for (row = nrl; row < nrh + 1 - rr; row += order) {
-		row0 = ppInput[row - 1];
-		row1 = ppInput[row + 0];
-		row2 = ppInput[row + 1];
-		row3 = ppInput[row + 2];
-		row4 = ppInput[row + 3];
 		for (col = ncl; col < nch + 1 - cr; col += order) {
-			x0 = scalar_or3(row1, col); x1 = scalar_or3(row1, col + 1); x2 = scalar_or3(row1, col + 2);
-			x3 = scalar_or3(row2, col); x4 = scalar_or3(row2, col + 1); x5 = scalar_or3(row2, col + 2);
-			x6 = scalar_or3(row3, col); x7 = scalar_or3(row3, col + 1); x8 = scalar_or3(row3, col + 2);
+			x0 = scalar_or3(ppInput[row + 0], col); x1 = scalar_or3(ppInput[row + 0], col + 1); x2 = scalar_or3(ppInput[row + 0], col + 2);
+			x3 = scalar_or3(ppInput[row + 1], col); x4 = scalar_or3(ppInput[row + 1], col + 1); x5 = scalar_or3(ppInput[row + 1], col + 2);
+			x6 = scalar_or3(ppInput[row + 2], col); x7 = scalar_or3(ppInput[row + 2], col + 1); x8 = scalar_or3(ppInput[row + 2], col + 2);
 
-			ppOutput[row + 0][col + 0] = scalar_or3(row0, col + 0) | x0 | x3;
-			ppOutput[row + 1][col + 0] = 				         x0 | x3 | x6;
-			ppOutput[row + 2][col + 0] = 				         x3 | x6 | scalar_or3(row4, col + 0);
-
-
-			ppOutput[row + 0][col + 1] = scalar_or3(row0, col + 1) | x1 | x4;
-			ppOutput[row + 1][col + 1] = 				         x1 | x4 | x7;
-			ppOutput[row + 2][col + 1] = 				         x4 | x7 | scalar_or3(row4, col + 1);
+			ppOutput[row + 0][col + 0] = scalar_or3(ppInput[row - 1], col + 0) | x0 | x3;
+			ppOutput[row + 1][col + 0] = 				         			x0 | x3 | x6;
+			ppOutput[row + 2][col + 0] = 				         			x3 | x6 | scalar_or3(ppInput[row + 3], col + 0);
 
 
-			ppOutput[row + 0][col + 2] = scalar_or3(row0, col + 2) | x2 | x5;
-			ppOutput[row + 1][col + 2] = 				         x2 | x5 | x8;
-			ppOutput[row + 2][col + 2] = 				         x5 | x8 | scalar_or3(row4, col + 2);
+			ppOutput[row + 0][col + 1] = scalar_or3(ppInput[row - 1], col + 1) | x1 | x4;
+			ppOutput[row + 1][col + 1] =			  			            x1 | x4 | x7;
+			ppOutput[row + 2][col + 1] =			  			            x4 | x7 | scalar_or3(ppInput[row + 3], col + 1);
+
+
+			ppOutput[row + 0][col + 2] = scalar_or3(ppInput[row - 1], col + 2) | x2 | x5;
+			ppOutput[row + 1][col + 2] = 				                    x2 | x5 | x8;
+			ppOutput[row + 2][col + 2] = 				                    x5 | x8 | scalar_or3(ppInput[row + 3], col + 2);
 
 		}
 	}
@@ -1484,40 +2004,40 @@ void ui8matrix_dilation_LU3x3_O3xO3_ver1 (uint8** ppInput, long nrl, long nrh, l
 		case 2 :
 			switch(cr){
 				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
 				break;
 				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);	
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);	
 				break;
 				default :
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
 				break;
 			}
 		break;
 		case 1:
 			switch(cr){
 				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
 				break;
 				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh, nrh, ncl, nch, s, ppOutput);	
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh, nrh, ncl, nch, s, ppOutput);	
 				break;
 				default :
-					ui8matrix_dilation_LU3x3_O1xO3(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_NS(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
 				break;
 			}
 		break;
 		default:
 			switch(cr){
 				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
 				break;
 				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
+					ui8matrix_dilation_LU3x3_O3xO1_NS(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
 				break;
 				default :
 				break;
@@ -1526,7 +2046,7 @@ void ui8matrix_dilation_LU3x3_O3xO3_ver1 (uint8** ppInput, long nrl, long nrh, l
 	}
 	// ui8matrix_dilation_LU3x3(ppInput, row, nrh, col, nrh, s, ppOutput);
 }
-void ui8matrix_dilation_LU3x3_O3xO1_RR_ver1(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O3xO1_RR_NS(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y;
@@ -1599,390 +2119,9 @@ void ui8matrix_dilation_LU3x3_O3xO1_RR_ver1(uint8** ppInput, long nrl, long nrh,
 	}
 }
 
-void ui8matrix_dilation_LU3x3_O1xO3_RR_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
-{
-	const long order = 3;
-	long row = nrl, col = ncl, r;
-	uint8 y0, y1, y2;
-	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14;
-	uint8 *row0, *row1, *row2, *row3, *row4;
-
-	r = (nch + 1) % order;
-	row0 = ppInput[row - 1];
-	row1 = ppInput[row + 0];
-	for (row = nrl; row < nrh + 1; row++) {
-		row2 = ppInput[row + 1];
-
-		x0  = row0[ncl -1]; x1  = row0[ncl + 0]; 
-		x5  = row1[ncl -1]; x6  = row1[ncl + 0]; 
-		x10 = row2[ncl -1]; x11 = row2[ncl + 0]; 
-		for (col = ncl; col < nch + 1 - r; col += order) {
-			x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-			x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-			x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			
-
-			y1 = x1 | x2 | x6 | x7 | x11 | x12; // 5 calcs
-			ppOutput[row][col + 0] = (x0 		  ) | (x5          ) | (x10            ) | y1; // 3 calc	
-			ppOutput[row][col + 1] = (          x3) | (          x8) | (            x13) | y1; // 3 calc	
-			ppOutput[row][col + 2] = (x2 | x3 | x4) | (x7 | x8 | x9) | (x12 | x13 | x14); //8 calc 
-
-			// 8 + 6 + 5 = 21 calcs
-			x0  = x3;  x1  = x4;
-			x5  = x8;  x6  = x9;
-			x10 = x13; x11 = x14;
-			
-		}
-		row0 = row1;
-		row1 = row2;
-	}
-
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	
-	switch(r) {
-	case 2:
-		// ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-		for (row = nrl; row < nrh + 1; row++) {
-			row2 = ppInput[row + 1];
-
-			x0  = row0[nch - 2]; x1  = row0[nch - 1];  x2  = row0[nch + 0]; x3  = row0[nch + 1]; 
-			x5  = row1[nch - 2]; x6  = row1[nch - 1];  x7  = row1[nch + 0]; x8  = row1[nch + 1]; 
-			x10 = row2[nch - 2]; x11 = row2[nch - 1];  x12 = row2[nch + 0]; x13 = row2[nch + 1];
-
-			y1 = x1 | x2 | x6 | x7 | x11 | x12; // 5 calcs
-			ppOutput[row][nch - 1] = (x0 		  ) | (x5          ) | (x10            ) | y1; // 3 calc	
-			ppOutput[row][nch + 0] = (          x3) | (          x8) | (            x13) | y1; // 3 calc	
-		
-			row0 = row1;
-			row1 = row2;
-		}
-
-		
-		break;
-	case 1:
-		for (row = nrl; row < nrh + 1; row++) {
-			row2 = ppInput[row + 1];
-
-			x1  = row0[nch - 1];  x2  = row0[nch + 0]; x3  = row0[nch + 1]; 
-			x6  = row1[nch - 1];  x7  = row1[nch + 0]; x8  = row1[nch + 1]; 
-			x11 = row2[nch - 1];  x12 = row2[nch + 0]; x13 = row2[nch + 1];
-
-			ppOutput[row][nch + 0] = (x1 | x2 | x3) | (x6 | x7 | x8) | (x11 | x12 | x13); // 3 calc
-
-			row0 = row1;
-			row1 = row2;
-		}
-		break;
-	default:
-		break;
-	}
-}
 
 
-void ui8matrix_dilation_LU3x3_O3xO3_RR_ver1(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
-{
-	const long order = 3;
-	long row = nrl, col = ncl, x, y, rr, cr;
-	// uint8 y00, y10, y20, y30, y40, y01, y11, y21, y31, y41, y02, y12, y22, y32, y42;
-	uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
-	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25;
-	uint8 r0c0, r1c0, r2c0, r0c1,r1c1, r2c1, r0c2, r1c2, r2c2;
-	uint8 *row0, *row1, *row2, *row3, *row4;
-	uint8 *out_row0, *out_row1, *out_row2;
-
-	rr = (nrh + 1) % order;
-	cr = (nch + 1) % order;
-
-	row0 = ppInput[nrl - 1]; x0  = row0[ncl - 1]; x1  = row0[ncl + 0];
-	row1 = ppInput[nrl + 0]; x5  = row1[ncl - 1]; x6  = row1[ncl + 0];
-		
-	for (col = ncl; col < nch + 1 - cr; col += order) {
-		row0 = ppInput[nrl - 1];
-		row1 = ppInput[nrl + 0]; 
-		
-		x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-		x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-		y0  = x0  | x1  | x2 ; y1  = x1  | x2  | x3 ; y2  = x2  | x3  | x4 ; 
-		y3  = x5  | x6  | x7 ; y4  = x6  | x7  | x8 ; y5  = x7  | x8  | x9 ;
-			
-		for (row = nrl; row < nrh + 1 - rr; row += order) {
-			row2 = ppInput[row + 1];
-			row3 = ppInput[row + 2];
-			row4 = ppInput[row + 3];
-			out_row0 = ppOutput[row + 0];
-			out_row1 = ppOutput[row + 1];
-			out_row2 = ppOutput[row + 2];
-
-			x10 = row2[col - 1]; x11 = row2[col + 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			x15 = row3[col - 1]; x16 = row3[col + 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
-			x20 = row4[col - 1]; x21 = row4[col + 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
-
-			y6  = x10 | x11 | x12; y7  = x11 | x12 | x13; y8  = x12 | x13 | x14;
-			y9  = x15 | x16 | x17; y10 = x16 | x17 | x18; y11 = x17 | x18 | x19;
-			y12 = x20 | x21 | x22; y13 = x21 | x22 | x23; y14 = x22 | x23 | x24;
-
-			out_row0[col + 0] = y0 | y3 | y6;
-			out_row0[col + 1] = y1 | y4 | y7;
-			out_row0[col + 2] = y2 | y5 | y8;
-
-			out_row1[col + 0] = y3 | y6 | y9 ;
-			out_row1[col + 1] = y4 | y7 | y10;
-			out_row1[col + 2] = y5 | y8 | y11;
-
-			out_row2[col + 0] = y6 | y9  | y12;
-			out_row2[col + 1] = y7 | y10 | y13;
-			out_row2[col + 2] = y8 | y11 | y14;
-			
-			y0  = y9 ; y1  = y10; y2  = y11; 
-			y3  = y12; y4  = y13; y5  = y14;
-
-			row0 = row3;
-			row1 = row4;
-		}
-		x0 = x3; x1 = x4;
-		x5 = x8; x6 = x9;
-	}
-	switch (rr) {
-		case 2 :
-			switch(cr){
-				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
-				break;
-				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);	
-				break;
-				default :
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
-				break;
-			}
-			break;
-		case 1:
-			switch(cr){
-				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
-				break;
-				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);	
-				break;
-				default :
-					ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
-				break;
-			}
-		break;
-		default:
-			switch(cr){
-				case 2 :
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
-				break;
-				case 1: 
-					ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
-				break;
-				default :
-				break;
-			}
-		break;
-	}
-		
-}
-
-
-void ui8matrix_dilation_pipeline_LU3x3_O1xO3_PJ (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
-{
-	const long order = 3;
-	long row = nrl, col = ncl, x, y, r = 0;
-	uint8 **temp = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
-	uint8 *row0, *row1, *row2, *row3, y0, y1, y2, y3, y4, y5, z0, z1, z2;
-	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14;
-	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
-	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
-	
-	r = (nch + 1) % order;
-	// Prologue	
-	row0 = ppInput[row - 1];
-	row1 = ppInput[row + 0];
-	row2 = ppInput[row + 1];
-	
-	// temp_row1 = temp[row - 1];
-	// temp_row2 = temp[row + 0];
-	// temp_row3 = temp[row + 1];
-	for (row = nrl; row < nrh + 1; row++) {
-		row0 = ppInput[row - 1];
-		row1 = ppInput[row + 0];
-		row2 = ppInput[row + 1];
-		temp_row1 = temp[row + 0];
-
-		temp_row1[ncl - 1] = row0[ncl - 1] | row1[ncl - 1] | row2[ncl - 1];
-		temp_row1[ncl + 0] = row0[ncl + 0] | row1[ncl + 0] | row2[ncl + 0];
-	}
-
-	row0 = ppInput[ncl - 1];
-	row1 = ppInput[ncl + 0];
-	for (row = nrl; row < nrh + 1; row ++){
-		temp_row1 = temp[row + 0];
-		
-		row2 = ppInput[row + 1];
-
-		out_row1 = ppOutput[row]; 
-		
-		y0 = temp_row1[ncl - 1];		// LOAD => A
-		y1 = temp_row1[ncl - 0];		// LOAD => B
-		
-		for (col = ncl; col < nch + 1 - r; col += order) {
-			x0 = row0[col + 1]; x1 = row1[col + 1]; x2 = row2[col + 1];
-			x3 = row0[col + 2]; x4 = row1[col + 2]; x5 = row2[col + 2];
-			x6 = row0[col + 3]; x7 = row1[col + 3]; x8 = row2[col + 3];
-			
-			z0 = (x0 | x1 | x2);
-			z1 = (x3 | x4 | x5);
-			z2 = (x6 | x7 | x8);
-			
-			out_row1 [col + 0] = y0	| y1 | z0; // A | B | C
-			out_row1 [col + 1] = y1	| z0 | z1; // B | C | D
-			out_row1 [col + 2] = z0 | z1 | z2; // C | D | E
-
-			// temp_row1[col + 1] = (x0 | x1 | x2);		  // STORE => C 
-			temp_row1[col + 2] = z1;		  // STORE => D
-			temp_row1[col + 3] = z2;		  // STORE => E 
-														  // NEXT  :  F 
-														  // NEXT  :  G 
-														  // NEXT  :  H
-			y0 = z1; 						  // STORE => D
-			y1 = z2; 						  // STORE => E 
-											  // NEXT  :  F 
-											  // NEXT  :  G 
-											  // NEXT  :  H
-		}
-		row0 = row1;
-		row1 = row2;
-	}
-	switch (r) {
-		case 2: 
-			row0 = ppInput[nrl - 1];
-			row1 = ppInput[nrl + 0];
-			for (row = nrl; row < nrh + 1; row++) {
-				row2 = ppInput[row + 1];
-				temp_row1 = temp[row + 0];
-				out_row1 = ppOutput[row]; 
-
-
-				x0 = row0[nch - 2]; x1 = row1[nch - 2]; x2 = row2[nch - 2];
-				x3 = row0[nch - 1]; x4 = row1[nch - 1]; x5 = row2[nch - 1];
-				x6 = row0[nch + 0]; x7 = row1[nch + 0]; x8 = row2[nch + 0];
-				x9 = row0[nch + 1]; x10 = row1[nch + 1]; x11 = row2[nch + 1];
-			
-				out_row1 [nch - 1] = x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7  | x8; // A | B | C
-				out_row1 [nch + 0] = x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11; // B | C | D
-				row0 = row1;
-				row1 = row2;
-			}
-			break;
-		case 1: 
-			row0 = ppInput[nrl - 1];
-			row1 = ppInput[nrl + 0];
-			for (row = nrl; row < nrh + 1; row++) {
-				row2 = ppInput[row + 1];
-				// temp_row1 = temp[row + 0];
-				x3 = row0[nch - 1]; x4 = row1[nch - 1]; x5 = row2[nch - 1];
-				x6 = row0[nch + 0]; x7 = row1[nch + 0]; x8 = row2[nch + 0];
-				x9 = row0[nch + 1]; x10 = row1[nch + 1]; x11 = row2[nch + 1];
-				ppOutput[row][nch] =  x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11; // A | B | C
-				// out_row1 [nch + 0] = x1 | x2 | row0[nch + 1] | row1[nch + 0] | row2[nch + 0]; // B | C | D
-				row0 = row1;
-				row1 = row2;
-			}
-			break;
-		default:
-			break;
-	}
-	// display_ui8matrix(ppOutput, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
-	free_ui8matrix(temp, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
-	
-}
-
-void ui8matrix_dilation_LU3x3_O1xO3_RR_ver2 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
-{
-	const long order = 3;
-	long row = nrl, col = ncl, x, y, r;
-	uint8 y0, y1, y2, y3, y4, y5;
-	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19;
-	uint8 *row0, *row1, *row2, *row3, *row4;
-
-	r = (nch + 1) % order;
-	row0 = ppInput[row - 1];
-	row1 = ppInput[row + 0];
-	for (row = nrl; row < nrh + 1; row++) {
-		row2 = ppInput[row + 1];
-
-		x0  = row0[ncl - 1]; x1  = row0[ncl + 0]; 
-		x5  = row1[ncl - 1]; x6  = row1[ncl + 0]; 
-		x10 = row2[ncl - 1]; x11 = row2[ncl + 0]; 
-		for (col = ncl; col < nch + 1 - r; col += order) {
-			x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-			x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-			x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			// y0 = x1  | x2; 
-			// y1 = x2  | x3;
-			// y2 = x6  | x7;
-			// y3 = x7  | x8;
-			// y4 = x11 | x12; 
-			// y5 = x12 | x13;
-			// ppOutput[row][col + 0] = (x0 | x1 | x2 ) | (x5 | x6 | x7) | (x10 | x11 | x12);
-			// ppOutput[row][col + 1] = (x1 | x2 | x3 ) | (x6 | x7 | x8) | (x11 | x12 | x13);
-			// ppOutput[row][col + 2] = (x2 | x3 | x4 ) | (x7 | x8 | x9) | (x12 | x13 | x14);
-			
-			ppOutput[row][col + 0] = x0 | x1 | x2 |           x5 | x6 | x7 |           x10 | x11 | x12; 			//8 calc -> 3 calc
-			ppOutput[row][col + 1] =      x1 | x2 | x3 |           x6 | x7 | x8 |            x11 | x12 | x13; 		//8 calc -> 3 calc
-			ppOutput[row][col + 2] =           x2 | x3 | x4 |           x7 | x8 | x9 |             x12 | x13 | x14; //8 calc -> 3 calc
-			x0  = x3;  x1  = x4;
-			x5  = x8;  x6  = x9;
-			x10 = x13; x11 = x14;
-			
-		}
-		row0 = row1;
-		row1 = row2;
-	}
-
-		
-	row = nrl;
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	
-	switch(r) {
-	case 2:
-		for (row; row < nrh + 1; row++) {
-			row2 = ppInput[row + 1];
-			x0  = row0[col - 1]; x1  = row0[col +  0]; x2  = row0[col + 1]; x3  = row0[col + 2];
-			x5  = row1[col - 1]; x6  = row1[col +  0]; x7  = row1[col + 1]; x8  = row1[col + 2];
-			x10 = row2[col - 1]; x11 = row2[col +  0]; x12 = row2[col + 1]; x13 = row2[col + 2];
-			ppOutput[row][col + 0] = (x0 | x1 | x2 ) | (x5 | x6 | x7) | (x10 | x11 | x12);
-			ppOutput[row][col + 1] = (x1 | x2 | x3 ) | (x6 | x7 | x8) | (x11 | x12 | x13);
-			row0 = row1;
-			row1 = row2;
-		}
-		break;
-	case 1:
-		for (row; row < nrh + 1; row++) {			
-			row2 = ppInput[row + 1];
-			x0  = row0[col - 1]; x1  = row0[col +  0]; x2  = row0[col + 1];
-			x5  = row1[col - 1]; x6  = row1[col +  0]; x7  = row1[col + 1];
-			x10 = row2[col - 1]; x11 = row2[col +  0]; x12 = row2[col + 1];
-			ppOutput[row][col + 0] = (x0 | x1 | x2 ) | (x5 | x6 | x7) | (x10 | x11 | x12);
-			row0 = row1;
-			row1 = row2;
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-
-void ui8matrix_dilation_LU3x3_O1xO3_RR_ver3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+void ui8matrix_dilation_LU3x3_O1xO3_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r;
