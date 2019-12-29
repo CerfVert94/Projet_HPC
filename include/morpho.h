@@ -36,24 +36,25 @@ void ui8matrix_dilation_LU3x3_O3xO1 (uint8** ppInput, long nrl, long nrh, long n
 void ui8matrix_dilation_LU3x3_O1xO3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_LU3x3_O3xO3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
-/*************************************************/
-/******** Loop Unroll + Register Rotation ********/
-/*************************************************/
-void ui8matrix_dilation_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_O1xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_O3xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+/***********************************************************************/
+/******** Loop Unroll + Register Rotation of Values / Addresses ********/
+/***********************************************************************/
+void ui8matrix_dilation_LU3x3_O3xO1_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O1xO3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
-/*************************************************/
-/******** Pack & Jam ********/
-/*************************************************/
-void ui8matrix_dilation_LU3x3_O1xO3_PJ (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+/**************************************************************/
+/******** Loop Unroll + Register Rotation of Addresses ********/
+/**************************************************************/
+void ui8matrix_dilation_LU3x3_O1xO3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO1_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 // void ui8matrix_dilation_LU3x3_O1xO3_Full_Scalari (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-/***********************************************************************/
-/******** Alternate Versions : Loop Unroll + Register Rotation  ********/
-/***********************************************************************/
-void ui8matrix_dilation_LU3x3_O3xO1_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_O3xO1_RR_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+/************************************/
+/******** Alternate Versions ********/
+/************************************/
+void ui8matrix_dilation_LU3x3_O3xO1_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O3xO1_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_LU3x3_O1xO3_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_LU3x3_O1xO3_RR_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_LU3x3_O1xO3_RR_ver2 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
@@ -64,7 +65,9 @@ void ui8matrix_dilation_LU3x3_O3xO3_ver1 (uint8** ppInput, long nrl, long nrh, l
 /*************************/
 /******* Pipeline ********/
 /*************************/
-void ui8matrix_dilation_pipeline3x3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_row_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_col_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_col_pipeline_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_pipeline_LU3x3_O3xO1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 void ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
@@ -79,14 +82,9 @@ void ui8matrix_sequence_naive_inline(uint8** ppInput, long nrl, long nrh, long n
 void ui8matrix_sequence_LU3x3(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-// void ui8matrix_dilation_LU3x3_O3xO3_1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 
 
-void ui8matrix_dilation_LU3x3_O1xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_O3xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_O1xO3_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
 
 
 
