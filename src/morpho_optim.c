@@ -3,6 +3,7 @@
 #include <img.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <omp.h>
 //#include <malloc.h>
 #include <morpho.h>
 // #include <test_morpho.h>
@@ -72,57 +73,31 @@
 void ui8matrix_dilation_LU3x3_O1xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
-	long row = nrl, col = ncl, r;
+	long row = nrl, col = ncl, r, nrow, quota;
 	uint8 y0, y1, y2;
 	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14;
 	uint8 *row0, *row1, *row2, *row3, *row4;
 	uint8 *out_row0;
+	int id, nb_threads;
 
+	
 	r = (nch + 1) % order;
-	row0 = ppInput[nrl - 1];
-	row1 = ppInput[nrl + 0];
-	for (row = nrl; row < nrh + 1; row++) {
-		// row0 = ppInput[row - 1];
-		// row1 = ppInput[row + 0];
-		row2 = ppInput[row + 1];
-
-		out_row0 = ppOutput[row + 0];
-		x0  = row0[ncl - 1]; x1  = row0[ncl + 0];
-		x5  = row1[ncl - 1]; x6  = row1[ncl + 0];
-		x10 = row2[ncl - 1]; x11 = row2[ncl + 0];
-		
-		for (col = ncl; col < nch + 1 - r; col += order) {
-			x0  = row0[col - 1]; x1  = row0[col + 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-			x5  = row1[col - 1]; x6  = row1[col + 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-			x10 = row2[col - 1]; x11 = row2[col + 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			
-			y0 = x1  | x2  ;
-			y1 = x6  | x7  ;
-			y2 = x11 | x12 ;
-
-			out_row0[col + 0] = (x0  | y0) | 
-								(x5  | y1) | 
-								(x10 | y2);
-
-			out_row0[col + 1] = (y0 | x3) | 
-								(y1 | x8) | 
-								(y2 | x13);
-								
-			out_row0[col + 2] = (x2  | x3  | x4) | 
-								(x7  | x8  | x9) | 
-								(x12 | x13 | x14); 
-
-			x0  = x3;  x1  = x4;
-			x5  = x8;  x6  = x9;
-			x10 = x13; x11 = x14;
-			
+	if (nch - ncl > 0) {
+		nrow = nrh - nrl + 1;
+		omp_set_num_threads(4);
+		#pragma omp parallel default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch, r, nrow,s) private(id, nb_threads, quota)
+		{
+			id = omp_get_thread_num();
+			nb_threads = omp_get_num_threads();
+			quota = nrow / nb_threads;
+			if (id == nb_threads - 1) ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh - quota, 	   nrh					 , ncl, nch - r, s, ppOutput);	//printf("[L%d] %ld ~ %ld\n", id, nrh - quota, nrh);
+			else					  ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrl + quota * id, nrl + quota * (id + 1) - 1, ncl, nch - r, s, ppOutput);//	printf("[%d] %ld ~ %ld\n", id, nrl + quota * id, nrl + quota * (id + 1));
 		}
-		row0 = row1;
-		row1 = row2;
 	}
-
+	
 	switch(r) {
 		case 2:		
+		#pragma omp parallel for default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch) private(row0, row1, row2, out_row0, col, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14)
 		for (row = nrl; row < nrh + 1; row++) {
 			row0 = ppInput[row - 1];
 			row1 = ppInput[row + 0];
@@ -146,16 +121,13 @@ void ui8matrix_dilation_LU3x3_O1xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, 
 		}
 		break;
 	case 1:
+		#pragma omp parallel for default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch) firstprivate(row0, row1, row2, out_row0, col)
 		for (row = nrl; row < nrh + 1; row++) {
 			row0 = ppInput[row - 1];
 			row1 = ppInput[row + 0];
 			row2 = ppInput[row + 1];
-
+			
 			out_row0 = ppOutput[row + 0];
-		
-			// x1  = row0[nch - 1] | x2  = row0[nch + 0] | x3  = row0[nch + 1]; 
-			// x6  = row1[nch - 1] | x7  = row1[nch + 0] | x8  = row1[nch + 1]; 
-			// x11 = row2[nch - 1] | x12 = row2[nch + 0] | x13 = row2[nch + 1]; 
 
 			out_row0[nch + 0] = (row0[nch - 1] |  row0[nch + 0] | row0[nch + 1])| 
 			  					(row1[nch - 1] |  row1[nch + 0] | row1[nch + 1])| 
@@ -171,72 +143,83 @@ void ui8matrix_dilation_LU3x3_O1xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, 
 void ui8matrix_dilation_LU3x3_O3xO3_RR_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
 	const long order = 3;
-	long row = nrl, col = ncl, x, y, rr, cr;
-	// uint8 y00, y10, y20, y30, y40, y01, y11, y21, y31, y41, y02, y12, y22, y32, y42;
+	long row = nrl, col = ncl, x, y, rr, cr, nrow;
 	uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
 	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25;
-	uint8 r0c0, r1c0, r2c0, r0c1,r1c1, r2c1, r0c2, r1c2, r2c2;
 	uint8 *row0, *row1, *row2, *row3, *row4;
 	uint8 *out_row0, *out_row1, *out_row2;
+	int id, nb_threads;
 
 	rr = (nrh + 1) % order;
 	cr = (nch + 1) % order;
-	
-	row0 = ppInput[row - 1];
-	row1 = ppInput[row + 0];
-
-	for (row = nrl; row < nrh + 1 - rr; row += order) {
-		row2 = ppInput[row + 1];
-		row3 = ppInput[row + 2];
-		row4 = ppInput[row + 3];
-		out_row0 = ppOutput[row + 0];
-		out_row1 = ppOutput[row + 1];
-		out_row2 = ppOutput[row + 2];
-
-
-		x0  = row0[ncl - 1]; x1  = row0[ncl + 0]; x2  = row0[ncl + 1]; x3  = row0[ncl + 2]; x4  = row0[ncl + 3];
-		x5  = row1[ncl - 1]; x6  = row1[ncl + 0]; x7  = row1[ncl + 1]; x8  = row1[ncl + 2]; x9  = row1[ncl + 3];
-		x10 = row2[ncl - 1]; x11 = row2[ncl + 0]; x12 = row2[ncl + 1]; x13 = row2[ncl + 2]; x14 = row2[ncl + 3];
-		x15 = row3[ncl - 1]; x16 = row3[ncl + 0]; x17 = row3[ncl + 1]; x18 = row3[ncl + 2]; x19 = row3[ncl + 3];
-		x20 = row4[ncl - 1]; x21 = row4[ncl + 0]; x22 = row4[ncl + 1]; x23 = row4[ncl + 2]; x24 = row4[ncl + 3];
-		y0  = x0  | x5  | x10; y1  = x1  | x6  | x11;
-		y5  = x5  | x10 | x15; y6  = x6  | x11 | x16;
-		y10 = x10 | x15 | x20; y11 = x11 | x16 | x21;
-
-		for (col = ncl; col < nch + 1 - cr; col += order) {
-			// x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-			// x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-			// x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			// x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
-			// x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
-			x0  = row0[col - 1]; x1  = row0[col + 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
-			x5  = row1[col - 1]; x6  = row1[col + 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
-			x10 = row2[col - 1]; x11 = row2[col + 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
-			x15 = row3[col - 1]; x16 = row3[col + 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
-			x20 = row4[col - 1]; x21 = row4[col + 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
-
-
-			y2  = x2  | x7  | x12; y3  = x3  | x8  | x13; y4  = x4  | x9  | x14; 
-			y7  = x7  | x12 | x17; y8  = x8  | x13 | x18; y9  = x9  | x14 | x19; 
-			y12 = x12 | x17 | x22; y13 = x13 | x18 | x23; y14 = x14 | x19 | x24; 
- 
-			out_row0[col + 0] = y0 | y1 | y2; 
-			out_row0[col + 1] = y1 | y2 | y3; 
-			out_row0[col + 2] = y2 | y3 | y4;
-			y0 = y3; y1 = y4;
-
-			out_row1[col + 0] = y5 | y6 | y7;
-			out_row1[col + 1] = y6 | y7 | y8;
-			out_row1[col + 2] = y7 | y8 | y9;
-			y5 = y8; y6 = y9;
-			
-			out_row2[col + 0] = y10 | y11 | y12;
-			out_row2[col + 1] = y11 | y12 | y13;
-			out_row2[col + 2] = y12 | y13 | y14;
-			y10 = y13; y11 = y14;
+	nrow = (nrh - nrl + 1);
+	omp_set_num_threads(4);
+	#pragma omp parallel default(none) shared(ppInput, ppOutput, ncl, nch, nrow, s, rr, cr) firstprivate(nrl, nrh) private(row, col, row0, row1, row2, row3, row4, out_row0, out_row1, out_row2, id, nb_threads,x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14)
+	{
+		id = omp_get_thread_num();
+		nb_threads = omp_get_num_threads();
+		// if (nrow > 1) {
+		// printf("init : %ld ~ %ld\n",  nrl, nrh);
+		if (id == nb_threads - 1) 
+		{ 
+			nrl = nrh - (nrow / nb_threads) + 1;
 		}
-		row0 = row3;
-		row1 = row4;
+		else { 
+			nrl = (nrow / nb_threads) * (id + 0); 
+			nrh = (nrow / nb_threads) * (id + 1) - 1;
+		}
+		
+		// getchar();
+		row0 = ppInput[nrl - 1];
+		row1 = ppInput[nrl + 0];
+		for (row = nrl; row < nrh + 1 - rr; row += order) {
+			row2 = ppInput[row + 1];
+			row3 = ppInput[row + 2];
+			row4 = ppInput[row + 3];
+			out_row0 = ppOutput[row + 0];
+			out_row1 = ppOutput[row + 1];
+			out_row2 = ppOutput[row + 2];
+
+
+			x0  = row0[ncl - 1]; x1  = row0[ncl + 0]; x2  = row0[ncl + 1]; x3  = row0[ncl + 2]; x4  = row0[ncl + 3];
+			x5  = row1[ncl - 1]; x6  = row1[ncl + 0]; x7  = row1[ncl + 1]; x8  = row1[ncl + 2]; x9  = row1[ncl + 3];
+			x10 = row2[ncl - 1]; x11 = row2[ncl + 0]; x12 = row2[ncl + 1]; x13 = row2[ncl + 2]; x14 = row2[ncl + 3];
+			x15 = row3[ncl - 1]; x16 = row3[ncl + 0]; x17 = row3[ncl + 1]; x18 = row3[ncl + 2]; x19 = row3[ncl + 3];
+			x20 = row4[ncl - 1]; x21 = row4[ncl + 0]; x22 = row4[ncl + 1]; x23 = row4[ncl + 2]; x24 = row4[ncl + 3];
+			y0  = x0  | x5  | x10; y1  = x1  | x6  | x11;
+			y5  = x5  | x10 | x15; y6  = x6  | x11 | x16;
+			y10 = x10 | x15 | x20; y11 = x11 | x16 | x21;
+
+			for (col = ncl; col < nch + 1 - cr; col += order) {
+				x0  = row0[col - 1]; x1  = row0[col + 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
+				x5  = row1[col - 1]; x6  = row1[col + 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
+				x10 = row2[col - 1]; x11 = row2[col + 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
+				x15 = row3[col - 1]; x16 = row3[col + 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
+				x20 = row4[col - 1]; x21 = row4[col + 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
+
+
+				y2  = x2  | x7  | x12; y3  = x3  | x8  | x13; y4  = x4  | x9  | x14; 
+				y7  = x7  | x12 | x17; y8  = x8  | x13 | x18; y9  = x9  | x14 | x19; 
+				y12 = x12 | x17 | x22; y13 = x13 | x18 | x23; y14 = x14 | x19 | x24; 
+	
+				out_row0[col + 0] = y0 | y1 | y2; 
+				out_row0[col + 1] = y1 | y2 | y3; 
+				out_row0[col + 2] = y2 | y3 | y4;
+				y0 = y3; y1 = y4;
+
+				out_row1[col + 0] = y5 | y6 | y7;
+				out_row1[col + 1] = y6 | y7 | y8;
+				out_row1[col + 2] = y7 | y8 | y9;
+				y5 = y8; y6 = y9;
+				
+				out_row2[col + 0] = y10 | y11 | y12;
+				out_row2[col + 1] = y11 | y12 | y13;
+				out_row2[col + 2] = y12 | y13 | y14;
+				y10 = y13; y11 = y14;
+			}
+			row0 = row3;
+			row1 = row4;
+		}
 	}
 	switch (rr) {
 		case 2 :
@@ -382,24 +365,24 @@ void ui8matrix_dilation_LU3x3_O1xO3_OMP (uint8** ppInput, long nrl, long nrh, lo
 	uint8 y0, y1, y2, x0, x1, x2, x3, x4, x5, x6, x7, x8;
 	uint8 *row0, *row1, *row2, *row3, *row4;
 	uint8 *out_row0;
+	int id, thread_num, nb_threads;
 	r = (nch + 1)  % order;
 	
+	omp_set_num_threads(4);
+	#pragma omp parallel for default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch, r) firstprivate(row0, row1, row2, out_row0, col)
 	for (row = nrl; row < nrh + 1; row ++) {
 		row0 = ppInput[row - 1];
 		row1 = ppInput[row + 0];
 		row2 = ppInput[row + 1];
 		out_row0 = ppOutput[row + 0];
 		for (col = ncl; col < nch + 1 - r; col += order) {
-			// x0 = scalar_or3(row0, col); x3 = scalar_or3(row0, col + 1); x6 = scalar_or3(row0, col + 2);
-			// x1 = scalar_or3(row1, col); x4 = scalar_or3(row1, col + 1); x7 = scalar_or3(row1, col + 2);
-			// x2 = scalar_or3(row2, col); x5 = scalar_or3(row2, col + 1); x8 = scalar_or3(row2, col + 2);
-
+			
 			out_row0[col + 0] = scalar_or3(row0, col + 0)|
 								scalar_or3(row1, col + 0)|
 								scalar_or3(row2, col + 0);
 			out_row0[col + 1] = scalar_or3(row0, col + 1)|
- 								scalar_or3(row1, col + 1)|
- 								scalar_or3(row2, col + 1);
+								scalar_or3(row1, col + 1)|
+								scalar_or3(row2, col + 1);
 			out_row0[col + 2] = scalar_or3(row0, col + 2)|
 								scalar_or3(row1, col + 2)|
 								scalar_or3(row2, col + 2);
@@ -408,6 +391,7 @@ void ui8matrix_dilation_LU3x3_O1xO3_OMP (uint8** ppInput, long nrl, long nrh, lo
 
 	switch(r) {
 		case 2:
+			#pragma omp parallel for default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch, r) firstprivate(row0, row1, row2, out_row0, col)
 			for (row = nrl; row < nrh + 1; row ++) {
 				row0 = ppInput[row - 1];
 				row1 = ppInput[row + 0];
@@ -423,6 +407,7 @@ void ui8matrix_dilation_LU3x3_O1xO3_OMP (uint8** ppInput, long nrl, long nrh, lo
 			}
 			break;
 		case 1:
+			#pragma omp parallel for default(none) shared(ppInput, ppOutput, nrl, nrh, ncl, nch, r) firstprivate(row0, row1, row2, out_row0, col)
 			for (row = nrl; row < nrh + 1; row ++) {
 				ppOutput[row + 0][nch + 0] = scalar_or3(ppInput[row - 1], nch) | 
 										  	 scalar_or3(ppInput[row + 0], nch) | 
@@ -434,7 +419,6 @@ void ui8matrix_dilation_LU3x3_O1xO3_OMP (uint8** ppInput, long nrl, long nrh, lo
 			break;
 	}
 }
-
 
 void ui8matrix_dilation_LU3x3_O1xO3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
 {
