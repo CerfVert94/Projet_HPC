@@ -25,8 +25,8 @@
 #define TIME(v)   
 
 
-#define LALIGNED_STR     "%-45s"
-#define RALIGNED_STR     "%45s"
+#define LALIGNED_STR     "%-60s"
+#define RALIGNED_STR     "%60s"
 #define RALIGNED_SINT    "%40d"
 #define RALIGNED_UINT    "%40u"
 #define RALIGNED_SLONG   "%40ld"
