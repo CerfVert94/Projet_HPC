@@ -39,8 +39,11 @@ inline void ui8matrix_sequence_naive(uint8** ppInput, long nrl, long nrh, long n
 	uint8 **ppPreOutput0, **ppPreOutput1;
 	ppPreOutput0 = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 	ppPreOutput1 = ui8matrix(nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
+	memset_ui8matrix(ppPreOutput0, 0, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 	ui8matrix_erosion_naive (ppInput     , nrl, nrh, ncl, nch, s, ppPreOutput0);
+	memset_ui8matrix(ppPreOutput1, 0, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 	ui8matrix_dilation_naive(ppPreOutput0, nrl, nrh, ncl, nch, s, ppPreOutput1);
+	memset_ui8matrix(ppPreOutput0, 0, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
 	ui8matrix_dilation_naive(ppPreOutput1, nrl, nrh, ncl, nch, s, ppPreOutput0);
 	ui8matrix_erosion_naive (ppPreOutput0, nrl, nrh, ncl, nch, s, ppOutput);
 	free_ui8matrix(ppPreOutput0, nrl + s->nrl, nrh + s->nrh, ncl + s->ncl, nch + s->nch);
