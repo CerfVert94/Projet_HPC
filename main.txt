@@ -4,7 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <assert.h>
 
 #include "nrdef.h"
 #include "nrutil.h"
@@ -77,6 +78,7 @@ void movement_detection()
         SigmaDelta_step0(t_1);
         SigmaDelta(t, t_1);
 	    sprintf(filename, "../md/car_%d.pgm", idx + i + 1);
+        // ui8matrix_dilation_divide_row_and_conquer_OMP(t->E, t->nrl + BORD, t->nrh - BORD, t->ncl + BORD, t->nch - BORD, s, t->Omega);
         // ui8matrix_sequence_LU3x3(t->E, t->nrl + BORD, t->nrh - BORD, t->ncl + BORD, t->nch - BORD, s, t->Omega);
         binary_to_octal_ui8matrix(t->Omega, t->nrl + BORD, t->nrh - BORD, t->ncl + BORD, t->nch - BORD);
         SavePGM_ui8matrix(t->Omega, t->nrl + BORD, t->nrh - BORD, t->ncl + BORD, t->nch - BORD, filename);
@@ -86,63 +88,7 @@ void movement_detection()
     //info();
     free_structuring_element(s);
 }
-void test_dilations(struct morpho_set *dilation_sets, const int nb_implementations)
-{
-    const long start_x = 300, start_y = 200, end_x=340, end_y=240;
-    long x = 0, y = 0, nrl, nrh, ncl, nch;
-    uint8 **image, **X, **correct_output;
-    char filename[128];
-    for (int i = 0; i < nb_implementations; i++) {
-        if (dilation_sets[i].s->ncol == 3) {
-            test_implementation_dilation_3x3(&dilation_sets[i]);
-        }
-        else {//if (dilation_sets[i].s == s5)
-            // test_implementation_dilation_5x5(&dilation_sets[i]);
-            // test_integration_dilation_5x5(&dilation_sets[i]);
-        }
-    }
 
-    
-    for(x = start_x; x < end_x + 1; x++){
-        for(y = start_y; y < end_y + 1; y++){
-            snprintf(filename, 128, "testcases/car{%ld}{%ld}.pgm",x,y);
-            
-            image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-
-            X = ui8matrix(nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-            memset_ui8matrix(X, 0, nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-            copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
-            correct_output = ui8matrix(nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-            memset_ui8matrix(correct_output, 0, nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-            
-            ui8matrix_dilation_naive(X, nrl, nrh, ncl, nch, dilation_sets[0].s, correct_output);
-            for (int i = 0; i < nb_implementations; i++) {
-                printf("Integration test : %s (%30s)\n", dilation_sets[i].func_name, filename);
-                test_integration_morpho_3x3(&dilation_sets[i], X, nrl, nrh, ncl, nch, correct_output);
-	            printf("\tTest passed\n");
-            }
-                
-            free_ui8matrix(image,nrl, nrh, ncl, nch);
-            free_ui8matrix(X, nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-            free_ui8matrix(correct_output,nrl + dilation_sets[0].s->nrl, nrh + dilation_sets[0].s->nrh, ncl + dilation_sets[0].s->ncl, nch + dilation_sets[0].s->nch);
-        }
-    }
-}
-void test_erosions(struct morpho_set *erosion_sets, const int nb_implementations)
-{
-    for (int i = 0; i < nb_implementations; i++) {
-        if (erosion_sets[i].s->ncol == 3) {
-            test_implementation_erosion_3x3(&erosion_sets[i]);
-            // test_integration_erosion_3x3_r1(&erosion_sets[i]);
-            // test_integration_erosion_3x3_r2(&erosion_sets[i]);
-            // test_integration_erosion_3x3(&erosion_sets[i]);
-        }
-        else {//if (erosion_sets[i].s == s5)
-            // test_implementation_erosion_5x5(&erosion_sets[i]);
-            // test_integration_erosion_5x5(&erosion_sets[i]);
-        }
-    }
-}
 
 void make_testsets(){
     p_struct_elem_dim s5 = compute_struct_elem_dim(2,2,5,5);
@@ -206,60 +152,147 @@ int main(void)
     
     
     struct morpho_set dilation_sets[] = {
-                                        //  {.func_name = "ui8matrix_dilation_naive"                   , .morpho_func = ui8matrix_dilation_naive          , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO1"             , .morpho_func = ui8matrix_dilation_LU3x3_O1xO1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO1_ver1"        , .morpho_func = ui8matrix_dilation_LU3x3_O3xO1_ver1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO1_ver2"        , .morpho_func = ui8matrix_dilation_LU3x3_O3xO1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO1_RR_ver1"     , .morpho_func = ui8matrix_dilation_LU3x3_O3xO1_RR_ver1 , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO1_RR_ver2"     , .morpho_func = ui8matrix_dilation_LU3x3_O3xO1_RR , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_RR_ver1"     , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_RR_ver1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_RR_ver2"     , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_RR_ver2    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_RR_ver3"     , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_RR_ver3    , .s = s3},
-                                         {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_RR"          , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_RR    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_PJ"          , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_PJ    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O1xO3_ver1"        , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3_ver1    , .s = s3},
-                                         {.func_name = "ui8matrix_dilation_LU3x3_O1xO3"             , .morpho_func = ui8matrix_dilation_LU3x3_O1xO3         , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO3_ver1"        , .morpho_func = ui8matrix_dilation_LU3x3_O3xO3_ver1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO3_ver2"        , .morpho_func = ui8matrix_dilation_LU3x3_O3xO3    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_LU3x3_O3xO3_RR_ver1"     , .morpho_func = ui8matrix_dilation_LU3x3_O3xO3_RR_ver1    , .s = s3},
-                                         {.func_name = "ui8matrix_dilation_LU3x3_O3xO3_RR"          , .morpho_func = ui8matrix_dilation_LU3x3_O3xO3_RR    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_pipeline3x3"             , .morpho_func = ui8matrix_dilation_pipeline3x3          , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_pipeline_LU3x3_O3xO1"    , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_O3xO1    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR" , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_O3xO1_RR    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_pipeline_LU3x3_O1xO3"    , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_O1xO3    , .s = s3},
-                                        //  {.func_name = "ui8matrix_dilation_pipeline_LU3x3_O1xO3_PJ" , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_O1xO3_PJ    , .s = s3},
-                                         {.func_name = "ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR" , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR    , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_naive"                   , .morpho_func = ui8matrix_dilation_naive          , .s = s3}, 
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_O1xO1"                , .morpho_func = ui8matrix_dilation_LU3x3_O1xO1                   , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3"                , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3"                , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_AddrRR"         , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR"         , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR"         , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_NS"             , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_RR_NS"          , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_RR_NS             , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_NS"             , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_RR_NS"          , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_RR_NS             , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_NS"             , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_row_pipeline"               , .morpho_func = ui8matrix_dilation_row_pipeline                  , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_col_pipeline"               , .morpho_func = ui8matrix_dilation_col_pipeline                  , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_col_pipeline_RR"            , .morpho_func = ui8matrix_dilation_col_pipeline_RR               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline_LU3x3_ExLU_O3"       , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_ExLU_O3          , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR"    , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR       , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline_LU3x3_InLU_O3"       , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_InLU_O3          , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR"    , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR       , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3"             , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3                , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR"          , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR             , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_InLU_O3"             , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_InLU_O3                , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR"          , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR             , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_row_and_conquer"            , .morpho_func = ui8matrix_dilation_divide_row_and_conquer               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_row_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_InLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_row_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_ExLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_col_and_conquer"            , .morpho_func = ui8matrix_dilation_divide_col_and_conquer               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_col_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_dilation_divide_col_and_conquer_InLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_divide_col_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_dilation_divide_col_and_conquer_ExLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_O1xO1_OMP"            , .morpho_func = ui8matrix_dilation_LU3x3_O1xO1_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_OMP"            , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_OMP"            , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_OMP"            , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP            , .s = s3},
+                                        // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP         , .s = s3},
+                                        {.func_name = "ui8matrix_dilation_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_OMP               , .s = s3},
+                                        {.func_name = "ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP               , .s = s3},
+                                        {.func_name = "ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP               , .s = s3},
                                         };
 
-    // ui8matrix_dilation_LU3x3_O1xO3_RR;
-    // ui8matrix_dilation_LU3x3_O1xO3_ver2;
-    // ui8matrix_dilation_LU3x3_O3xO3_RR;
-    // ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR;
-    /*
-    ui8matrix_dilation_LU3x3_O1xO3_RR_ver4 :
-        Avg :  1.7846821392532795
-        Min :  1.34
-        Max :  8.72
-    ui8matrix_dilation_LU3x3_O1xO3_ver2 :
-        Avg :  2.315307769929364
-        Min :  1.79
-        Max :  9.9
-    ui8matrix_dilation_LU3x3_O3xO3_RR_ver1 :
-        Avg :  2.2552169525731585
-        Min :  2.07
-        Max :  5.28
-    ui8matrix_dilation_pipeline_LU3x3_O1xO3_RR :
-        Avg :  2.2591019172552973
-        Min :  2.06
-        Max :  5.55
-    */
-    nb_sets = 4;
+
     
-    test_dilations(dilation_sets, nb_sets);
-    launch_benchmark("output/benchmark_dilation.dat", dilation_sets, nb_sets, 10, 4000);
+    struct morpho_set erosion_sets[] = {
+                                        // {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive          , .s = s3}, 
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_O1xO1"                , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1                   , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3                   , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR         , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR            , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS             , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_RR_NS             , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_NS                , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_row_pipeline"               , .morpho_func = ui8matrix_erosion_row_pipeline                  , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_col_pipeline"               , .morpho_func = ui8matrix_erosion_col_pipeline                  , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_col_pipeline_RR"            , .morpho_func = ui8matrix_erosion_col_pipeline_RR               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3          , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR       , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3          , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR       , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3                , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR             , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3                , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR             , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_col_and_conquer               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_InLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_ExLU_O3               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_O1xO1_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP        , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP            , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP         , .s = s3},
+                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP               , .s = s3},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP               , .s = s3},
+                                       };
+    struct morpho_set sequence_sets[] = {
+                                        {.func_name = "ui8matrix_sequence_naive"                     , .morpho_func = ui8matrix_sequence_naive                        , .s = s3}, 
+                                        {.func_name = "ui8matrix_sequence_divide_row_and_conquer_OMP", .morpho_func = ui8matrix_sequence_divide_row_and_conquer_OMP   , .s = s3},
+                                       };
+                                       
+    nb_sets = 2; 
+    
+
+    
+    test_dilations(dilation_sets, nb_sets, false);
+    launch_benchmark("output/benchmark_dilation.dat", dilation_sets, nb_sets, 200, 2000);
+
+    // test_erosions(erosion_sets, nb_sets, false);
+    // launch_benchmark("output/benchmark_erosion.dat", erosion_sets, nb_sets, 200, 4000);
+
+    // test_sequences(sequence_sets, nb_sets, false);
+    // launch_benchmark("output/benchmark_sequence.dat", sequence_sets, nb_sets, 200, 2000);
+
     // make_testsets();
     free_structuring_element(s3);
     free_structuring_element(s5);
 
     return 0;    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
