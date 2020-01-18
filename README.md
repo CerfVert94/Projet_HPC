@@ -17,6 +17,7 @@ Progres
 
 
 #DONE
+
 3. Restructurer les entetes des fonction de morpho pour 
   - potentiellement enlever le parametre "struct struct_element_dim s". Il est peu utile. 
   - ajouter un parametre pour un buffer intermediaire. 
