@@ -94,7 +94,7 @@ void SigmaDelta_step2_SSE(p_vimage vt) {
 void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
 /*----------------------------------*/
 
-	vuint8 t_1V, tO, tV, TMP;
+	vuint8 t_1V, tO, NtO, tV, TMP;
 	vuint8 C1, C2;
 
 	vuint8 CMP = init_vuint8(127);
@@ -106,16 +106,17 @@ void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
 		for(int j = vt->v0+1; j < vt->v1-1; j++) {
 			t_1V = _mm_load_si128((vuint8*) &vt_1->V[i][j]);
 			tO 	 = _mm_load_si128((vuint8*) &vt->O[i][j]);
-			for (int k = 0; k < N; k++) _mm_add_epi8(tO, tO);
+			NtO = tO;
+			for (int k = 0; k < N; k++) _mm_add_epi8(NtO, tO);
 
-			vec_cmplt(t_1V, tO, C1, CMP);
+			vec_cmplt(t_1V, NtO, C1, CMP);
 			// tO = _mm_sub_epi8(tO, CMP);
 			// t_1M = _mm_sub_epi8(t_1M, CMP);
 			// C1  = _mm_cmplt_epi8(t_1M, tO);
 			// tO = _mm_add_epi8(tO, CMP);
 			// t_1M = _mm_add_epi8(t_1M, CMP);
 
-			C2  = _mm_cmpeq_epi8(tO, t_1V);
+			C2  = _mm_cmpeq_epi8(NtO, t_1V);
 
 		    TMP = _mm_or_si128(_mm_and_si128(C1, ONE), _mm_andnot_si128(C1, M_ONE));
 		    TMP = _mm_or_si128(_mm_and_si128(C2, ZERO), _mm_andnot_si128(C2, TMP));
