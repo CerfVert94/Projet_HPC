@@ -102,6 +102,9 @@ void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
 	vuint8 ZERO = init_vuint8(0);
 	vsint8 M_ONE = init_vsint8(-1);
 
+	vuint8 vVmax = init_vuint8(Vmax);
+	vuint8 vVmin = init_vuint8(Vmin);
+
 	for(int i = vt->nrl+BORD; i < vt->nrh-BORD; i++) {
 		for(int j = vt->v0+1; j < vt->v1-1; j++) {
 			t_1V = _mm_load_si128((vuint8*) &vt_1->V[i][j]);
@@ -121,6 +124,7 @@ void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
 		    TMP = _mm_or_si128(_mm_and_si128(C1, ONE), _mm_andnot_si128(C1, M_ONE));
 		    TMP = _mm_or_si128(_mm_and_si128(C2, ZERO), _mm_andnot_si128(C2, TMP));
 		    tV  = _mm_add_epi8(t_1V, TMP);
+		    tV  = _mm_max_epu8(_mm_min_epu8(tV, vVmax), vVmin);
 
 		    _mm_store_si128((vuint8*) &vt->V[i][j], tV);
 
