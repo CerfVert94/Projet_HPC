@@ -24,177 +24,183 @@ p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol
 void free_structuring_element(p_struct_elem_dim s);
 
 
-typedef void (*morpho_func_t)(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+typedef void (*morpho_func_t)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
-void ui8matrix_dilation_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-/****************************/
-/******* Loop Unroll ********/
-/****************************/
-void ui8matrix_dilation_LU3x3_O1xO1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-/***********************************************************************/
-/******** Loop Unroll + Register Rotation of Values / Addresses ********/
-/***********************************************************************/
-void ui8matrix_dilation_LU3x3_ExLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-/**************************************************************/
-/******** Loop Unroll + Register Rotation of Addresses ********/
-/**************************************************************/
-void ui8matrix_dilation_LU3x3_InLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-
-// void ui8matrix_dilation_LU3x3_InLU_O3_Full_Scalari (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-/************************************/
-/******** Alternate Versions ********/
-/************************************/
-
-void ui8matrix_dilation_divide_row_and_conquer (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_col_and_conquer (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_col_and_conquer_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-void ui8matrix_dilation_LU3x3_ExLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ExLU_O3_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_RR_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-/*************************/
-/******* Pipeline ********/
-/*************************/
-void ui8matrix_dilation_row_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_col_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_col_pipeline_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-void ui8matrix_dilation_pipeline_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-/**************************/
-/********* openMP *********/
-/**************************/
-void ui8matrix_dilation_LU3x3_O1xO1_OMP			   (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ExLU_O3_OMP			   (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3_OMP			   (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_OMP			   (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_OMP         (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_OMP         (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP      (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR_OMP      (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-
-
-
-
-void ui8matrix_erosion_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 /****************************/
 /******* Loop Unroll ********/
 /****************************/
-void ui8matrix_erosion_LU3x3_O1xO1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O1xO1 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 /***********************************************************************/
 /******** Loop Unroll + Register Rotation of Values / Addresses ********/
 /***********************************************************************/
-void ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_ExLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 /**************************************************************/
 /******** Loop Unroll + Register Rotation of Addresses ********/
 /**************************************************************/
-void ui8matrix_erosion_LU3x3_InLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_InLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
-void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 
-// void ui8matrix_erosion_LU3x3_InLU_O3_Full_Scalari (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+// void ui8matrix_dilation_LU3x3_InLU_O3_Full_Scalari (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 /************************************/
 /******** Alternate Versions ********/
 /************************************/
 
-void ui8matrix_erosion_divide_row_and_conquer (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_col_and_conquer (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_col_and_conquer_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_col_and_conquer_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_col_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
-void ui8matrix_erosion_LU3x3_ExLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3_RR_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_RR_ver1 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_NS (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_ExLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ExLU_O3_RR_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3_RR_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_RR_ver1 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 /*************************/
 /******* Pipeline ********/
 /*************************/
-void ui8matrix_erosion_row_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_col_pipeline (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_col_pipeline_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_row_pipeline (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_col_pipeline (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_col_pipeline_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
-void ui8matrix_erosion_pipeline_LU3x3_InLU_O3 (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 /**************************/
 /********* openMP *********/
 /**************************/
-void ui8matrix_erosion_LU3x3_O1xO1_OMP			         (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ExLU_O3_OMP			     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3_OMP			     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_OMP			     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP          (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP          (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP         (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_OMP       (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_OMP       (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP    (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR_OMP    (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_row_and_conquer_OMP        (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP    (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP     (uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+void ui8matrix_dilation_LU3x3_O1xO1_OMP			   (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ExLU_O3_OMP			   (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3_OMP			   (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_OMP			   (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_OMP         (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_OMP         (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP      (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR_OMP      (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 
 
-void ui8matrix_sequence_naive(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
+
+void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/****************************/
+/******* Loop Unroll ********/
+/****************************/
+void ui8matrix_erosion_LU3x3_O1xO1 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/***********************************************************************/
+/******** Loop Unroll + Register Rotation of Values / Addresses ********/
+/***********************************************************************/
+void ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/**************************************************************/
+/******** Loop Unroll + Register Rotation of Addresses ********/
+/**************************************************************/
+void ui8matrix_erosion_LU3x3_InLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+
+// void ui8matrix_erosion_LU3x3_InLU_O3_Full_Scalari (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+/************************************/
+/******** Alternate Versions ********/
+/************************************/
+
+void ui8matrix_erosion_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_col_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+void ui8matrix_erosion_LU3x3_ExLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3_RR_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_RR_ver1 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_NS (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/*************************/
+/******* Pipeline ********/
+/*************************/
+void ui8matrix_erosion_row_pipeline (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_col_pipeline (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_col_pipeline_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+void ui8matrix_erosion_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/**************************/
+/********* packed *********/
+/**************************/
+void ui8matrix_dilation_hpacked_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_dilation_vpacked_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+/**************************/
+/********* openMP *********/
+/**************************/
+void ui8matrix_erosion_LU3x3_O1xO1_OMP			         (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ExLU_O3_OMP			     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3_OMP			     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_OMP			     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP          (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP          (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP         (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_OMP       (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_OMP       (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP    (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR_OMP    (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_row_and_conquer_OMP        (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP    (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP     (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+
+
+void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 
 
@@ -203,15 +209,15 @@ void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** ppInput, long nrl, lo
 /*** DEPRECATED ***/
 /******************/
 
-// uint8  erosion_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s);
-// uint8 dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s);
+// uint8  erosion_naive(uint8** X, long row, long col);
+// uint8 dilation_naive(uint8** X, long row, long col);
 
 
 
-// void ui8matrix_lambda_morpho(morpho_func_t morpho, long order, uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput);
-// void dilation_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s, uint8 **ppOutput);
-// void  erosion_naive(uint8** ppInput, long row, long col, p_struct_elem_dim s, uint8 **ppOutput);
+// void ui8matrix_lambda_morpho(morpho_func_t morpho, long order, uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+// void dilation_naive(uint8** X, long row, long col, uint8 **temp_buffer, uint8 **Y);
+// void  erosion_naive(uint8** X, long row, long col, uint8 **temp_buffer, uint8 **Y);
 
 
-void image_chain_processing(p_image img, p_struct_elem_dim s, int idx);
+void image_chain_processing(p_image img, int idx);
 #endif /* __MORPHO_H__ */

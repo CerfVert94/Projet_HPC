@@ -5,6 +5,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <stdbool.h>
 #define Vmin 1
 #define Vmax 254
 
@@ -45,6 +46,32 @@ static void exit_on_error(const char *msg);
 
 void binary_to_octal_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
 void octal_to_binary_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, long nch);
+
+
+typedef uint8** (*pack_func_t)(uint8 **X, long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch);
+typedef uint8** (*unpack_func_t)(uint8 **X, long nrl, long nrh, long ncl, long nch);
+
+uint8 **fcpacked_ui8matrix (           long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch, long *bord);
+uint8 **frpacked_ui8matrix (           long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch, long *bord);
+uint8 **hcpacked_ui8matrix (           long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch, long *bord);
+uint8 **hrpacked_ui8matrix (           long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch, long *bord);
+void free_packed_ui8matrix (uint8 **X                                        , long  packed_nrl, long  packed_nrh, long  packed_ncl, long  packed_nch, long  bord);
+
+void   fcpack_ui8matrix_ui8matrix (uint8 **X, long nrl, long nrh, long ncl, long nch, long packed_nrl, long packed_nrh, long packed_ncl, long packed_nch, long bord, uint8 **Y);
+void unfcpack_ui8matrix_ui8matrix (uint8 **X, long nrl, long nrh, long ncl, long nch, long packed_nrl, long packed_nrh, long packed_ncl, long packed_nch, long bord, uint8 **Y);
+// uint8 **unhpack_binary_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch);
+
+uint8 **vpack_binary_ui8matrix  (uint8 **X, long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch);
+uint8 **unvpack_binary_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch);
+inline long roundup_over8(long n)
+{
+    return (n != 0 ? (n < 0? -1 : 1) : 0);
+}
+inline long pack8(long n) 
+{
+    return n < 0 ? n / 8 + roundup_over8(n % 8) : (n + 1) / 8 + roundup_over8((n + 1) % 8) - 1;
+}
+void packing_test(char *filename, pack_func_t pack_func, unpack_func_t unpack_func, const char *func_name, bool display);
 
 
 #define NROW(nrl, nrh)  (nrh - nrl + 1)
