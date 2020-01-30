@@ -1,5 +1,5 @@
 /* ------------------------ */
-/* --- mouvement_SSE2.h --- */
+/* --- mouvement_SSSE3.h --- */
 /* ------------------------ */
 
 #ifndef __MOUVEMENT_SSE2_H__
