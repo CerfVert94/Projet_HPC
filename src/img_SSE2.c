@@ -1,5 +1,5 @@
 /* ------------------------ */
-/* ------ img_SSE2.c ------ */
+/* ------ img_SSSE3.c ------ */
 /* ------------------------ */
 
 #include <stdio.h>
@@ -63,12 +63,12 @@ p_vimage create_vimage(char* filename) {
     tmp->m1 = m1;
 
 
-    z = (v1-1)*card;
-    r = ch-z+1;
+    z = v1*card;
+    r = ch-z;
 
     tmp->I = vui8matrix(nrl, nrh, v0, v1);
-    for (i = rl; i < rh; i++) {
-        for (j = v0; j < v1-1; j++) {
+    for (i = rl; i <= rh; i++) {
+        for (j = v0; j < v1; j++) {
             l = j*card;
             x = init_vuint8_all(img[i][l], img[i][l+1], img[i][l+2], img[i][l+3], img[i][l+4], img[i][l+5], img[i][l+6], img[i][l+7], img[i][l+8], img[i][l+9], img[i][l+10], img[i][l+11], img[i][l+12], img[i][l+13], img[i][l+14], img[i][l+15]);
             _mm_store_si128(&tmp->I[i][j], x);
@@ -76,7 +76,7 @@ p_vimage create_vimage(char* filename) {
         x = init_vuint8(0);
         for (j = 0; j < r; j++)
         	p[j] = img[i][z+j];
-        _mm_store_si128(&tmp->I[i][v1-1], x);
+        _mm_store_si128(&tmp->I[i][v1], x);
     }
 
 	tmp->M = vui8matrix(nrl, nrh, v0, v1); 
@@ -101,7 +101,7 @@ void free_vimage(p_vimage vimage) {
 }
 
 /*-------*/
-void test_SSE() {
+void test_SSE_mouvement() {
 /*-------*/
 	
 	p_image t = create_image("../car3/car_3000.pgm");

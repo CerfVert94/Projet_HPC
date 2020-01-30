@@ -28,4 +28,7 @@ p_vimage create_vimage(char* filename);
 
 void free_vimage(p_vimage image);
 
+void test_SSE_mouvement();
+
+
 #endif // __IMG_SSE2_H__
