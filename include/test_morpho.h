@@ -10,52 +10,31 @@ struct morpho_set{
     enum {NO_PACK, HPACK, VPACK}pack_type;
 };
 
-
-double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size);
-double **benchmark_compression(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size);
-unsigned long long get_cpu_cycles(struct morpho_set *ptr_mset, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
-unsigned long long get_min_cpu_cycles(struct morpho_set *ptr_mset, long packet_size, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
-
-
-uint8** prologue_test_integration_3x3(struct morpho_set *mset, uint8** X, uint8* test_case,long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8** Y);
-void epilogue_test_integration_3x3(struct morpho_set *mset, uint8** X, long in_nrl, long in_nrh, long in_ncl, long in_nch,  long out_nrl, long out_nrh, long out_ncl, long out_nch, uint8 **temp_buffer, uint8** Y);
-void test_integration_morpho_3x3(struct morpho_set *mset, uint8** X, long nrl, long nrh, long ncl,long nch, uint8 **temp_buffer, uint8** correct_output);
-// void epilogue_test_integration_5x5(struct morpho_set *mset, uint8** X, uint8** Y);
-// uint8** prologue_test_integration_5x5(struct morpho_set *mset, uint8** X, uint8** Y);
+struct sd_set{
+    char func_name[128];
+    void (*sd_func)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch);
+};
 
 
-void test_implementation_erosion_3x3 (struct morpho_set *erosion_set );
-void test_implementation_erosion_5x5 (struct morpho_set *erosion_set );
-void test_implementation_dilation_3x3(struct morpho_set *dilation_set);
-void test_implementation_dilation_5x5(struct morpho_set *dilation_set);
 
 void test_dilations (struct morpho_set *dilation_sets, const int nb_implementations, bool display);
 void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool display);
 void test_sequences (struct morpho_set *sequence_sets, const int nb_implementations, bool display);
+
+void test_implementation_erosion3  (struct morpho_set *morpho_set);
+void test_implementation_dilation3 (struct morpho_set *morpho_set);
+void test_implementation_erosion5  (struct morpho_set *morpho_set );
+void test_implementation_dilation5 (struct morpho_set *morpho_set );
+
 void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display);
 void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display);
 
-void test_integration_erosion_3x3_r1 (struct morpho_set *erosion_set);
-void test_integration_erosion_3x3_r2 (struct morpho_set *erosion_set);
-void test_integration_dilation_3x3_r1(struct morpho_set *dilation_set);
-void test_integration_dilation_3x3_r2(struct morpho_set *dilation_set);
 // void test_integration_erosion_5x5 (struct morpho_set *erosion_set);
 // void test_integration_dilation_5x5(struct morpho_set *dilation_set);
 
 bool morpho_produces_one(struct morpho_set *mset, uint8** X);
 
 bool check_dimension_of_square_structuring_element(p_struct_elem_dim s,  long size);
-
-static inline bool check_for_3x3_structuring_element(p_struct_elem_dim s);
-static inline bool check_for_3x3_structuring_element(p_struct_elem_dim s) 
-{
-    return check_dimension_of_square_structuring_element(s, 3);
-}
-static inline bool check_for_5x5_structuring_element(p_struct_elem_dim s);
-static inline bool check_for_5x5_structuring_element(p_struct_elem_dim s) 
-{
-    return check_dimension_of_square_structuring_element(s, 5);
-}
 
 
 static inline uint32 extract_bits_from_permutation(uint32 perm, long irow, long ncol);
@@ -70,10 +49,6 @@ static inline uint8 get_column_at(uint8 col_vals, long icol) {
 
 uint8 **rand_ui8matrix(long size, p_struct_elem_dim s);
 uint8 **ui8matrix_checker(long nrl, long nrh, long ncl, long nch, const long chkr_size, const uint8 xor_mask);
-
-double **init_benchmark_results(long nb_funcs, long size, long step);
-void     free_benchmark_results(double **results, long nb_funcs);
-
 uint8**  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nch, uint32 perm);
 
 
