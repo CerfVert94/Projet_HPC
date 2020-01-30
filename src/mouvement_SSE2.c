@@ -20,22 +20,33 @@
 #include "mouvement_SSE2.h"
 #include "util.h"
 
+
 /*-----------------------------*/
-void SigmaDelta_step0_SSE(p_vimage t0) {
+void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y) {
+/*-----------------------------*/
+	long i;
+	int j;
+	for (i = nrl; i <= nrh; i++)
+		for (j = vmin; j <= vmax; j++ )
+			Y[i][j] = X[i][j];
+}
+
+/*-----------------------------*/
+void SigmaDelta_step0_SSE(vuint8** I, vuint8** M, vuint8** V, long nrl, long nrh, int v0, int v1) {
 /*-----------------------------*/
 	//copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
-	int i, j;
-	for (i = 0; i < t0->nrh; i++) {
-		for (j = 0; j < t0-> nch; j++)
-			t0->V[i][j] = init_vuint8(1);
-	}
+	copy_vui8matrix_vui8matrix(I, nrl, nrh, v0, v1, M);
+	long i, j;
+	for (i = 0; i <= nrh; i++)
+		for (j = 0; j <= v1; j++)
+			V[i][j] = init_vuint8(1);
 }
 
 /*-------------------------------------------------*/
-void SigmaDelta_step1_SSE(p_vimage vt, p_vimage vt_1) {
+void SigmaDelta_step1_SSE(vuint8** I, vuint8** M_1, vuint8** M, long nrl, long nrh, int v0, int v1) {
 /*-------------------------------------------------*/
 
-	vuint8 tI, t_1M, tM, TMP;
+	vuint8 vI, vM_1, vM, TMP;
 	vuint8 C1, C2;
 
 	vuint8 CMP = init_vuint8(127);
@@ -43,25 +54,25 @@ void SigmaDelta_step1_SSE(p_vimage vt, p_vimage vt_1) {
 	vuint8 ZERO = init_vuint8(0);
 	vsint8 M_ONE = init_vsint8(-1);
 
-	for(int i = vt->nrl+BORD; i < vt->nrh-BORD; i++) {
-		for(int j = vt->v0+1; j < vt->v1-1; j++) {
-			tI   = _mm_load_si128((vuint8*) &vt->I[i][j]);
-			t_1M = _mm_load_si128((vuint8*) &vt_1->M[i][j]);
+	for(long i = nrl+BORD; i <= nrh-BORD; i++) {
+		for(long j = v0+1; j <= v1; j++) {
+			vI   = _mm_load_si128((vuint8*) &I[i][j]);
+			vM_1 = _mm_load_si128((vuint8*) &M[i][j]);
 
-			vec_cmplt(t_1M, tI, C1, CMP);
-			// tI = _mm_sub_epi8(tI, CMP);
-			// t_1M = _mm_sub_epi8(t_1M, CMP);
-			// C1  = _mm_cmplt_epi8(t_1M, tI);
-			// tI = _mm_add_epi8(tI, CMP);
-			// t_1M = _mm_add_epi8(t_1M, CMP);
+			vec_cmplt(vM_1, vI, C1, CMP);
+			// vI = _mm_sub_epi8(vI, CMP);
+			// vM_1 = _mm_sub_epi8(vM_1, CMP);
+			// C1  = _mm_cmplt_epi8(vM_1, vI);
+			// vI = _mm_add_epi8(vI, CMP);
+			// vM_1 = _mm_add_epi8(vM_1, CMP);
 
-			C2  = _mm_cmpeq_epi8(tI, t_1M);
+			C2  = _mm_cmpeq_epi8(vI, vM_1);
 
 		    TMP = _mm_or_si128(_mm_and_si128(C1, ONE), _mm_andnot_si128(C1, M_ONE));
 		    TMP = _mm_or_si128(_mm_and_si128(C2, ZERO), _mm_andnot_si128(C2, TMP));
-		    tM  = _mm_add_epi8(t_1M, TMP);
+		    vM  = _mm_add_epi8(vM_1, TMP);
 
-		    _mm_store_si128((vuint8*) &vt->M[i][j], tM);
+		    _mm_store_si128((vuint8*) &M[i][j], vM);
 
 		}
 	}
@@ -70,31 +81,31 @@ void SigmaDelta_step1_SSE(p_vimage vt, p_vimage vt_1) {
 	
 
 /*----------------------------------*/
-void SigmaDelta_step2_SSE(p_vimage vt) {
+void SigmaDelta_step2_SSE(vuint8** O, vuint8** M, vuint8** I, long nrl, long nrh, int v0, int v1) {
 /*----------------------------------*/
 
-	vuint8 tI, tM, tO;
+	vuint8 vI, vM, vO;
 
 	vuint8 A, B, C;
 
-	for(int i = vt->nrl+BORD; i < vt->nrh-BORD; i++) {
-		for(int j = vt->v0+1; j < vt->v1-1; j++) {
-			tI = _mm_load_si128((vuint8*) &vt->I[i][j]);
-			tM = _mm_load_si128((vuint8*) &vt->M[i][j]);
+	for(long i = nrl+BORD; i <= nrh-BORD; i++) {
+		for(long j = v0+1; j <= v1; j++) {
+			vI = _mm_load_si128((vuint8*) &I[i][j]);
+			vM = _mm_load_si128((vuint8*) &M[i][j]);
 			
-			tO = vec_subabs(tI, tM);
+			vO = vec_subabs(vI, vM);
 
-			_mm_store_si128((vuint8*) &vt->O[i][j], tO);
+			_mm_store_si128((vuint8*) &O[i][j], vO);
 		}
 	}
 	
 }
 
 /*----------------------------------*/
-void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
+void SigmaDelta_step3_SSE(vuint8** V, vuint8** V_1, vuint8** O, long nrl, long nrh, int v0, int v1) {
 /*----------------------------------*/
 
-	vuint8 t_1V, tO, NtO, tV, TMP;
+	vuint8 t_1V, vO, NvO, vV, TMP;
 	vuint8 C1, C2;
 
 	vuint8 CMP = init_vuint8(127);
@@ -105,58 +116,58 @@ void SigmaDelta_step3_SSE(p_vimage vt, p_vimage vt_1) {
 	vuint8 vVmax = init_vuint8(Vmax);
 	vuint8 vVmin = init_vuint8(Vmin);
 
-	for(int i = vt->nrl+BORD; i < vt->nrh-BORD; i++) {
-		for(int j = vt->v0+1; j < vt->v1-1; j++) {
-			t_1V = _mm_load_si128((vuint8*) &vt_1->V[i][j]);
-			tO 	 = _mm_load_si128((vuint8*) &vt->O[i][j]);
-			NtO = tO;
-			for (int k = 0; k < N; k++) _mm_add_epi8(NtO, tO);
+	for(long i = nrl+BORD; i <= nrh-BORD; i++) {
+		for(long j = v0+1; j <= v1; j++) {
+			t_1V = _mm_load_si128((vuint8*) &V[i][j]);
+			vO 	 = _mm_load_si128((vuint8*) &O[i][j]);
+			NvO = vO;
+			for (int k = 0; k < N; k++) _mm_add_epi8(NvO, vO);
 
-			vec_cmplt(t_1V, NtO, C1, CMP);
-			// tO = _mm_sub_epi8(tO, CMP);
-			// t_1M = _mm_sub_epi8(t_1M, CMP);
-			// C1  = _mm_cmplt_epi8(t_1M, tO);
-			// tO = _mm_add_epi8(tO, CMP);
-			// t_1M = _mm_add_epi8(t_1M, CMP);
+			vec_cmplt(t_1V, NvO, C1, CMP);
+			// NvO = _mm_sub_epi8(NvO, CMP);
+			// vM_1 = _mm_sub_epi8(vM_1, CMP);
+			// C1  = _mm_cmplt_epi8(vM_1, NvO);
+			// NvO = _mm_add_epi8(NvO, CMP);
+			// vM_1 = _mm_add_epi8(vM_1, CMP);
 
-			C2  = _mm_cmpeq_epi8(NtO, t_1V);
+			C2  = _mm_cmpeq_epi8(NvO, t_1V);
 
 		    TMP = _mm_or_si128(_mm_and_si128(C1, ONE), _mm_andnot_si128(C1, M_ONE));
 		    TMP = _mm_or_si128(_mm_and_si128(C2, ZERO), _mm_andnot_si128(C2, TMP));
-		    tV  = _mm_add_epi8(t_1V, TMP);
-		    tV  = _mm_max_epu8(_mm_min_epu8(tV, vVmax), vVmin);
+		    vV  = _mm_add_epi8(t_1V, TMP);
+		    vV  = _mm_max_epu8(_mm_min_epu8(vV, vVmax), vVmin);
 
-		    _mm_store_si128((vuint8*) &vt->V[i][j], tV);
+		    _mm_store_si128((vuint8*) &V[i][j], vV);
 
 		}
 	}
 }
 
 /*----------------------------------*/
-void SigmaDelta_step4_SSE(p_vimage vt) {
+void SigmaDelta_step4_SSE(vuint8** O, vuint8** V, vuint8** E, long nrl, long nrh, int v0, int v1) {
 /*----------------------------------*/
 
-	vuint8 tO, tV, tE;
+	vuint8 vO, vV, tE;
 
 	vuint8 ZERO = init_vuint8(0);
 	vuint8 ONE = init_vuint8(1);
 
 	vuint8 C, CMP = init_vuint8(127);
 
-	for(int i = vt->nrl+BORD; i < vt->nrh-BORD; i++) {
-		for(int j = vt->v0+1; j < vt->v1-1; j++) {
-			tO = _mm_load_si128((vuint8*) &vt->O[i][j]);
-			tV = _mm_load_si128((vuint8*) &vt->V[i][j]);
+	for(long i = nrl+BORD; i <= nrh-BORD; i++) {
+		for(long j = v0+1; j <= v1; j++) {
+			vO = _mm_load_si128((vuint8*) &O[i][j]);
+			vV = _mm_load_si128((vuint8*) &V[i][j]);
 			
-			vec_cmplt(tO, tV, C, CMP);
-			// tO = _mm_sub_epi8(tO, CMP);
-			// tV = _mm_sub_epi8(tV, CMP);
-			// C  = _mm_cmplt_epi8(tO, tV);
-			// tO = _mm_add_epi8(tO, CMP);
-			// tV = _mm_add_epi8(tV, CMP);
+			vec_cmplt(vO, vV, C, CMP);
+			// vO = _mm_sub_epi8(vO, CMP);
+			// vV = _mm_sub_epi8(vV, CMP);
+			// C  = _mm_cmplt_epi8(vO, vV);
+			// vO = _mm_add_epi8(vO, CMP);
+			// vV = _mm_add_epi8(vV, CMP);
 
     		tE = _mm_or_si128(_mm_and_si128(C, ZERO), _mm_andnot_si128(C, ONE));
-            _mm_store_si128(&vt->E[i][j], tE);
+            _mm_store_si128(&E[i][j], tE);
 		}
 	}
 	
