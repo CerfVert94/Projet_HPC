@@ -6,7 +6,7 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE =  img.c main.c util.c mouvement.c nrutil.c  test_morpho.c vnrutil.c mutil.c test_mouvement.c morpho_pack_optim.c morpho_optim_omp.c morpho_optim.c morpho.c img_SSE2.c mouvement_SSE2.c 
+FILE =  util.c img.c main.c mouvement.c nrutil.c  test_morpho.c vnrutil.c mutil.c test_mouvement.c morpho_pack_optim.c morpho_optim_omp.c morpho_optim.c morpho.c img_SSE2.c mouvement_SSE2.c benchmark.c
  
 # -- Paths ----------
 SRC_PATH = src
@@ -26,7 +26,7 @@ CC = gcc
 AR = ar -rc
 
 # -- Flags ----------
-C_DEBUG_FLAGS = -O3  -g 
+C_DEBUG_FLAGS = -O0  -g 
 C_CC_FLAGS = -std=c99
 C_OPTIMISATION_FLAGS = -O3 -fstrict-aliasing  
 C_ARCH_FLAGS = -mssse3 -fopenmp
