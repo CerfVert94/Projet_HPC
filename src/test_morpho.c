@@ -20,170 +20,6 @@
 #define SE_NRH  1
 #define SE_NCL -1
 #define SE_NCH  1
-
-unsigned long long get_cpu_cycles(struct morpho_set *ptr_mset, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
-{
-    unsigned long long begin = 0, end = 0, cycles = 0;
-
-	begin = __rdtsc();
-	ptr_mset->morpho_func(X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	end = __rdtsc();
-	return end - begin;
-}
-
-unsigned long long get_min_cpu_cycles(struct morpho_set *ptr_mset, long packet_size, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
-{
-	unsigned long long min_cycles, *cycles;
-	int i;
-	if(packet_size <= 0) {
-		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
-		exit(EXIT_FAILURE);
-	}
-	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
-	for (int i = 0; i < packet_size; i++) {
-		cycles[i] = get_cpu_cycles(ptr_mset, X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	}
-
-	min_cycles = cycles[0];
-	for (long i = 1; i < packet_size; i++) 
-		if (min_cycles > cycles[i]) 
-			min_cycles = cycles[i];
-	free(cycles);
-	return min_cycles;
-}
-
-
-
-double **benchmark(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
-{
-	unsigned long long  min_cycles_sum, begin, end;
-	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
-	double **results;
-	uint8 **X, **Y, **temp_buffer;
-	
-	nrl = ncl = 0;
-	nrh = nch = hs - 1;
-	// Find the largest margins.
-	for (idx_set = 0; idx_set < nb_sets; idx_set++) {
-		nrl = min(SE_NRL, nrl);
-		ncl = min(SE_NCL, ncl);
-		nrh = max(SE_NRH + hs - 1, nrh);
-		nch = max(SE_NCH + hs - 1, nch);
-	}
-	
-	// Initialize to save the benchmark result.
-	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
-	// the least largest 3x3 checkered square matrix as an input / output matrix.
-	
-	cnt = 0;
-	for (size = ls - 1; size < hs; size += step) {
-		X            = ui8matrix_checker(-2, size + 2, -2, size + 2, 3, 1); 
-		Y            = ui8matrix(0, size, 0, size);
-		temp_buffer  = ui8matrix(-2, size + 2, -2, size + 2); 
-		
-		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
-			begin = __rdtsc();			
-			memset_ui8matrix(Y, 0, 0, size, 0, size);
-
-			min_cycles_sum = 0;
-			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles(&msets[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
-			
-			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
-			end = __rdtsc();
-			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
-		}
-	
-		free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
-		free_ui8matrix(X, -2, size + 2, -2, size + 2);
-		free_ui8matrix(Y, 0, size, 0, size);
-
-		cnt++;
-	}
-	return results;
-}
-
-double **benchmark_compression(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
-{
-	unsigned long long  min_cycles_sum, begin, end;
-	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
-	long packed_nrl, packed_nrh, packed_ncl, packed_nch, bord;
-	double **results;
-	uint8 **X, **packedX, **Y, **temp_buffer, **Z;
-	
-	nrl = ncl = 0;
-	nrh = nch = hs - 1;
-	// Find the largest margins.
-	for (idx_set = 0; idx_set < nb_sets; idx_set++) {
-		nrl = min(SE_NRL, nrl);
-		ncl = min(SE_NCL, ncl);
-		nrh = max(SE_NRH + hs - 1, nrh);
-		nch = max(SE_NCH + hs - 1, nch);
-	}
-	
-	// Initialize to save the benchmark result.
-	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
-	// the least largest 3x3 checkered square matrix as an input / output matrix.
-	
-	cnt = 0;
-	for (size = ls - 1; size < hs; size += step) {
-		packedX      = fcpacked_ui8matrix(0, size, 0, size, &packed_nrl, &packed_nrh, &packed_ncl, &packed_nch, &bord); 
-		temp_buffer  = fcpacked_ui8matrix(0, size, 0, size, &packed_nrl, &packed_nrh, &packed_ncl, &packed_nch, &bord); 
-		Y            = fcpacked_ui8matrix(0, size, 0, size, &packed_nrl, &packed_nrh, &packed_ncl, &packed_nch, &bord); 
-		X            = ui8matrix_checker(-bord, size + bord, -bord, size + bord, 3, 1); 
-		Z            = ui8matrix(0, size, 0, size); 
-		
-		
-		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
-			memset_ui8matrix(Y, 0, packed_nrl, packed_nrh, packed_ncl, packed_nch);
-
-			begin = __rdtsc();			
-			fcpack_ui8matrix_ui8matrix(X, 0, size, 0, size, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord, packedX);
-			min_cycles_sum = 0;
-			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles(&msets[idx_set], packet_size, packedX, packed_nrl, packed_nrh, packed_ncl, packed_nch, temp_buffer, Y);
-			
-			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
-			unfcpack_ui8matrix_ui8matrix(Y, 0, size, 0, size, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord, Z);
-			end = __rdtsc();
-			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
-		}
-	
-		// free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
-		free_packed_ui8matrix(packedX    , packed_nrl, packed_nrh, packed_ncl, packed_nch, bord);
-		free_packed_ui8matrix(temp_buffer, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord);
-		free_packed_ui8matrix(Y          , packed_nrl, packed_nrh, packed_ncl, packed_nch, bord);
-		free_ui8matrix(X, -2, size + 2, -2, size + 2);
-		free_ui8matrix(Z, 0, size, 0, size);
-
-		cnt++;
-	}
-	return results;
-}
-
-/*
-bool check_dimension_of_square_structuring_element(p_struct_elem_dim  long size)
-{
-	const long SE_SIZE = size;
-	const long SE_ORIGIN = size / 2;
-	const long nrl =  SE_ORIGIN - (SE_SIZE - 1);
-	const long nrh = -SE_ORIGIN + (SE_SIZE - 1);
-	const long ncl =  SE_ORIGIN - (SE_SIZE - 1);
-	const long nch = -SE_ORIGIN + (SE_SIZE - 1);
-	// if(s->nrow != size 		) return false;
-	// if(s->ncol != size 		) return false;
-	// if(s->y0   != SE_ORIGIN ) return false;
-	// if(s->x0   != SE_ORIGIN ) return false;
-	if(SE_NRL  != nrl       ) return false;
-	if(SE_NRH  != nrh       ) return false;
-	if(SE_NCL  != ncl       ) return false;
-	if(SE_NCH  != nch       ) return false;
-	return true;
-}*/
-
-
 #define STRUCTURING_ELEMENT_DIM(s) SE_NRL, SE_NRH, SE_NCL, SE_NCH
 #define PROGRESS_FACTOR 		   10
 void print_progress(uint32 current, uint32 max)
@@ -192,15 +28,15 @@ void print_progress(uint32 current, uint32 max)
 	printf("\tTest progress : [%*d / %-*d].\n", n, current, n, max);
 }
 
-void test_implementation_erosion_3x3(struct morpho_set *erosion_set)
+void test_implementation_erosion3(struct morpho_set *erosion_set)
 {
-	// assert(check_for_3x3_structuring_element(erosion_set->s) == true);
+	// assert(check_for3_structuring_element(erosion_set->s) == true);
 	// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 3;
 	uint32 perm, max;
 	uint8 **X;
 	
-	X = ui8matrix(STRUCTURING_ELEMENT_DIM(erosion_set->s));
+	X = ui8matrix(-1, 1, -1, 1);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	// Loop 1: Get permutations :
@@ -217,14 +53,14 @@ void test_implementation_erosion_3x3(struct morpho_set *erosion_set)
 	puts("Passed all tests.\n");
 	free_ui8matrix(X, STRUCTURING_ELEMENT_DIM(erosion_set->s));
 }
-void test_implementation_dilation_3x3(struct morpho_set *dilation_set)
+void test_implementation_dilation3(struct morpho_set *dilation_set)
 {
 	// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 3;
 	uint32 perm, max, min = 0;
 	uint8 **X;
 	
-	X = ui8matrix(STRUCTURING_ELEMENT_DIM(dilation_set->s));
+	X = ui8matrix(-1, 1, -1, 1);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	printf("Implementation test : %s\n", dilation_set->func_name);
@@ -242,15 +78,15 @@ void test_implementation_dilation_3x3(struct morpho_set *dilation_set)
 	free_ui8matrix(X, STRUCTURING_ELEMENT_DIM(dilation_set->s));
 }
 
-void test_implementation_erosion_5x5(struct morpho_set *erosion_set)
+void test_implementation_erosion5(struct morpho_set *erosion_set)
 {
-	// assert(check_for_5x5_structuring_element(erosion_set->s) == true);
+	// assert(check_for5_structuring_element(erosion_set->s) == true);
 	// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 5;
 	uint32 perm, max;
 	uint8 **X;
 	
-	X = ui8matrix(STRUCTURING_ELEMENT_DIM(erosion_set->s));
+	X = ui8matrix(-2, 2, -2, 2);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	printf("Implementation test : %s\n", erosion_set->func_name);
@@ -268,7 +104,7 @@ void test_implementation_erosion_5x5(struct morpho_set *erosion_set)
 	free_ui8matrix(X, STRUCTURING_ELEMENT_DIM(erosion_set->s));
 
 }
-void test_implementation_dilation_5x5(struct morpho_set *dilation_set)
+void test_implementation_dilation5(struct morpho_set *dilation_set)
 {
 	// assert(check_for_5x5_structuring_element(dilation_set->s) == true);
 	// A binary square matrix has 2^(size*size)-1 combinations
@@ -276,7 +112,7 @@ void test_implementation_dilation_5x5(struct morpho_set *dilation_set)
 	uint32 perm, max, min = 0;
 	uint8 **X;
 	
-	X = ui8matrix(STRUCTURING_ELEMENT_DIM(dilation_set->s));
+	X = ui8matrix(-2, 2, -2, 2);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	// Loop 1: Get permutations :
@@ -307,53 +143,7 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 	return Z[0][0] == 1;
 }
 
-uint8** prologue_test_integration_3x3(struct morpho_set *mset, uint8** X, uint8* test_case , long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8** Y)
-{
-	const long size = (nrh - nrl + 1) * (nch - ncl + 1);
-	
 
-	X = ui8matrix(nrl, nrh, 
-					    ncl, nch);
-
-	memset_ui8matrix(X, 0, nrl, nrh, 
-								 ncl, nch);
-
-	memcpy(&X[nrl][ncl], test_case, size * sizeof(X[nrl][ncl]));
-
-	// display_ui8matrix(X , nrl, nrh, 
-						 		// ncl, nch, "%u", "Input");
-	printf("Integration test : %s\n", mset->func_name);
-	return X;
-}
-
-
-void epilogue_test_integration_3x3(struct morpho_set *mset, uint8** X, long in_nrl, long in_nrh, long in_ncl, long in_nch,  long out_nrl, long out_nrh, long out_ncl, long out_nch, uint8** temp_buffer, uint8** Y)
-{
-	puts("Passed the integration test.\n");
-	free_ui8matrix(X , in_nrl,  in_nrh , in_ncl,  in_nch);
-	free_ui8matrix(Y, out_nrl, out_nrh, out_ncl, out_nch);
-}
-
-
-
-void test_integration_morpho_3x3(struct morpho_set *mset, uint8** X, long img_nrl, long img_nrh, long img_ncl,long img_nch, uint8 **temp_buffer, uint8** correct_output)
-{
-	char filename[128];
-	static int i = 0;
-	long nrl = img_nrl + SE_NRL,\
-		 nrh = img_nrh + SE_NRH,\
-		 ncl = img_ncl + SE_NCL,\
-		 nch = img_nch + SE_NCH;
-    long size = (nrh - nrl + 1) * (nch - ncl + 1);
-    uint8** Y = ui8matrix(nrl, nrh, ncl, nch);
-	memset_ui8matrix(Y, 0, nrl, nrh, ncl, nch);
-	
-	mset->morpho_func(X, img_nrl, img_nrh, img_ncl, img_nch, temp_buffer,Y);
-	assert(!memcmp(Y[nrl] + ncl, correct_output[nrl] + ncl, size * sizeof(**Y)));
-	// snprintf(filename, 128, "output/car[%d][%s].pgm",i++, mset->func_name);
-    // SavePGM_ui8matrix(Y, nrl, nrh, ncl, nch, filename);
-    free_ui8matrix(Y, nrl, nrh, ncl, nch);
-}
 
 void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool display)
 {
@@ -362,7 +152,7 @@ void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementati
     char filename[128];
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
     for (int i = 0; i < nb_implementations; i++) {
-            test_implementation_erosion_3x3(&erosion_sets[i]);
+            test_implementation_erosion3(&erosion_sets[i]);
     }
     test_intergration("../car3/car_3000.pgm", &naive_morpho_set, erosion_sets, nb_implementations, display);
 	
@@ -375,18 +165,14 @@ void test_dilations(struct morpho_set *dilation_sets, const int nb_implementatio
     long x = 0, y = 0, nrl, nrh, ncl, nch;
     char filename[128];
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_dilation_naive", ui8matrix_dilation_naive};
-    // for (int i = 0; i < nb_implementations; i++) {
-    //     if (dilation_sets[i].pack_type == NO_PACK)
-	// 		test_implementation_dilation_3x3(&dilation_sets[i]);
-	// 	// else
-	// 	// {
-	// 	// 	/* code */
-	// 	// }
+    for (int i = 0; i < nb_implementations; i++) {
+        if (dilation_sets[i].pack_type == NO_PACK)
+			test_implementation_dilation3(&dilation_sets[i]);
 		
         
-    // }
-    // test_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
-	test_packed_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
+    }
+    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
+	// test_packed_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
   
     // snprintf(filename, 128, "testcases/car{%ld}{%ld}.pgm",x,y);
 }
@@ -437,8 +223,8 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
                 printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
 
 				if (morpho_sets[i].pack_type == NO_PACK) {
-					memset_ui8matrix(Y, 0, nrl, temp_nrh, ncl, temp_nch); 
-					morpho_sets[i].morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
+					memset_ui8matrix          (Y, 0, nrl, temp_nrh, ncl, temp_nch); 
+					morpho_sets[i].morpho_func(X   , nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
 				}
                 if (display) {
 					printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
@@ -550,25 +336,6 @@ uint8**  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nc
 
 }
 
-double **init_benchmark_results(long nb_funcs, long size, long step)
-{
-	double **results;
-	results = (double **) malloc(sizeof(double *) * nb_funcs);
-	if (!results)    
-		exit_on_error("malloc failed");
-
-	results[0] = (double *) malloc(sizeof(double) * nb_funcs * (size / step + 1));
-	if (!results[0]) 
-		exit_on_error("malloc failed");
-	for (long i = 1; i < nb_funcs; i++) results[i] = results[i - 1] + size;
-	return results;
-
-}
-void free_benchmark_results(double **results, long nb_funcs)
-{
-	free((char *)results[0]);
-	free((char **)results);
-}
 
 uint8 **ui8matrix_checker(long nrl, long nrh, long ncl, long nch, const long chkr_size,  const uint8 xor_mask)
 {
