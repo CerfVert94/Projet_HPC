@@ -8,6 +8,18 @@
 
 #pragma message("  include  simd_macro.h")
 
+// -------
+// defines
+// -------
+
+#define leftshift1a  _mm_set_epi8(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1)
+#define leftshift1b  _mm_set_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0)
+#define rightshift1a _mm_set_epi8(-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+#define rightshift1b _mm_set_epi8(0, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
+
+
+
+
 // -----------------------
 // melanges / permutations
 // -----------------------
@@ -15,14 +27,14 @@
 #define vec_border(a,b) b
 #define vec_middle(a,b) a
 
-#define vec_left1(v0, v1) _mm_shuffle_ps(v0, _mm_shuffle_ps(v0, v1, _MM_SHUFFLE(1,0,3,2)), _MM_SHUFFLE(2,1,2,1))
-#define vec_left2(v0, v1) _mm_shuffle_ps(v0, v1, _MM_SHUFFLE(1,0,3,2))
-#define vec_left3(v0, v1) _mm_shuffle_ps(_mm_shuffle_ps(v0, v1, _MM_SHUFFLE(2,0,3,2)), v1, _MM_SHUFFLE(2,1,2,1))
+#define vec_left1(v0, v1)  _mm_or_si128(_mm_shuffle_epi8(v0, leftshift1a), _mm_shuffle_epi8(v1, leftshift1b))
+#define vec_left2(v0, v1) v1
+#define vec_left3(v0, v1) v1
 #define vec_left4(v0, v1) v1
 
-#define vec_right1(v1, v2) _mm_shuffle_ps(_mm_shuffle_ps(v2, v1, _MM_SHUFFLE(3,2,1,0)), v2, _MM_SHUFFLE(2,1,0,3))
-#define vec_right2(v1, v2) _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(1,0,3,2))
-#define vec_right3(v1, v2) _mm_shuffle_ps(v1, _mm_shuffle_ps(v2, v1, _MM_SHUFFLE(3,2,1,0)), _MM_SHUFFLE(0,3,2,1))
+#define vec_right1(v1, v2) _mm_or_si128(_mm_shuffle_epi8(v1, rightshift1a), _mm_shuffle_epi8(v2, rightshift1b))
+#define vec_right2(v1, v2) v1
+#define vec_right3(v1, v2) v1
 #define vec_right4(v1, v2) v1 
 
 // -------
@@ -54,9 +66,15 @@
 #define vec_subabs(a, b) _mm_subs_epu8(_mm_max_epu8(a,b), _mm_min_epu8(a,b))
 
 // vec compare 
-#define vec_cmplsb(a, b, c, d) a = _mm_sub_epi8(a, d);\
+#define vec_cmpgt(a, b, c, d) a = _mm_sub_epi8(a, d);\
 							   b = _mm_sub_epi8(b, d);\
 							   c = _mm_cmpgt_epi8(a, b);\
+							   a = _mm_add_epi8(a, d);\
+							   b = _mm_add_epi8(b, d)
+
+#define vec_cmplt(a, b, c, d) a = _mm_sub_epi8(a, d);\
+							   b = _mm_sub_epi8(b, d);\
+							   c = _mm_cmplt_epi8(a, b);\
 							   a = _mm_add_epi8(a, d);\
 							   b = _mm_add_epi8(b, d)
 #endif // __SIMD_MACRO_H__
