@@ -8,6 +8,8 @@
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
+#include <emmintrin.h>
+#include <tmmintrin.h>
 
 #include "nrdef.h"
 #include "nrutil.h"
@@ -19,7 +21,9 @@
 #include "img.h"
 #include "img_SSE2.h"
 
+/*----------------------------------*/
 p_vimage create_vimage(char* filename) {
+/*----------------------------------*/
 
 	int i, j, l, z, r;
 	long rl, rh, cl, ch;
@@ -88,7 +92,9 @@ p_vimage create_vimage(char* filename) {
 	return tmp;
 }
 
+/*-----------------------------*/
 void free_vimage(p_vimage vimage) {
+/*-----------------------------*/
 
 	free_vui8matrix(vimage->I, vimage->nrl, vimage->nrh, vimage->v0, vimage->v1);
 	free_vui8matrix(vimage->M, vimage->nrl, vimage->nrh, vimage->v0, vimage->v1);
@@ -100,9 +106,9 @@ void free_vimage(p_vimage vimage) {
 
 }
 
-/*-------*/
+/*---------------------*/
 void test_SSE_mouvement() {
-/*-------*/
+/*---------------------*/
 	
 	p_image t = create_image("../car3/car_3000.pgm");
 	p_vimage vt = create_vimage("../car3/car_3000.pgm");
