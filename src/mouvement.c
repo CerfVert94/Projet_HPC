@@ -34,111 +34,23 @@ void routine_FrameDifference(p_image t, p_image t1) {
 }
 
 /*-----------------------------*/
-void SigmaDelta_step0(p_image t0) {
-/*-----------------------------*/
-	copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
-	long i, j;
-	for (i = t0->nrl; i < t0->nrh; i++) {
-		for (j = t0->ncl; j < t0-> nch; j++)
-			t0->V[i][j] = 1;
-	}
-}
-
-/*-----------------------------------------*/
-void SigmaDelta_step1(p_image t, p_image t_1) {
-/*-----------------------------------------*/
-	long i, j;
-
-	for (i = t->nrl; i < t->nrh; i++) {
-		for (j = t->ncl; j < t->nch; j++) {
-			if (t_1->M[i][j] < t->I[i][j])
-				t->M[i][j] = t_1->M[i][j] + 1;
-			else if (t_1->M[i][j] > t->I[i][j])
-				t->M[i][j] = t_1->M[i][j] - 1;
-			else
-				t->M[i][j] = t_1->M[i][j];
-		}
-	}
-
-}
-
-/*-----------------------------------------*/
-void SigmaDelta_step2(p_image t) {
-/*-----------------------------------------*/
-	long i, j;
-
-	for (i = t->nrl; i < t->nrh; i++) {
-		for (j = t->ncl; j < t->nch; j++)
-			t->O[i][j] = abs(t->M[i][j] - t->I[i][j]);
-	}
-
-}
-
-/*-----------------------------------------*/
-void SigmaDelta_step3(p_image t, p_image t_1) {
-/*-----------------------------------------*/
-	long i, j;
-
-	for (i = t->nrl; i < t->nrh; i++) {
-		for (j = t->ncl; j < t->nch; j++) {
-			if (t_1->V[i][j] < (N * t->O[i][j]))
-				t->V[i][j] = t_1->V[i][j] + 1;
-			else if (t_1->V[i][j] > (N * t->O[i][j]))
-				t->V[i][j] = t_1->V[i][j] - 1;
-			else
-				t->V[i][j] = t_1->V[i][j];
-			t->V[i][j] = max(min(t->V[i][j], Vmax), Vmin);
-		}
-	}
-
-}
-
-/*-----------------------------------------*/
-void SigmaDelta_step4(p_image t) {
-/*-----------------------------------------*/
-	long i, j;
-
-	for (i = t->nrl; i < t->nrh; i++) {
-		for (j = t->ncl; j < t->nch; j++) {
-			if (t->O[i][j] < t->V[i][j] )
-				t->E[i][j] = 0;
-			else
-				t->E[i][j] = 1;
-		}
-	}
-
-}
-
-/*-----------------------------------------*/
-void SigmaDelta(p_image t, p_image t_1) {
-/*-----------------------------------------*/
-	SigmaDelta_step1(t, t_1);
-	SigmaDelta_step2(t);
-	SigmaDelta_step3(t, t_1);
-	SigmaDelta_step4(t);
-
-}
-
-
-
-/*-----------------------------*/
-void SigmaDelta_step0_tmp(uint8** I, uint8** M, uint8** V, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step0(uint8** I, uint8** M, uint8** V, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------*/
 	copy_ui8matrix_ui8matrix(I, nrl, nrh, ncl, nch, M);
 	long i, j;
-	for (i = nrl; i < nrh; i++) {
-		for (j = ncl; j < nch; j++)
+	for (i = nrl; i <= nrh; i++) {
+		for (j = ncl; j <= nch; j++)
 			V[i][j] = 1;
 	}
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step1_tmp(uint8** I, uint8** M_1, uint8** M, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step1(uint8** I, uint8** M_1, uint8** M, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
-	for (i = nrl; i < nrh; i++) {
-		for (j = ncl; j < nch; j++) {
+	for (i = nrl; i <= nrh; i++) {
+		for (j = ncl; j <= nch; j++) {
 			if (M_1[i][j] < I[i][j])
 				M[i][j] = M_1[i][j] + 1;
 			else if (M_1[i][j] > I[i][j])
@@ -151,24 +63,24 @@ void SigmaDelta_step1_tmp(uint8** I, uint8** M_1, uint8** M, long nrl, long nrh,
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step2_tmp(uint8** O, uint8** M, uint8** I, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step2(uint8** O, uint8** M, uint8** I, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
-	for (i = nrl; i < nrh; i++) {
-		for (j = ncl; j < nch; j++)
+	for (i = nrl; i <= nrh; i++) {
+		for (j = ncl; j <= nch; j++)
 			O[i][j] = abs(M[i][j] - I[i][j]);
 	}
 
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step3_tmp(uint8** V, uint8** V_1, uint8** O, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step3(uint8** V, uint8** V_1, uint8** O, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
-	for (i = nrl; i < nrh; i++) {
-		for (j = ncl; j < nch; j++) {
+	for (i = nrl; i <= nrh; i++) {
+		for (j = ncl; j <= nch; j++) {
 			if (V_1[i][j] < (N * O[i][j]))
 				V[i][j] = V_1[i][j] + 1;
 			else if (V_1[i][j] > (N * O[i][j]))
@@ -182,12 +94,12 @@ void SigmaDelta_step3_tmp(uint8** V, uint8** V_1, uint8** O, long nrl, long nrh,
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step4_tmp(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step4(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
-	for (i = nrl; i < nrh; i++) {
-		for (j = ncl; j < nch; j++) {
+	for (i = nrl; i <= nrh; i++) {
+		for (j = ncl; j <= nch; j++) {
 			if (O[i][j] < V[i][j] )
 				E[i][j] = 0;
 			else
@@ -197,15 +109,13 @@ void SigmaDelta_step4_tmp(uint8** O, uint8** V, uint8** E, long nrl, long nrh, l
 
 }
 
-
-
 /*-----------------------------------------*/
-void SigmaDelta_tmp(p_image t, p_image t_1) {
+void SigmaDelta(p_image t, p_image t_1) {
 /*-----------------------------------------*/
-	SigmaDelta_step1_tmp(t->I, t_1->M, t->M, t->nrl, t->nrh, t->ncl, t->nch);
-	SigmaDelta_step2_tmp(t->O, t->M, t->I, t->nrl, t->nrh, t->ncl, t->nch);
-	SigmaDelta_step3_tmp(t->V, t_1->V, t->O, t->nrl, t->nrh, t->ncl, t->nch);
-	SigmaDelta_step4_tmp(t->O, t->V, t->E, t->nrl, t->nrh, t->ncl, t->nch);
+	SigmaDelta_step1(t->I, t_1->M, t->M, t->nrl, t->nrh, t->ncl, t->nch);
+	SigmaDelta_step2(t->O, t->M, t->I, t->nrl, t->nrh, t->ncl, t->nch);
+	SigmaDelta_step3(t->V, t_1->V, t->O, t->nrl, t->nrh, t->ncl, t->nch);
+	SigmaDelta_step4(t->O, t->V, t->E, t->nrl, t->nrh, t->ncl, t->nch);
 
 }
 
@@ -219,11 +129,8 @@ void test_mouvement() {
 	printf("Nrh: %ld\n", t->nrh);
 	printf("Nch: %ld\n", t->nch);
 
-	SigmaDelta_step0(t_1);
+	SigmaDelta_step0(t_1->I, t_1->M, t_1->V, t->nrl, t->nrh, t->ncl, t->nch);
 	SigmaDelta(t, t_1);
-
-	 //SigmaDelta_step0_tmp(t_1->I, t_1->M, t_1->V, t->nrl, t->nrh, t->ncl, t->nch);
-	 //SigmaDelta_tmp(t, t_1);
 	for (long i = t->nrl; i < 50; i++) { 
 		for (long j = t->ncl; j < 50; j++) {
 			printf("%d ", t->E[i][j]);
