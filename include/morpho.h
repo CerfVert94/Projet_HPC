@@ -6,25 +6,16 @@
 
 #pragma message("  include  morpho.h")
 
-typedef struct struct_elem_dim {
-	//ori = origin
-	long x0;
-	long y0;
-	long nrow;
-	long ncol;
-
-	long nrl;
-	long nrh;
-	long ncl;
-	long nch;
-} struct_elem_dim;
-
-typedef struct struct_elem_dim struct_elem_dim, *p_struct_elem_dim;
-p_struct_elem_dim compute_struct_elem_dim(long x0, long y0, long nrow, long ncol);
-void free_structuring_element(p_struct_elem_dim s);
+// A struct type that contains a morpho function and a structuring element
+struct morpho_set{
+    char func_name[128];
+    void (*morpho_func)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+    enum {NO_PACK, HPACK, VPACK}pack_type;
+};
 
 
-typedef void (*morpho_func_t)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+
+// typedef void (*morpho_func_t)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 void ui8matrix_dilation_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 

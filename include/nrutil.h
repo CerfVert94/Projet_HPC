@@ -38,12 +38,14 @@ float64* f64vector(long nl, long nh);
 void free_f32vector(float32 *v, long nl, long nh);
 void free_f64vector(float64 *v, long nl, long nh);
 
+// uint8**   ui8matrix_vbord(long nrl, long nrh, long ncl, long nch, long nvbl, long nvbh, long nhbl, long nhbh);
+
 uint8**   ui8matrix(long nrl, long nrh, long ncl, long nch);
 sint8**   si8matrix(long nrl, long nrh, long ncl, long nch);
 uint16** ui16matrix(long nrl, long nrh, long ncl, long nch);
 sint16** si16matrix(long nrl, long nrh, long ncl, long nch);
 uint32** ui32matrix(long nrl, long nrh, long ncl, long nch);
-sint32** qi32matrix(long nrl, long nrh, long ncl, long nch);
+sint32** si32matrix(long nrl, long nrh, long ncl, long nch);
 float32** f32matrix(long nrl, long nrh, long ncl, long nch);
 
 void free_ui8matrix(uint8   **m, long nrl, long nrh, long ncl, long nch);

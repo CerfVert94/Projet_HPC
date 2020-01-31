@@ -63,11 +63,14 @@ void unfcpack_ui8matrix_ui8matrix (uint8 **X, long nrl, long nrh, long ncl, long
 
 uint8 **vpack_binary_ui8matrix  (uint8 **X, long nrl, long nrh, long ncl, long nch, long *packed_nrl, long *packed_nrh, long *packed_ncl, long *packed_nch);
 uint8 **unvpack_binary_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch);
-inline long roundup_over8(long n)
+
+static inline long roundup_over8(long n);
+static inline long roundup_over8(long n)
 {
     return (n != 0 ? (n < 0? -1 : 1) : 0);
 }
-inline long pack8(long n) 
+static inline long pack8(long n);
+static inline long pack8(long n) 
 {
     return n < 0 ? n / 8 + roundup_over8(n % 8) : (n + 1) / 8 + roundup_over8((n + 1) % 8) - 1;
 }

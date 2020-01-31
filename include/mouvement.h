@@ -8,6 +8,12 @@
 #define THRESHOLD 20
 #define N 2
 
+struct sd_set{
+    char func_name[128];
+    void (*sd_func)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch);
+};
+
+
 void routine_FrameDifference(p_image t, p_image t1);
 
 /* Init image*/
