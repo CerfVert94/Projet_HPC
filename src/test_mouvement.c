@@ -8,10 +8,12 @@
 #include "util.h"
 #include "img.h"
 #include "mouvement.h"
-#include "test_mouvement.h"
 #include <stdbool.h>
+#include "test_mouvement.h"
+#include <assert.h>
 
 const char *nom_func;
+
 
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step0(uint8** M, uint8** I, uint8** V, uint8 _Vmin, long nrl, long nrh, long ncl, long nch) {
@@ -23,8 +25,9 @@ void test_implementation_SigmaDelta_step0(uint8** M, uint8** I, uint8** V, uint8
 	assert(M_correctly_initialized && V_correctly_initialized);
 }
 
+
 /*---------------------------------------------------*/
-void test_implementation_SigmaDelta_step1(struct sd_set *sd) {
+void test_implementation_SigmaDelta_step1(struct sd_set *sd, int nb_imps) {
 /*---------------------------------------------------*/
 	
 	uint8 M_t0[1][1] = {{0}};
@@ -35,105 +38,187 @@ void test_implementation_SigmaDelta_step1(struct sd_set *sd) {
 	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
 	uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
 	
-	const int lower_limit = 127;
-	const int upper_limit = 128;
+	const uint8 lower_limit = 127;
+	const uint8 upper_limit = 128;
     
-	XX[0][0] = lower_limit;
-	YY[0][0] = upper_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+    for (int i = 0; i < nb_imps; i++) {
 
-	XX[0][0] = upper_limit;
-	YY[0][0] = lower_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+    	printf("Implementation test for %s\n", sd[i].func_name);
 
-	XX[0][0] = lower_limit;
-	YY[0][0] = lower_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u < %u ==> m_t1 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+	    assert(SD_step1_produces_valid_output(M_t0[0][0], I_t0[0][0], M_t1[0][0]) == true);
+	    
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u > %u ==> m_t1 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+	    assert(SD_step1_produces_valid_output(M_t0[0][0], I_t0[0][0], M_t1[0][0]) == true);
 
-	XX[0][0] = upper_limit;
-	YY[0][0] = upper_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u == %u ==> m_t1 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+	    assert(SD_step1_produces_valid_output(M_t0[0][0], I_t0[0][0], M_t1[0][0]) == true);
+
+		XX[0][0] = upper_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u == %u ==> m_t1 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+	    assert(SD_step1_produces_valid_output(M_t0[0][0], I_t0[0][0], M_t1[0][0]) == true);
+
+		printf("Test passed.\n");
+
+	}
 }
 
 /*---------------------------------------------------*/
-bool SD_step1_produces_valid_output(uint8 m_t0, uint8 i_t1, uint8 m_t1) {
+void test_implementation_SigmaDelta_step2(struct sd_set *sd, int nb_imps) {
+/*---------------------------------------------------*/
+	
+	uint8 M_t0[1][1] = {{0}};
+	uint8 I_t0[1][1] = {{0}};
+	uint8 O_t0[1][1] = {{0}};
+	
+	uint8 *X[1] = {M_t0[0]}, **XX = X;
+	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
+	uint8 *Z[1] = {O_t0[0]}, **ZZ = Z;
+	
+	const uint8 lower_limit = 127;
+	const uint8 upper_limit = 128;
+    
+    for (int i = 0; i < nb_imps; i++) {
+
+    	printf("Implementation test for %s\n", sd[i].func_name);
+
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u - %u ==> o_t0 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+		assert(SD_step2_produces_valid_output(M_t0[0][0], I_t0[0][0], O_t0[0][0]) == true);
+
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u - %u ==> o_t0 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+		assert(SD_step2_produces_valid_output(M_t0[0][0], I_t0[0][0], O_t0[0][0]) == true);
+
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u - %u ==> o_t0 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+		assert(SD_step2_produces_valid_output(M_t0[0][0], I_t0[0][0], O_t0[0][0]) == true);
+
+		XX[0][0] = upper_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%u - %u ==> o_t0 = %u\r\n", XX[0][0], YY[0][0], ZZ[0][0]);
+		assert(SD_step2_produces_valid_output(M_t0[0][0], I_t0[0][0], O_t0[0][0]) == true);
+		
+		printf("Test passed.\n");
+
+	}
+}
+
+
+/*---------------------------------------------------*/
+void test_implementation_SigmaDelta_step3(struct sd_set *sd, int nb_imps) {
+/*---------------------------------------------------*/
+	
+	uint8 V_t0[1][1] = {{0}};
+	uint8 O_t1[1][1] = {{0}};
+	uint8 V_t1[1][1] = {{0}};
+	
+	uint8 *X[1] = {V_t0[0]}, **XX = X;
+	uint8 *Y[1] = {O_t1[0]}, **YY = Y;
+	uint8 *Z[1] = {V_t1[0]}, **ZZ = Z;
+	
+	const uint8 lower_limit = 1;
+	const uint8 upper_limit = 254;
+    
+    for (int i = 0; i < nb_imps; i++) {
+
+    	printf("Implementation test for %s\n", sd[i].func_name);
+
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%03u <  %u * %03u ==> v_t1 = %03u\r\n", XX[0][0], sd[i].n_coeff, YY[0][0], ZZ[0][0]);
+		assert(SD_step3_produces_valid_output(V_t0[0][0], sd[i].n_coeff, O_t1[0][0], V_t1[0][0], sd[i].v_min, sd[i].v_max) == true);
+
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%03u >  %u * %03u ==> v_t1 = %03u\r\n", XX[0][0], sd[i].n_coeff, YY[0][0], ZZ[0][0]);
+		assert(SD_step3_produces_valid_output(V_t0[0][0], sd[i].n_coeff, O_t1[0][0], V_t1[0][0], sd[i].v_min, sd[i].v_max) == true);
+
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%03u == %u * %03u ==> v_t1 = %03u\r\n", XX[0][0], sd[i].n_coeff, YY[0][0], ZZ[0][0]);
+		assert(SD_step3_produces_valid_output(V_t0[0][0], sd[i].n_coeff, O_t1[0][0], V_t1[0][0], sd[i].v_min, sd[i].v_max) == true);
+
+		XX[0][0] = upper_limit;
+		YY[0][0] = upper_limit;
+	    sd[i].sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	    printf("%03u == %u * %03u ==> v_t1 = %03u\r\n", XX[0][0], sd[i].n_coeff, YY[0][0], ZZ[0][0]);
+		assert(SD_step3_produces_valid_output(V_t0[0][0], sd[i].n_coeff, O_t1[0][0], V_t1[0][0], sd[i].v_min, sd[i].v_max) == true);
+		
+		printf("Test passed.\n");
+
+	}
+}
+
+
+/*---------------------------------------------------*/
+bool SD_step1_produces_valid_output(uint8 m_t0,          uint8 i_t1,  uint8 m_t1) {
 /*---------------------------------------------------*/
 	// if P then Q => not P or Q
 	int m_lt_i_condition_satisfied = !(m_t0 <  i_t1) || (m_t1 == m_t0 + 1);
 	int m_gt_i_condition_satisfied = !(m_t0 >  i_t1) || (m_t1 == m_t0 - 1);
 	int m_eq_i_condition_satisfied = !(m_t0 == i_t1) || (m_t1 == m_t0);
+    printf("\tm_lt_i_condition_satisfied ==> %u\r\n", m_lt_i_condition_satisfied);
+    printf("\tm_gt_i_condition_satisfied ==> %u\r\n", m_gt_i_condition_satisfied);
+    printf("\tm_eq_i_condition_satisfied ==> %u\r\n", m_eq_i_condition_satisfied);
 
 	return m_lt_i_condition_satisfied &&
 	 	   m_gt_i_condition_satisfied &&
 	 	   m_eq_i_condition_satisfied;
 }
 
-
 /*---------------------------------------------------*/
-void test_implementation_SigmaDelta_step1(struct sd_set *sd) {
-/*---------------------------------------------------*/
-	
-	uint8 M_t0[1][1] = {{0}};
-	uint8 I_t0[1][1] = {{0}};
-	uint8 M_t1[1][1] = {{0}};
-	
-	uint8 *X[1] = {M_t0[0]}, **XX = X;
-	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
-	uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
-	
-	const int lower_limit = 127;
-	const int upper_limit = 128;
-    
-	XX[0][0] = lower_limit;
-	YY[0][0] = upper_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
-
-	XX[0][0] = upper_limit;
-	YY[0][0] = lower_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
-
-	XX[0][0] = lower_limit;
-	YY[0][0] = lower_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
-
-	XX[0][0] = upper_limit;
-	YY[0][0] = upper_limit;
-    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
-	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
-}
-
-/*---------------------------------------------------*/
-bool SD_step2_produces_valid_output(uint8 m_t, uint8 i_t, uint8 o_t) {
+bool SD_step2_produces_valid_output(uint8 m_t ,          uint8 i_t ,  uint8 o_t) {
 /*---------------------------------------------------*/
 	return (abs(m_t - i_t) == o_t);
 }
 /*---------------------------------------------------*/
 bool SD_step3_produces_valid_output(uint8 v_t0, uint8 n, uint8 o_t, uint8 v_t1, uint8 _vmin, uint8 _vmax) {
 /*---------------------------------------------------*/
-	int min_clamped = (0 < v_t0       && v_t0 - 1 < _vmin && v_t1 == _vmin) ||
-					  (                  v_t0 - 0 < _vmin && v_t1 == _vmin);
-	int max_clamped = (    v_t0 < 255 && v_t0 + 1 > _vmax && v_t1 == _vmax) ||
-					  (                  v_t0 + 0 > _vmax && v_t1 == _vmax);
+	int min_clamped = !(v_t0 >  n * o_t && v_t0 - 1 < _vmin) || v_t1 == _vmin;
+	int max_clamped = !(v_t0 <  n * o_t && v_t0 + 1 > _vmax) || v_t1 == _vmax;
+					  
 	// if P then Q => not P or Q
-	int v_lt_N_o_condition_satisfied = !(v_t0 <  n * o_t) || ((v_t1 == v_t0 + 1)                || max_clamped);
-	int v_gt_N_o_condition_satisfied = !(v_t0 >  n * o_t) || ((v_t1 == v_t0 - 1) || min_clamped               );
-	int v_eq_N_o_condition_satisfied = !(v_t0 == n * o_t) || ((v_t1 == v_t0)     || min_clamped || max_clamped);
+	int v_lt_N_o_condition_satisfied = !(v_t0 <  n * o_t) || ((v_t1 == v_t0 + 1));
+	int v_gt_N_o_condition_satisfied = !(v_t0 >  n * o_t) || ((v_t1 == v_t0 - 1));
+	int v_eq_N_o_condition_satisfied = !(v_t0 == n * o_t) || ((v_t1 == v_t0)    );
+
+    printf("\tv_lt_N_o_condition_satisfied ==> %u\r\n", v_lt_N_o_condition_satisfied);
+    printf("\tv_gt_N_o_condition_satisfied ==> %u\r\n", v_gt_N_o_condition_satisfied);
+    printf("\tv_eq_N_o_condition_satisfied ==> %u\r\n", v_eq_N_o_condition_satisfied);
+    printf("\tmin_clamped ==> %u\r\n", min_clamped);
+    printf("\tmax_clamped ==> %u\r\n", max_clamped);
 	
 
-	return v_lt_N_o_condition_satisfied && 
-		   v_gt_N_o_condition_satisfied &&
-	 	   v_eq_N_o_condition_satisfied;
+
+	return ( v_lt_N_o_condition_satisfied || !max_clamped) &&
+		   ( v_gt_N_o_condition_satisfied || !min_clamped) &&
+	 	   ( v_eq_N_o_condition_satisfied || ! (min_clamped  && max_clamped));
 }
 
 /*---------------------------------------------------*/
-bool SD_step4_produces_valid_output(uint8 o_t,uint8 v_t, uint8 e) {
+bool SD_step4_produces_valid_output(uint8 o_t ,          uint8 v_t, uint8 e) {
 /*---------------------------------------------------*/
 	int o_lt_v_condition_satisfied  = !(o_t <  v_t) || (e == 0);
 	int o_geq_v_condition_satisfied = !(o_t >= v_t) || (e == 1);
@@ -149,7 +234,7 @@ uint8 test_corps_SigmaDelta_step1(uint8 t_1M, uint8 tI) {
 	if (t_1M < tI)
 		return t_1M + 1;
 	else if (t_1M > tI)
-		return t_1M - 1;
+		return t_1M + 1;
 	else
 		return t_1M;
 
