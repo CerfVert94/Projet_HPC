@@ -207,7 +207,7 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
 	memset_ui8matrix(temp_buffer, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 	
     copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
-	octal_to_binary_ui8matrix(X, nrl, nrh, ncl, nch);
+	//octal_to_binary_ui8matrix(X, nrl, nrh, ncl, nch);
 
     for(temp_nrh = nrl + 9; temp_nrh < nrh + 1; temp_nrh++){
         for(temp_nch = ncl + 9; temp_nch < nch + 1; temp_nch++){
