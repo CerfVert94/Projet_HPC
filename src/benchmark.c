@@ -81,7 +81,6 @@ double **benchmark_of_morpho(struct morpho_set *msets, long nb_sets, long ls, lo
 	
 	// Initialize to save the benchmark result.
 	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
-	// the least largest 3x3 checkered square matrix as an input / output matrix.
 	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
@@ -91,13 +90,6 @@ double **benchmark_of_morpho(struct morpho_set *msets, long nb_sets, long ls, lo
 		
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
 			begin = __rdtsc();			
-			// memset_ui8matrix(Y, 0, 0, size, 0, size);
-
-	
-			// printf("size:%ld / idx : %d\r\n",size,idx_set);
-			// if(idx_set == 7){
-			// 	getchar();
-			// }
 			min_cycles_sum = 0;
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
 				min_cycles_sum += get_min_cpu_cycles_of_morpho(&msets[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
