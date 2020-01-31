@@ -1,5 +1,5 @@
 /* ------------------------ */
-/* ------ img_SSSE3.c ------ */
+/* ------ img_SIMD.c ------ */
 /* ------------------------ */
 
 #include <stdio.h>
@@ -19,7 +19,7 @@
 #include "vnrutil.h"
 
 #include "img.h"
-#include "img_SSE2.h"
+#include "img_SIMD.h"
 
 /*----------------------------------*/
 p_vimage create_vimage(char* filename) {
@@ -107,7 +107,7 @@ void free_vimage(p_vimage vimage) {
 }
 
 /*---------------------*/
-void test_SSE_mouvement() {
+void test_SIMD_img() {
 /*---------------------*/
 	
 	p_image t = create_image("../car3/car_3000.pgm");

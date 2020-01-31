@@ -6,8 +6,8 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE =  img.c main.c mouvement.c nrutil.c vnrutil.c mutil.c test_mouvement.c morpho.c\
-		img_SSE2.c mouvement_SSE2.c
+FILE =  img.c main.c mouvement.c nrutil.c vnrutil.c mutil.c morpho.c\
+		img_SIMD.c mouvement_SIMD.c morpho_SIMD.c
  
 # -- Paths ----------
 SRC_PATH = src

@@ -10,6 +10,7 @@
 #define Vmax 254
 
 #define BORD 2
+#define vBORD BORD/16 +1
 
 #define max(a,b) (a >= b ? a : b)
 #define min(a,b) (a <= b ? a : b)

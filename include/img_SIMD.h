@@ -1,12 +1,12 @@
 /* ------------------------ */
-/* ------ img_SSE2.h ------ */
+/* ------ img_SIMD.h ------ */
 /* ------------------------ */
 
-#ifndef __IMG_SSE2_H__
-#define __IMG_SSE2_H__
+#ifndef __IMG_SIMD_H__
+#define __IMG_SIMD_H__
 
-#ifndef __IMG_H__
-#define __IMG_H__
+#ifndef __IMG_SIMD_H__
+#define __IMG_SIMD_H__
 #define MOVE 1
 #define STATIC 0
 #endif // __IMG_H__
@@ -28,7 +28,7 @@ p_vimage create_vimage(char* filename);
 
 void free_vimage(p_vimage image);
 
-void test_SSE_mouvement();
+void test_SIMD_img();
 
 
-#endif // __IMG_SSE2_H__
+#endif // __IMG_SIMD_H__

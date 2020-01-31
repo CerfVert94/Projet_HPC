@@ -15,7 +15,7 @@
 #define leftshift1a  _mm_setr_epi8(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1)
 #define leftshift1b  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0)
 #define rightshift1a _mm_setr_epi8(-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)
-#define rightshift1b _mm_setr_epi8(0, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
+#define rightshift1b _mm_setr_epi8(0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
 
 
 
@@ -32,7 +32,7 @@
 #define vec_left3(v0, v1) v1
 #define vec_left4(v0, v1) v1
 
-#define vec_right1(v1, v2) _mm_or_si128(_mm_shuffle_epi8(v1, rightshift1a), _mm_shuffle_epi8(v2, rightshift1b))
+#define vec_right1(v1, v2) _mm_or_si128(_mm_shuffle_epi8(v2, rightshift1a), _mm_shuffle_epi8(v1, rightshift1b))
 #define vec_right2(v1, v2) v1
 #define vec_right3(v1, v2) v1
 #define vec_right4(v1, v2) v1 
