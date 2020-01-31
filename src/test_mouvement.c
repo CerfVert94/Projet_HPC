@@ -27,11 +27,36 @@ void test_implementation_SigmaDelta_step0(uint8** M, uint8** I, uint8** V, uint8
 void test_implementation_SigmaDelta_step1(struct sd_set *sd) {
 /*---------------------------------------------------*/
 	
-	uint8** M_t0;
-	uint8** I_t0;
-	uint8** M_t1;
-	long nrl, nrh, ncl, nch;
-	sd->sd_func();
+	uint8 M_t0[1][1] = {{0}};
+	uint8 I_t0[1][1] = {{0}};
+	uint8 M_t1[1][1] = {{0}};
+	
+	uint8 *X[1] = {M_t0[0]}, **XX = X;
+	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
+	uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
+	
+	const int lower_limit = 127;
+	const int upper_limit = 128;
+    
+	XX[0][0] = lower_limit;
+	YY[0][0] = upper_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = upper_limit;
+	YY[0][0] = lower_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = lower_limit;
+	YY[0][0] = lower_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = upper_limit;
+	YY[0][0] = upper_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
 }
 
 /*---------------------------------------------------*/
@@ -45,6 +70,43 @@ bool SD_step1_produces_valid_output(uint8 m_t0, uint8 i_t1, uint8 m_t1) {
 	return m_lt_i_condition_satisfied &&
 	 	   m_gt_i_condition_satisfied &&
 	 	   m_eq_i_condition_satisfied;
+}
+
+
+/*---------------------------------------------------*/
+void test_implementation_SigmaDelta_step1(struct sd_set *sd) {
+/*---------------------------------------------------*/
+	
+	uint8 M_t0[1][1] = {{0}};
+	uint8 I_t0[1][1] = {{0}};
+	uint8 M_t1[1][1] = {{0}};
+	
+	uint8 *X[1] = {M_t0[0]}, **XX = X;
+	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
+	uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
+	
+	const int lower_limit = 127;
+	const int upper_limit = 128;
+    
+	XX[0][0] = lower_limit;
+	YY[0][0] = upper_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = upper_limit;
+	YY[0][0] = lower_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = lower_limit;
+	YY[0][0] = lower_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
+
+	XX[0][0] = upper_limit;
+	YY[0][0] = upper_limit;
+    sd->sd_func(XX, YY, ZZ, 0, 0, 0, 0);
+	assert(SD_step1_produces_valid_output(M_t0, I_t0[0][0], M_t1[0][0]) == true);
 }
 
 /*---------------------------------------------------*/
