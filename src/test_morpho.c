@@ -31,7 +31,6 @@ void print_progress(uint32 current, uint32 max)
 
 void test_implementation_erosion3(struct morpho_set *erosion_set)
 {
-	// assert(check_for3_structuring_element(erosion_set->s) == true);
 	// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 3;
 	uint32 perm, max;
