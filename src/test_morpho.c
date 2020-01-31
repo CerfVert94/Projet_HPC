@@ -1,5 +1,6 @@
 #include <nrdef.h>
 #include <nrutil.h>
+#include <mynrutil.h>
 #include <img.h>
 #include <morpho.h>
 #include <stdbool.h>
@@ -232,7 +233,7 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
                     display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets[i].func_name);
                     display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
                 }
-                assert(!memcmp(Y[nrl] + ncl, Z[nrl] + ncl, (temp_nrh - nrl + 1) * (temp_nch - ncl + 1) * sizeof(**Z)));
+                assert(!memcmp_ui8matrix(Y, Z, nrl, temp_nrh, ncl, temp_nch));
 	            printf("\tTest passed\n");
             }
             free_ui8matrix(Y, nrl, temp_nrh , ncl, temp_nch); 
@@ -296,7 +297,7 @@ void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_se
                     display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%u ", morpho_sets[i].func_name);
                     display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%u ", naive_morpho_set->func_name);
                 }
-                assert(!memcmp(Y[nrl] + ncl, Z[nrl] + ncl, (temp_nrh - nrl + 1) * (temp_nch - ncl + 1) * sizeof(**Z)));
+                assert(!memcmp_ui8matrix(Y, Z, nrl, temp_nrh, ncl, temp_nch));
 				printf("\tTest passed\n");
 				
 			}
@@ -366,16 +367,4 @@ uint8 **ui8matrix_checker(long nrl, long nrh, long ncl, long nch, const long chk
 	}
 	return Y;
 }
-uint8 **rand_ui8matrix(long size, p_struct_elem_dim s)
-{
-	uint8** matrix, rand;
-	long nrl, nrh, ncl, nch;
-	matrix = ui8matrix(0 + SE_NRL, size + SE_NRH, 0 + SE_NCL, size + SE_NCH);
-	// printf("%ld %ld %ld %ld\n",  0 + SE_NRL, size + SE_NRH, 0 + SE_NCL, size + SE_NCH);
-	for (long i = 0; i < size; i++)
-		for (long j = 0; j < size; j++) {
-			matrix[i][j] =  ui8rand() % 2;
-		}
 
-	return matrix;
-}
