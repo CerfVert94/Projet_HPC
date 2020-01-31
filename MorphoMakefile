@@ -6,7 +6,7 @@
 # with a little help of Stephane Piskorski and Joel Falcou
 
 # -- Lile list ----------
-FILE =  mynrutil.c util.c img.c main.c mouvement.c nrutil.c  test_morpho.c vnrutil.c mutil.c test_mouvement.c morpho_pack_optim.c morpho_optim_omp.c morpho_optim.c morpho.c img_SSE2.c mouvement_SSE2.c benchmark.c
+FILE =  mynrutil.c util.c img.c main.c mouvement.c nrutil.c  test_morpho.c vnrutil.c mutil.c test_mouvement.c morpho_pack_optim.c morpho_optim_omp.c morpho_optim.c morpho.c  mouvement.c img_SIMD.c mouvement_SIMD.c benchmark.c
  
 # -- Paths ----------
 SRC_PATH = src
