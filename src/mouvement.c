@@ -34,7 +34,7 @@ void routine_FrameDifference(p_image t, p_image t1) {
 }
 
 /*-----------------------------*/
-void SigmaDelta_step0(uint8** I, uint8** M, uint8** V, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step0(uint8** M  , uint8** I, uint8** V, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------*/
 	copy_ui8matrix_ui8matrix(I, nrl, nrh, ncl, nch, M);
 	long i, j;
@@ -45,7 +45,7 @@ void SigmaDelta_step0(uint8** I, uint8** M, uint8** V, long nrl, long nrh, long 
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step1(uint8** I, uint8** M_1, uint8** M, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step1(uint8** M_1, uint8** I, uint8** M, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
@@ -63,7 +63,7 @@ void SigmaDelta_step1(uint8** I, uint8** M_1, uint8** M, long nrl, long nrh, lon
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step2(uint8** O, uint8** M, uint8** I, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step2(uint8** M  , uint8** I, uint8** O, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
@@ -75,7 +75,7 @@ void SigmaDelta_step2(uint8** O, uint8** M, uint8** I, long nrl, long nrh, long 
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step3(uint8** V, uint8** V_1, uint8** O, long nrl, long nrh, long ncl, long nch) {
+void SigmaDelta_step3(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, long ncl, long nch) {
 /*-----------------------------------------*/
 	long i, j;
 
