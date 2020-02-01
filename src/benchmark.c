@@ -17,6 +17,32 @@
 #include <math.h>
 
 
+void save_benchmark(const char *filename, void *sets, size_t struct_size, int nb_sets, double **results, long min_size, long max_size, long step);
+void launch_morpho_benchmark(const char *filename, struct morpho_set *morphos, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    double **results;
+    results = benchmark_of_morpho(morphos, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+    save_benchmark(filename, morphos, sizeof(struct morpho_set), nb_sets, results, min_size, max_size, step);
+}
+
+
+void launch_SD_step_benchmark(const char *filename, struct sd_set *sd_steps, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    double **results;
+    results = benchmark_of_sd_step(sd_steps, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+    save_benchmark(filename, sd_steps, sizeof(struct sd_set), nb_sets, results, min_size, max_size, step);
+}
+
+
+void launch_SD_benchmark(const char *filename, struct complete_sd_set *csds, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    double **results;
+    results = benchmark_of_sd(csds, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+	save_benchmark(filename, csds, sizeof(struct complete_sd_set), nb_sets, results, min_size, max_size, step);
+}
+
+void launch_packed_morpho_benchmark(const char *filename, struct morpho_set *packed_morphos, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    // double **results;
+    // results = benchmark_o_(morphos, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+    // save_benchmark(filename, morphos, sizeof(struct morpho_set), nb_sets, results, min_size, max_size, step);
+}
 double **init_benchmark_results(long nb_funcs, long size, long step)
 {
 	double **results;
@@ -168,7 +194,7 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 	return results;
 }
 
-double **benchmark_of_morpho(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
+double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
 {
 	unsigned long long  min_cycles_sum, begin, end;
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
@@ -188,12 +214,12 @@ double **benchmark_of_morpho(struct morpho_set *msets, long nb_sets, long ls, lo
 			begin = __rdtsc();			
 			min_cycles_sum = 0;
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles_of_morpho(&msets[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
+				min_cycles_sum += get_min_cpu_cycles_of_morpho(&morphos[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
 			
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
 		}
 	
 		free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
@@ -205,7 +231,7 @@ double **benchmark_of_morpho(struct morpho_set *msets, long nb_sets, long ls, lo
 	return results;
 }
 
-double **benchmark_of_packed_morpho(struct morpho_set *msets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
+double **benchmark_of_packed_morpho(struct morpho_set *morphos, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
 {
 	unsigned long long  min_cycles_sum, begin, end;
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
@@ -233,13 +259,13 @@ double **benchmark_of_packed_morpho(struct morpho_set *msets, long nb_sets, long
 			fcpack_ui8matrix_ui8matrix(X, 0, size, 0, size, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord, packedX);
 			min_cycles_sum = 0;
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles_of_morpho(&msets[idx_set], packet_size, packedX, packed_nrl, packed_nrh, packed_ncl, packed_nch, temp_buffer, Y);
+				min_cycles_sum += get_min_cpu_cycles_of_morpho(&morphos[idx_set], packet_size, packedX, packed_nrl, packed_nrh, packed_ncl, packed_nch, temp_buffer, Y);
 			
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			unfcpack_ui8matrix_ui8matrix(Y, 0, size, 0, size, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord, Z);
 			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  msets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
 		}
 	
 		// free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
@@ -298,4 +324,31 @@ double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls,
 		cnt++;
 	}
 	return results;
+}
+void save_benchmark(const char *filename, void *sets, size_t struct_size, int nb_sets, double **results, long min_size, long max_size, long step)
+{
+	FILE *file = fopen(filename, "w");
+    if (!file)
+        exit_on_error("fopen failed");
+    long k = 0;
+	char* set_ptr = (char*)sets;
+
+    fprintf(file, "#%*s ", 4, "Size");
+    for (long i = 0; i < nb_sets; i++) {
+		
+		// printf(RALIGNED_STR, (char*)&set_ptr[i * struct_size]);
+        fprintf(file, RALIGNED_STR" ", (char*)&set_ptr[i * struct_size]);
+    }
+
+    fputc('\n', file);
+    for (long size = min_size; size < max_size + 1; size += step) {
+        fprintf(file, "%*ld ", 4, size);
+        for (long i = 0; i < nb_sets; i++) {
+            fprintf(file, RALIGNED_DOUBLE" ", results[i][k]);
+         }
+        fprintf(file, "\n");
+        k++;
+    }
+    free_benchmark_results(results, 1);
+    fclose(file);
 }

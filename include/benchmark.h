@@ -3,6 +3,12 @@
 
 #pragma message("  include  benchmark.h")
 
+void launch_morpho_benchmark       (const char *filename, struct morpho_set *morphos       , const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step);
+void launch_packed_morpho_benchmark(const char *filename, struct morpho_set *packed_morphos, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step);
+void launch_SD_step_benchmark      (const char *filename, struct sd_set *sd_steps          , const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step);
+void launch_SD_benchmark           (const char *filename, struct complete_sd_set *csds     , const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step);
+
+
 unsigned long long get_cpu_cycles_of_morpho           (struct morpho_set *ptr_mset                  , uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 unsigned long long get_min_cpu_cycles_of_morpho       (struct morpho_set *ptr_mset, long packet_size, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 

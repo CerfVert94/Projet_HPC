@@ -36,130 +36,6 @@ void info(void)
 #endif
 }
 
-void launch_benchmark(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
-    FILE *file;
-    
-    double **results;
-    long k = 0, cnt = 0;
-    
-    results = benchmark_of_morpho(msets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
-
-    file = fopen(filename, "w");
-    if (!file)
-        exit_on_error("fopen failed");
-    k = 0;
-
-    fprintf(file, "#%*s", 4, "Size");
-    for (long i = 0; i < nb_sets; i++) {
-        fprintf(file, RALIGNED_STR, msets[i].func_name);
-    }
-
-    fputc('\n', file);
-    for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%*ld", 4, size);
-        for (long i = 0; i < nb_sets; i++) {
-            fprintf(file, RALIGNED_DOUBLE, results[i][k]);
-        }
-        fprintf(file, "\n");
-        k++;
-    }
-    free_benchmark_results(results, 1);
-    fclose(file);
-}
-
-
-void launch_SD_step_benchmark(const char *filename, struct sd_set *sdsets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
-    FILE *file;
-    
-    double **results;
-    long k = 0, cnt = 0;
-    
-    results = benchmark_of_sd_step(sdsets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
-
-    file = fopen(filename, "w");
-    if (!file)
-        exit_on_error("fopen failed");
-    k = 0;
-
-    fprintf(file, "#%*s", 4, "Size");
-    for (long i = 0; i < nb_sets; i++) {
-        fprintf(file, RALIGNED_STR, sdsets[i].func_name);
-    }
-
-    fputc('\n', file);
-    for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%*ld", 4, size);
-        for (long i = 0; i < nb_sets; i++) {
-            fprintf(file, RALIGNED_DOUBLE, results[i][k]);
-        }
-        fprintf(file, "\n");
-        k++;
-    }
-    free_benchmark_results(results, 1);
-    fclose(file);
-}
-
-
-void launch_SD_benchmark(const char *filename, struct complete_sd_set *csdsets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
-    FILE *file;
-    
-    double **results;
-    long k = 0, cnt = 0;
-    
-    results = benchmark_of_sd(csdsets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
-
-    file = fopen(filename, "w");
-    if (!file)
-        exit_on_error("fopen failed");
-    k = 0;
-
-    fprintf(file, "#%*s", 4, "Size");
-    for (long i = 0; i < nb_sets; i++) {
-        fprintf(file, RALIGNED_STR, csdsets[i].func_name);
-    }
-
-    fputc('\n', file);
-    for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%*ld", 4, size);
-        for (long i = 0; i < nb_sets; i++) {
-            fprintf(file, RALIGNED_DOUBLE, results[i][k]);
-        }
-        fprintf(file, "\n");
-        k++;
-    }
-    free_benchmark_results(results, 1);
-    fclose(file);
-}
-void launch_benchmark_compression(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
-    FILE *file;
-    
-    double **results;
-    long k = 0, cnt = 0;
-    
-    // results = benchmark_o_(msets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
-
-    file = fopen(filename, "w");
-    // if (!file)
-        exit_on_error("fopen failed");
-    k = 0;
-
-    fprintf(file, "#%*s", 4, "Size");
-    for (long i = 0; i < nb_sets; i++) {
-        fprintf(file, RALIGNED_STR, msets[i].func_name);
-    }
-
-    fputc('\n', file);
-    for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%*ld", 4, size);
-        for (long i = 0; i < nb_sets; i++) {
-            fprintf(file, RALIGNED_DOUBLE, results[i][k]);
-        }
-        fprintf(file, "\n");
-        k++;
-    }
-    free_benchmark_results(results, 1);
-    fclose(file);
-}
 void movement_detection()
 {
     // char filename[128];
@@ -377,17 +253,18 @@ int main(void)
     long nb_sets;
     nb_sets = 45; 
 
-    test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 1, false);
-    test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 1, false);
-    test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 1, false);
-    test_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step3, 1, false);
-    test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 1, false);
-    test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
-    test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
-    test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
-    
-    // launch_SD_step_benchmark("output/benchmark_SD_step.dat", SD_steps, 5, 1, 1, 200, 5000, 50);
-    // launch_SD_benchmark("output/benchmark_SD.dat", completeSDs, 1, 1, 1, 200, 5000, 50);
+    // test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 1, false);
+    // test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 1, false);
+    // test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 1, false);
+    // test_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step3, 1, false);
+    // test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 1, false);
+    // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
+    // test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
+    // test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
+    launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , nb_sets, 1, 1, 200, 1000, 1);
+    launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , nb_sets, 1, 1, 200, 1000, 1);
+    launch_SD_step_benchmark("output/benchmark_SD_step.dat" , SD_steps   ,       5, 1, 1, 200, 5000, 50);
+    launch_SD_benchmark(     "output/benchmark_SD.dat"      , completeSDs,       1, 1, 1, 200, 5000, 50);
     
     // long ncol = 20, nrow = 20;
     // long packed_nrl, packed_nrh, packed_ncl, packed_nch, bord;
@@ -433,7 +310,7 @@ int main(void)
 
     
     // test_dilations(dilations, nb_sets, false);
-    // launch_benchmark("output/benchmark_dilation.dat", dilations, nb_sets, 1, 1, 200, 1000);
+    
     // launch_benchmark_compression("output/benchmark_dilation.dat", dilations, nb_sets, 1, 1, 200, 25000);
     // for (int i = -40; i < 49; i++)
     //     pack_binary_ui8matrix(NULL, i, i, i, i, &nrl, &nrh, &ncl, &nch);
