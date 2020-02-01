@@ -14,10 +14,10 @@ UNAME_S := $(shell uname -s)
 # -- Lile list ----------
 FILE =  img.c main.c mouvement.c nrutil.c vnrutil.c mutil.c morpho.c\
 		img_SIMD.c mouvement_SIMD.c morpho_SIMD.c test_morpho.c test_mouvement.c\
-		util.c mynrutil.c morpho_pack_optim.c morpho_optim_omp.c benchmark.c
+		util.c mynrutil.c morpho_pack_optim.c benchmark.c
 
 ifneq ($(UNAME_S),Darwin)
-	FILE += morpho_optim.c
+	FILE += morpho_optim.c morpho_optim_omp.c
 endif
  
 # -- Paths ----------
