@@ -43,16 +43,16 @@ void verify_case_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *s
 }
 
 /*---------------------------------------------------*/
-void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *str_case, uint8 **V_t0, uint8 **O_t1, uint8 **V_t1, uint8 v_t0, uint8 o_t1, uint8 n_coeff, uint8 v_min, uint8 v_max, bool logging)
+void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *str_case, uint8 **V_t0, uint8 **O_t1, uint8 **V_t1, uint8 v_t0, uint8 o_t1, bool logging)
 /*---------------------------------------------------*/
 {
 	printf("Case %d : %s\n", num_case, str_case);
 	V_t0[0][0] = v_t0;
 	O_t1[0][0] = o_t1;
-	sd->sd_func(V_t0, O_t1, V_t1, 0, 0, 0, 0, n_coeff, v_min, v_max);
+	sd->sd_func(V_t0, O_t1, V_t1, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
 	if(logging)
 		printf("\t[V_t0 = %u] [O_t1 = %u] => [V_t1 = %u]\n", V_t0[0][0], O_t1[0][0], V_t1[0][0]);
-	assert(SD_step3_produces_valid_output(V_t0[0][0], n_coeff, O_t1[0][0], V_t1[0][0], v_min, v_max, logging) == true);
+	assert(SD_step3_produces_valid_output(V_t0[0][0], O_t1[0][0], V_t1[0][0], sd->n_coeff, sd->v_min, sd->v_max, logging) == true);
 }
 
 /*---------------------------------------------------*/
@@ -190,7 +190,7 @@ void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct 
 					printf("[row, col] = [%ld, %ld]\n", row, col);
 					printf("[V_t0 = %u] [O_t1 = %u] => [V_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
 				}
-				assert(SD_step3_produces_valid_output(X[row][col], sd[i].n_coeff, Y[row][col], Z[row][col], sd[i].v_min, sd[i].v_max, logging));
+				assert(SD_step3_produces_valid_output(X[row][col], Y[row][col], Z[row][col], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging));
 			}
 		printf("Test passed.\n");
 				
@@ -349,31 +349,31 @@ void test_implementation_SigmaDelta_step3(struct sd_set *sd, int nb_sets, bool l
     	printf("Implementation test for %s\n", sd[i].func_name);
 		XX[0][0] = test_vmin;
 		YY[0][0] = test_vmin;
-		verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+		verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmax + 1;
 		YY[0][0] = test_vmax;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmin - 1;
 		YY[0][0] = test_vmin;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmin + 1;
 		YY[0][0] = test_vmin / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmax + 2;
 		YY[0][0] = test_vmax / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmin - 1;
 		YY[0][0] = test_vmin / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmin * sd[i].n_coeff;
 		YY[0][0] = test_vmin;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / no clamping     ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = test_vmax / sd[i].n_coeff * sd[i].n_coeff;
 		YY[0][0] = test_vmax / sd[i].n_coeff;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, sd[i].v_min, sd[i].v_max, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		XX[0][0] = (test_vmin) / sd[i].n_coeff * sd[i].n_coeff;
 		YY[0][0] = test_vmin / sd[i].n_coeff;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], sd[i].n_coeff, test_vmin, test_vmax, logging);
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		printf("Test passed.\n");
 
 	}
@@ -454,26 +454,18 @@ bool SD_step2_produces_valid_output(uint8 m_t ,          uint8 i_t ,  uint8 o_t,
 #define MAX_CLAMPED(v_t0, v_t1, v_max) (v_t0 > v_max ? v_t1 == v_max : v_t1 == v_t0)
 #define MIN_CLAMPED(v_t0, v_t1, v_min) (v_t0 < v_min ? v_t1 == v_min : v_t1 == v_t0)
 /*---------------------------------------------------*/
-bool SD_step3_produces_valid_output(uint8 v_t0, uint8 n, uint8 o_t1, uint8 v_t1, uint8 v_min, uint8 v_max, bool logging) {
+bool SD_step3_produces_valid_output(uint8 v_t0, uint8 o_t1, uint8 v_t1, uint8 n_coeff, uint8 v_min, uint8 v_max, bool logging) {
 /*---------------------------------------------------*/
 	// if P then Q => not P or Q
 
-	bool v_lt_n_o_condition_satisfied = (v_t0 <  n * o_t1 ? v_t1 == v_t0 + 1 || MIN_CLAMPED(v_t0 + 1, v_t1, v_min) || MAX_CLAMPED(v_t0 + 1, v_t1, v_max) : false);
-	bool v_gt_n_o_condition_satisfied = (v_t0 >  n * o_t1 ? v_t1 == v_t0 - 1 || MIN_CLAMPED(v_t0 - 1, v_t1, v_min) || MAX_CLAMPED(v_t0 - 1, v_t1, v_max) : false);
-	bool v_eq_n_o_condition_satisfied = (v_t0 == n * o_t1 ? v_t1 == v_t0     || MIN_CLAMPED(v_t0    , v_t1, v_min) || MAX_CLAMPED(v_t0    , v_t1, v_max) : false);
-	// If the conditions above aren't satisfied, then v_t1 is clamped.
-	// int min_clamped = !(!v_gt_n_o_condition_satisfied || !v_eq_n_o_condition_satisfied) || v_t1 == _vmin;
-	// int max_clamped = !(!v_lt_n_o_condition_satisfied || !v_eq_n_o_condition_satisfied) || v_t1 == _vmax;
+	bool v_lt_n_o_condition_satisfied = (v_t0 <  n_coeff * o_t1 ? v_t1 == v_t0 + 1 || MIN_CLAMPED(v_t0 + 1, v_t1, v_min) || MAX_CLAMPED(v_t0 + 1, v_t1, v_max) : false);
+	bool v_gt_n_o_condition_satisfied = (v_t0 >  n_coeff * o_t1 ? v_t1 == v_t0 - 1 || MIN_CLAMPED(v_t0 - 1, v_t1, v_min) || MAX_CLAMPED(v_t0 - 1, v_t1, v_max) : false);
+	bool v_eq_n_o_condition_satisfied = (v_t0 == n_coeff * o_t1 ? v_t1 == v_t0     || MIN_CLAMPED(v_t0    , v_t1, v_min) || MAX_CLAMPED(v_t0    , v_t1, v_max) : false);
 	if(logging) {
 		printf("\t[V_t0] less    than [n * O_t1] (clamped) => %s\r\n", v_lt_n_o_condition_satisfied ? "true"  : "false");
 		printf("\t[V_t0] greater than [n * O_t1] (clamped) => %s\r\n", v_gt_n_o_condition_satisfied ? "true"  : "false");
 		printf("\t[V_t0] equal   to   [n * O_t1] (clamped) => %s\r\n", v_eq_n_o_condition_satisfied ? "true"  : "false");
 	}
-    // printf("\tmin_clamped ==> %u\r\n", min_clamped);
-    // printf("\tmax_clamped ==> %u\r\n", max_clamped);
-	
-
-
 	return (v_lt_n_o_condition_satisfied ||   
 		    v_gt_n_o_condition_satisfied ||   
 	 	    v_eq_n_o_condition_satisfied ) &&

@@ -22,8 +22,8 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct sd_set *sd, int nb_sets, bool logging);
 void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct sd_set *sd, int nb_sets, bool logging);
 
-bool SD_step0_produces_valid_output(uint8 m_t0,          uint8 i_t0,  uint8 v_t0, bool logging);
-bool SD_step1_produces_valid_output(uint8 m_t0,          uint8 i_t1,  uint8 m_t1, bool logging);
-bool SD_step2_produces_valid_output(uint8 m_t ,          uint8 i_t ,  uint8 o_t, bool logging);
-bool SD_step3_produces_valid_output(uint8 v_t0, uint8 n, uint8 o_t, uint8 v_t1, uint8 _vmin, uint8 _vmax, bool logging);
-bool SD_step4_produces_valid_output(uint8 o_t ,          uint8 v_t, uint8 e, bool logging);
+bool SD_step0_produces_valid_output(uint8 m_t0, uint8 i_t0, uint8 v_t0                                         , bool logging);
+bool SD_step1_produces_valid_output(uint8 m_t0, uint8 i_t1, uint8 m_t1                                         , bool logging);
+bool SD_step2_produces_valid_output(uint8 m_t1, uint8 i_t1, uint8 o_t1                                         , bool logging);
+bool SD_step3_produces_valid_output(uint8 v_t0, uint8 o_t1, uint8 v_t1, uint8 n_coeff, uint8 v_min, uint8 v_max, bool logging);
+bool SD_step4_produces_valid_output(uint8 o_t1, uint8 v_t1, uint8 e_t1                                         , bool logging);
