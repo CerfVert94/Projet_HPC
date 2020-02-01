@@ -23,6 +23,39 @@
 #define SE_NCH  1
 #define STRUCTURING_ELEMENT_DIM(s) SE_NRL, SE_NRH, SE_NCL, SE_NCH
 #define PROGRESS_FACTOR 		   10
+
+
+void test_erosions(char *filename, struct morpho_set *erosion_sets , const int nb_sets, bool logging)
+{
+    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
+	uint8 **image;
+	long nrl, nrh, ncl, nch;
+    for (int i = 0; i < nb_sets; i++) {
+        test_implementation_erosion3(&erosion_sets[i]);
+    	image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
+		test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, &erosion_sets[i], logging);
+	}
+	free_ui8matrix(image, nrl, nrh, ncl, nch);
+
+}
+void test_dilations(char *filename, struct morpho_set *dilation_sets, const int nb_sets, bool logging)
+{
+    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_dilation_naive", ui8matrix_dilation_naive};
+	uint8 **image;
+	long nrl, nrh, ncl, nch;
+    for (int i = 0; i < nb_sets; i++) {
+		test_implementation_dilation3(&dilation_sets[i]);
+    	image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
+		test_intergration(image, nrl, nrh, ncl, nch, filename,  &naive_morpho_set, &dilation_sets[i], logging);
+	}
+	free_ui8matrix(image, nrl, nrh, ncl, nch);
+}
+void test_sequences(char *filename, struct morpho_set *sequence_sets, const int nb_sets, bool logging)
+{
+    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive};
+    // test_intergration(filename, &naive_morpho_set, sequence_sets, logging);
+}
+
 void print_progress(uint32 current, uint32 max)
 {	
 	static const int n = 9;
@@ -145,38 +178,56 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 
 
 
-void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool logging)
+void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets,bool logging)
 {
-    const long start_x = 280, start_y = 200, end_x=320, end_y=240;
-    long x = 0, y = 0, nrl, nrh, ncl, nch;
-    char filename[128];
-    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
-    for (int i = 0; i < nb_implementations; i++) 
-        test_implementation_erosion3(&erosion_sets[i]);
+      
+    long temp_nrh, temp_nch;
+	long packed_nrl, packed_ncl, packed_nrh, packed_nch;
+    // struct struct_elem_dim *s = naive_morpho_set->s;
+    uint8 **X, **Y, **Z,**temp_buffer;
 
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, erosion_sets, nb_implementations, logging);
+    // Test Input
+    X = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// Middle Buffer
+    temp_buffer = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// Test Output
+	Y = ui8matrix(nrl, nrh, ncl, nch);
+	// Valid Output
+	Z = ui8matrix(nrl, nrh, ncl, nch);
 
+    // Full zero intialization & copy image 
+    memset_ui8matrix(X          , 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	memset_ui8matrix(temp_buffer, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+    copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
+
+    for(temp_nrh = nrl; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = ncl; temp_nch < nch + 1; temp_nch++){
+            memset_ui8matrix(Z, 0, nrl, temp_nrh , ncl, temp_nch); 
+            naive_morpho_set->morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
+         
+			printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets->func_name, filename);
+			printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
+
+			memset_ui8matrix          (Y, 0, nrl, temp_nrh, ncl, temp_nch); 
+			morpho_sets->morpho_func(X   , nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
+
+			if (logging) {
+				printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
+				display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%03u ", "Input");
+				display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets->func_name);
+				display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
+			}
+			for (long row = nrl; row < temp_nrh; row++)
+				assert(!memcmp_ui8matrix(Y, Z, row, row, ncl, temp_nch));
+			printf("\tTest passed\n");
+		}
+    }
+	free_ui8matrix(Y, nrl, nrh, ncl, nch); 
+	free_ui8matrix(Z, nrl, nrh, ncl, nch); 
+	free_ui8matrix(temp_buffer, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+    free_ui8matrix(X, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 }
-void test_dilations(struct morpho_set *dilation_sets, const int nb_implementations, bool logging)
-{
-    const long start_x = 280, start_y = 200, end_x=320, end_y=240;
-    long x = 0, y = 0, nrl, nrh, ncl, nch;
-    char filename[128];
-    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_dilation_naive", ui8matrix_dilation_naive};
-    for (int i = 0; i < nb_implementations; i++) 
-		test_implementation_dilation3(&dilation_sets[i]);
-
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, logging);
-}
-void test_sequences(struct morpho_set *sequence_sets, const int nb_implementations, bool logging)
-{
-    const long start_x = 280, start_y = 200, end_x=0, end_y=240;
-    long x = 0, y = 0, nrl, nrh, ncl, nch;
-    char filename[128];
-    struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive};
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, sequence_sets, nb_implementations, logging);
-}
-
+/*
 void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
 {
       
@@ -234,7 +285,7 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
     free_ui8matrix(X, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 }
-
+*/
 void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
 {
       
