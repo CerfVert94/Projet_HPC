@@ -1,0 +1,190 @@
+	
+
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+	row2 = ppInput[row + 1];
+	row3 = ppInput[row + 2];
+	row4 = ppInput[row + 3];
+
+	out_row0 = ppOutput[row + 0];
+	out_row1 = ppOutput[row + 1];
+	out_row2 = ppOutput[row + 2];
+
+	x0  = row0[-1]; x1  = row0[ 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
+	x5  = row1[-1]; x6  = row1[ 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
+	x10 = row2[-1]; x11 = row2[ 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
+	x15 = row3[-1]; x16 = row3[ 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
+	x20 = row4[-1]; x21 = row4[ 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
+
+	y00 = x0  | x1  | x2 ; y01 = x1  | x2  | x3 ; y02 = x2  | x3  | x4 ;
+	y10 = x5  | x6  | x7 ; y11 = x6  | x7  | x8 ; y12 = x7  | x8  | x9 ;
+	y20 = x10 | x11 | x12; y21 = x11 | x12 | x13; y22 = x12 | x13 | x14;
+	y30 = x15 | x16 | x17; y31 = x16 | x17 | x18; y32 = x17 | x18 | x19;
+	y40 = x20 | x21 | x22; y41 = x21 | x22 | x23; y42 = x22 | x23 | x24;
+
+	r0c0 = y00 | y10 | y20;
+	r1c0 = y10 | y20 | y30;
+	r2c0 = y20 | y30 | y40;
+	r0c1 = y01 | y11 | y21;
+	r1c1 = y11 | y21 | y31;
+	r2c1 = y21 | y31 | y41;
+	r0c2 = y02 | y12 | y22;
+	r1c2 = y12 | y22 | y32;
+	r2c2 = y22 | y32 | y42;
+
+	for (row = nrl; row < nrh + 1 - rr; row += order) {
+			// printf("%ld %ld :\n",row, col);
+			// printf("y00 = %u; y01 = %u; y02 = %u;\n", y00, y01, y02);
+			// printf("y10 = %u; y11 = %u; y12 = %u;\n", y10, y11, y12);
+			// printf("y20 = %u; y21 = %u; y22 = %u;\n", y20, y21, y22);
+			// printf("y30 = %u; y31 = %u; y32 = %u;\n", y30, y31, y32);
+			// printf("y40 = %u; y41 = %u; y42 = %u;\n", y40, y41, y42);
+			// getchar();
+		}
+			r0c0 = x0  | x1  | x2  | x5  | x6  | x7  | x10 | x11 | x12;
+			r1c0 = x5  | x6  | x7  | x10 | x11 | x12 | x15 | x16 | x17;
+			r2c0 = x10 | x11 | x12 | x15 | x16 | x17 | x20 | x21 | x22;
+			
+			r0c1 = x1  | x2  | x3  | x6  | x7  | x8  | x11 | x12 | x13;
+			r1c1 = x6  | x7  | x8  | x11 | x12 | x13 | x16 | x17 | x18;
+			r2c1 = x11 | x12 | x13 | x16 | x17 | x18 | x21 | x22 | x23;
+
+			r0c2 = x2  | x3  | x4  | x7  | x8  | x9  | x12 | x13 | x14;
+			r1c2 = x7  | x8  | x9  | x12 | x13 | x14 | x17 | x18 | x19;
+			r2c2 = x12 | x13 | x14 | x17 | x18 | x19 | x22 | x23 | x24;
+			
+			
+			
+			
+
+			// y00 = x0  | x1  | x2 ; y01 = x1  | x2  | x3 ; y02 = x2  | x3  | x4 ;
+			// y10 = x5  | x6  | x7 ; y11 = x6  | x7  | x8 ; y12 = x7  | x8  | x9 ;
+			// y20 = x10 | x11 | x12; y21 = x11 | x12 | x13; y22 = x12 | x13 | x14;
+			// y30 = x15 | x16 | x17; y31 = x16 | x17 | x18; y32 = x17 | x18 | x19;
+			// y40 = x20 | x21 | x22; y41 = x21 | x22 | x23; y42 = x22 | x23 | x24;	
+			r0c0 = x0  | x1  | x2  | x5  | x6  | x7  | x10 | x11 | x12;
+			r1c0 = x5  | x6  | x7  | x10 | x11 | x12 | x15 | x16 | x17;
+			r2c0 = x10 | x11 | x12 | x15 | x16 | x17 | x20 | x21 | x22;
+
+			r0c1 = x1  | x2  | x3  | x6  | x7  | x8  | x11 | x12 | x13;
+			r1c1 = x6  | x7  | x8  | x11 | x12 | x13 | x16 | x17 | x18;
+			r2c1 = x11 | x12 | x13 | x16 | x17 | x18 | x21 | x22 | x23;
+
+			r0c2 = x2  | x3  | x4  | x7  | x8  | x9  | x12 | x13 | x14;
+			r1c2 = x7  | x8  | x9  | x12 | x13 | x14 | x17 | x18 | x19;
+			r2c2 = x12 | x13 | x14 | x17 | x18 | x19 | x22 | x23 | x24;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			i8matrix_dilation_LU3x3_O3xO3_RR(uint8** ppInput, long nrl, long nrh, long ncl, long nch, p_struct_elem_dim s, uint8 **ppOutput)
+{
+		const long order = 3;
+	long row = nrl, col = ncl, x, y, rr, cr;
+	uint8 y00, y10, y20, y30, y40, y01, y11, y21, y31, y41, y02, y12, y22, y32, y42;
+	uint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25;
+	uint8 r0c0, r1c0, r2c0, r0c1,r1c1, r2c1, r0c2, r1c2, r2c2;
+	uint8 *row0, *row1, *row2, *row3, *row4;
+	uint8 *out_row0, *out_row1, *out_row2;
+
+	rr = (nrh + 1) % order;
+	cr = (nch + 1) % order;
+	
+	row0 = ppInput[row - 1];
+	row1 = ppInput[row + 0];
+
+	for (row = nrl; row < nrh + 1 - rr; row += order) {
+		row2 = ppInput[row + 1];
+		row3 = ppInput[row + 2];
+		row4 = ppInput[row + 3];
+
+		x0  = row0[-1]; x1  = row0[ 0]; x2  = row0[col + 1]; x3  = row0[col + 2]; x4  = row0[col + 3];
+		x5  = row1[-1]; x6  = row1[ 0]; x7  = row1[col + 1]; x8  = row1[col + 2]; x9  = row1[col + 3];
+		x10 = row2[-1]; x11 = row2[ 0]; x12 = row2[col + 1]; x13 = row2[col + 2]; x14 = row2[col + 3];
+		x15 = row3[-1]; x16 = row3[ 0]; x17 = row3[col + 1]; x18 = row3[col + 2]; x19 = row3[col + 3];
+		x20 = row4[-1]; x21 = row4[ 0]; x22 = row4[col + 1]; x23 = row4[col + 2]; x24 = row4[col + 3];
+		for (col = ncl; col < nch + 1 - cr; col += order) {
+			y00 = x0  | x1  | x2 ; y01 = x1  | x2  | x3 ; y02 = x2  | x3  | x4 ;
+			y10 = x5  | x6  | x7 ; y11 = x6  | x7  | x8 ; y12 = x7  | x8  | x9 ;
+			y20 = x10 | x11 | x12; y21 = x11 | x12 | x13; y22 = x12 | x13 | x14;
+			y30 = x15 | x16 | x17; y31 = x16 | x17 | x18; y32 = x17 | x18 | x19;
+			y40 = x20 | x21 | x22; y41 = x21 | x22 | x23; y42 = x22 | x23 | x24;
+
+			r0c0 = y00 | y10 | y20;
+			r1c0 = y10 | y20 | y30;
+			r2c0 = y20 | y30 | y40;
+			
+			r0c1 = y01 | y11 | y21;
+			r1c1 = y11 | y21 | y31;
+			r2c1 = y21 | y31 | y41;
+			r0c2 = y02 | y12 | y22;
+			r1c2 = y12 | y22 | y32;
+			r2c2 = y22 | y32 | y42;
+
+
+			x0  = x3 ; x1  = x4 ;
+			x5  = x8 ; x6  = x9 ;
+			x10 = x13; x11 = x14;
+			x15 = x18; x16 = x19;
+			x20 = x23; x21 = x24;
+		}
+		row0 = row3;
+		row1 = row4;
+	}
+	switch (rr) {
+		case 2 :
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);	
+				break;
+				default :
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh - 1, nrh, ncl, nch, s, ppOutput);
+				break;
+			}
+			break;
+		case 1:
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch, nch, s, ppOutput);		
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);	
+				break;
+				default :
+					ui8matrix_dilation_LU3x3_O1xO3_RR(ppInput, nrh, nrh, ncl, nch, s, ppOutput);
+				break;
+			}
+		break;
+		default:
+			switch(cr){
+				case 2 :
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch - 1, nch, s, ppOutput);
+				break;
+				case 1: 
+					ui8matrix_dilation_LU3x3_O3xO1_RR(ppInput, nrl, nrh, nch, nch, s, ppOutput);	
+				break;
+				default :
+				break;
+			}
+		break;
+	}
+		
+}
