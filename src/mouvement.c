@@ -15,18 +15,18 @@
 
 
 /*-----------------------------------------------*/
-void routine_FrameDifference(p_image t, p_image t1) {
+void routine_FrameDifference(p_image t0, p_image t1) {
 /*-----------------------------------------------*/
 	long i, j;
 	uint8 thresh = THRESHOLD, diff;
-	for (i = t->nrl; i < t->nrh; i++) {
-		for (j = t->ncl; j < t->nch; j++) {
-			diff = abs(t1->I[i][j] - t->I[i][j]);
+	for (i = t0->nrl; i < t0->nrh; i++) {
+		for (j = t0->ncl; j < t0->nch; j++) {
+			diff = abs(t1->I[i][j] - t0->I[i][j]);
 			if (diff > thresh) {
-				t->E[i][j] = 1;
+				t0->E[i][j] = 1;
 			}
 			else {
-				t->E[i][j] = 0;
+				t0->E[i][j] = 0;
 			}
 		}
 	}
@@ -112,34 +112,33 @@ void SigmaDelta_step4(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long 
 }
 
 /*-----------------------------------------*/
-void SigmaDelta(p_image t, p_image t_1, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
-	SigmaDelta_step1(t->I, t_1->M, t->M, t->nrl, t->nrh, t->ncl, t->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step2(t->O,   t->M, t->I, t->nrl, t->nrh, t->ncl, t->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step3(t->V, t_1->V, t->O, t->nrl, t->nrh, t->ncl, t->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step4(t->O,   t->V, t->E, t->nrl, t->nrh, t->ncl, t->nch, n_coeff, v_min, v_max);
-
+	SigmaDelta_step1(t0->M, t1->I, t1->M, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step2(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step3(t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step4(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 }
 
 /*-------*/
 void test_mouvement() {
 /*-------*/
 	
-	p_image t_1 = create_image("../car3/car_3000.pgm");
-	p_image t = create_image("../car3/car_3001.pgm");
+	p_image t0 = create_image("../car3/car_3000.pgm");
+	p_image t1 = create_image("../car3/car_3001.pgm");
 
-	printf("Nrh: %ld\n", t->nrh);
-	printf("Nch: %ld\n", t->nch);
+	printf("Nrh: %ld\n", t0->nrh);
+	printf("Nch: %ld\n", t0->nch);
 
-	SigmaDelta_step0(t_1->I, t_1->M, t_1->V, t->nrl, t->nrh, t->ncl, t->nch, N, Vmin, Vmax);
-	SigmaDelta(t, t_1, N, Vmin, Vmax);
-	for (long i = t->nrl; i < 50; i++) { 
-		for (long j = t->ncl; j < 50; j++) {
-			printf("%d ", t->E[i][j]);
+	SigmaDelta_step0(t0->I, t0->M, t0->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, N, Vmin, Vmax);
+	SigmaDelta(t0, t1, N, Vmin, Vmax);
+	for (long i = t1->nrl; i < 50; i++) { 
+		for (long j = t1->ncl; j < 50; j++) {
+			printf("%d ", t1->E[i][j]);
 		}
 		printf("\n");
 	}
 
-	free_image(t);
-	free_image(t_1);
+	free_image(t0);
+	free_image(t1);
 }

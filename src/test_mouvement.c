@@ -19,7 +19,8 @@ const char *nom_func;
 void verify_case_SigmaDelta_step1(struct sd_set *sd, int num_case, const char *str_case, uint8 **X, uint8 **Y, uint8 **Z, uint8 x, uint8 y, bool logging)
 /*---------------------------------------------------*/
 {
-	printf("Case %d : %s\n", num_case, str_case);
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
 	X[0][0] = x;
 	Y[0][0] = y;
 	sd->sd_func(X, Y, Z, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
@@ -33,7 +34,8 @@ void verify_case_SigmaDelta_step1(struct sd_set *sd, int num_case, const char *s
 void verify_case_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *str_case, uint8 **X, uint8 **Y, uint8 **Z, uint8 x, uint8 y, bool logging)
 /*---------------------------------------------------*/
 {
-	printf("Case %d : %s\n", num_case, str_case);
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
 	X[0][0] = x;
 	Y[0][0] = y;
 	sd->sd_func(X, Y, Z, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
@@ -46,7 +48,8 @@ void verify_case_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *s
 void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *str_case, uint8 **V_t0, uint8 **O_t1, uint8 **V_t1, uint8 v_t0, uint8 o_t1, bool logging)
 /*---------------------------------------------------*/
 {
-	printf("Case %d : %s\n", num_case, str_case);
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
 	V_t0[0][0] = v_t0;
 	O_t1[0][0] = o_t1;
 	sd->sd_func(V_t0, O_t1, V_t1, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
@@ -59,7 +62,8 @@ void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *s
 void verify_case_SigmaDelta_step4(struct sd_set *sd, int num_case, const char *str_case, uint8 **X, uint8 **Y, uint8 **Z, uint8 x, uint8 y, bool logging)
 /*---------------------------------------------------*/
 {
-	printf("Case %d : %s\n", num_case, str_case);
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
 	X[0][0] = x;
 	Y[0][0] = y;
 	sd->sd_func(X, Y, Z, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
@@ -233,7 +237,80 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
 }
+void test_integration_SigmaDelta(char *filename0, char *filename1, struct complete_sd_set *sd, struct sd_set sd_step0_to_step4_naive[5], int nb_sets, bool logging)
+{
+	long nrl0, ncl0, nrh0, nch0;
+	long nrl1, ncl1, nrh1, nch1;
+	long nrl2, ncl2, nrh2, nch2;
+	p_image t0, t1, t_naive0, t_naive1;
+    uint8 **X, **Y, **Z;
+	bool sd_output_is_valid = false;
+	uint8 n_coeff, v_min, v_max;
 
+	t0 = create_image(filename0);
+	t1 = create_image(filename1);
+	t_naive0 = create_image(filename0);
+	t_naive1 = create_image(filename1);
+	nrl0 = t0->nrl; nrl1 = t1->nrl;
+	nrh0 = t0->nrh; nrh1 = t1->nrh;
+	ncl0 = t0->ncl; ncl1 = t1->ncl;
+	nch0 = t0->nch; nch1 = t1->nch;
+	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+
+	for (int i = 0; i < nb_sets; i++) {
+		
+		n_coeff = sd[i].n_coeff;
+		v_min   = sd[i].v_min;
+		v_max   = sd[i].v_max;
+		
+		X = t0->M; Y = t0->I; Z = t0->V;
+		sd[i].sd_step0(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		sd[i].sd_func(t0, t1, n_coeff, v_min, v_max);
+
+		X = t_naive0->M; Y = t_naive0->I; Z = t_naive0->V;
+		sd_step0_to_step4_naive[0].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		X = t_naive0->M; Y = t_naive1->I; Z = t_naive1->M;
+		sd_step0_to_step4_naive[1].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		X = t_naive1->M; Y = t_naive1->I; Z = t_naive1->O;
+		sd_step0_to_step4_naive[2].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		X = t_naive0->V; Y = t_naive1->O; Z = t_naive1->V;
+		sd_step0_to_step4_naive[3].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		X = t_naive1->O; Y = t_naive1->V; Z = t_naive1->E;
+		sd_step0_to_step4_naive[4].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		
+		printf("Integration test for %s\n", sd[i].func_name);
+		for (long row = nrl1; row < nrh1 + 1; row++)
+			for (long col = nrl1; col < nrh1 + 1; col++){
+					X = t_naive0->M; Y = t_naive0->I; Z = t_naive0->V;
+					assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+					X = t_naive0->M; Y = t_naive1->I; Z = t_naive1->M;
+					assert(SD_step1_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+					X = t_naive1->M; Y = t_naive1->I; Z = t_naive1->O;
+					assert(SD_step2_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+					X = t_naive0->V; Y = t_naive1->O; Z = t_naive1->V;
+					assert(SD_step3_produces_valid_output(X[row][col], Y[row][col], Z[row][col], n_coeff, v_min, v_max, logging));
+					X = t_naive1->O; Y = t_naive1->V; Z = t_naive1->E;
+					assert(SD_step4_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+					if (logging) {
+						printf("[row, col] = [%ld, %ld]\n", row, col);
+						printf("[I_naive = %u] [I = %u]\n", t_naive1->I[row][col], t1->I[row][col]);
+						printf("[M_naive = %u] [M = %u]\n", t_naive1->M[row][col], t1->M[row][col]);
+						printf("[O_naive = %u] [O = %u]\n", t_naive1->O[row][col], t1->O[row][col]);
+						printf("[V_naive = %u] [V = %u]\n", t_naive1->V[row][col], t1->V[row][col]);
+						printf("[E_naive = %u] [E = %u]\n", t_naive1->E[row][col], t1->E[row][col]);
+					}	
+					sd_output_is_valid = (t_naive1->E[row][col] == t1->E[row][col]);
+					assert(sd_output_is_valid);
+			}
+		printf("Test passed.\n");
+	}
+	free_image(t0);
+	free_image(t1);
+	free_image(t_naive0);
+	free_image(t_naive1);
+
+}
 
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step0(struct sd_set *sd, int nb_sets, bool logging) {
@@ -498,10 +575,10 @@ bool SD_step3_produces_valid_output(uint8 v_t0, uint8 o_t1, uint8 v_t1, uint8 n_
 }
 
 /*---------------------------------------------------*/
-bool SD_step4_produces_valid_output(uint8 o_t ,          uint8 v_t, uint8 e, bool logging) {
+bool SD_step4_produces_valid_output(uint8 o_t1, uint8 v_t1, uint8 e_t1, bool logging) {
 /*---------------------------------------------------*/
-	bool o_lt_v_condition_satisfied  = !(o_t <  v_t) || (e == 0);
-	bool o_geq_v_condition_satisfied = !(o_t >= v_t) || (e == 1);
+	bool o_lt_v_condition_satisfied  = !(o_t1 <  v_t1) || (e_t1 == 0);
+	bool o_geq_v_condition_satisfied = !(o_t1 >= v_t1) || (e_t1 == 1);
 
     if(logging) {
 		printf("\t[O_t1] less    than             [V_t1] => %s\r\n", o_lt_v_condition_satisfied ? "true"  : "false");
