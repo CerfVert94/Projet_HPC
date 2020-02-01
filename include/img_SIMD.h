@@ -29,6 +29,6 @@ p_vimage create_vimage(char* filename);
 void free_vimage(p_vimage image);
 
 void test_SIMD_img();
-
+void test2_SIMD_img();
 
 #endif // __IMG_SIMD_H__
