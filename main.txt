@@ -324,14 +324,16 @@ struct morpho_set dilation_sets[] = {
     struct sd_set SDs_step4[] = {
                                 {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
                                 };
-
-    struct sd_set SDs[] = {
-                           {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
-                           {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
-                           {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
-                           {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
-                           {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
-                          };
+    struct sd_set naiveSDs[5] = {
+                                 {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4, .n_coeff = N, .v_min = Vmin, .v_max =Vmax}
+                                };
+    struct complete_sd_set completeSDs[] = {
+                                    {.func_name = "SigmaDelta_naive", .sd_step0 = SigmaDelta_step0, .sd_func = SigmaDelta, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
+                                  };
 
 // -----------
 int main(void)
@@ -345,16 +347,16 @@ int main(void)
     test_implementation_SigmaDelta_step0(SDs_step0, 1, false);
     test_implementation_SigmaDelta_step1(SDs_step1, 1, false);
     test_implementation_SigmaDelta_step2(SDs_step2, 1, false);
-    test_implementation_SigmaDelta_step3(SDs_step3, 1, true);
+    test_implementation_SigmaDelta_step3(SDs_step3, 1, false);
     test_implementation_SigmaDelta_step4(SDs_step4, 1, false);
     test_integration_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step0, 1, false);
     test_integration_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step1, 1, false);
     test_integration_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step2, 1, false);
     test_integration_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step3, 1, false);
     test_integration_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step4, 1, false);
-
-
+    test_integration_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, naiveSDs, 1, false);
     // launch_SigmaDelta_benchmark("output/benchmark_SD.dat", SDs, 5, 1, 1, 200, 10000);
+    
     // long ncol = 20, nrow = 20;
     // long packed_nrl, packed_nrh, packed_ncl, packed_nch, bord;
     // uint8 **a, **b, **c, **temp, **out;
