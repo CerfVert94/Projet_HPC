@@ -345,35 +345,59 @@ void test_implementation_SigmaDelta_step3(struct sd_set *sd, int nb_sets, bool l
     const uint8 test_vmin = 0;
 	const uint8 test_vmax = 255;
 	int num_case = 0;
+	bool modify_vmin = false;
+	bool modify_vmax = false;
+	uint8 old_val;
     for (int i = 0; i < nb_sets; i++) {
 
     	printf("Implementation test for %s\n", sd[i].func_name);
+		assert(0 < sd[i].v_min < sd[i].v_max && sd[i].v_min < sd[i].v_max && sd[i].v_max < 255);
+		assert(sd[i].n_coeff <= 4);
 		XX[0][0] = test_vmin;
-		YY[0][0] = test_vmin;
+		YY[0][0] = test_vmin + 1;
 		verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmax + 1;
+
+		XX[0][0] = test_vmax - 1;
 		YY[0][0] = test_vmax;
 	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmin - 1;
-		YY[0][0] = test_vmin;
+
+		old_val = sd[i].v_min;
+		sd[i].v_min = 10; // Modify Vmin temporarily for the test.
+		XX[0][0] = test_vmin;
+		YY[0][0] = test_vmax;
 	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 < n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmin + 1;
-		YY[0][0] = test_vmin / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmax + 2;
-		YY[0][0] = test_vmax / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmin - 1;
-		YY[0][0] = test_vmin / sd[i].n_coeff - 1;
-	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmin * sd[i].n_coeff;
+		sd[i].v_min = old_val; // Restore the Vmin.
+
+		XX[0][0] = test_vmin + 3;
 		YY[0][0] = test_vmin;
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+
+		XX[0][0] = test_vmax;
+		YY[0][0] = test_vmin;
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+
+		old_val = sd[i].v_min;
+		sd[i].v_min = 10; // Modify Vmin temporarily for the test.
+		XX[0][0] = test_vmin + 1;
+		YY[0][0] = test_vmin;
+	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		sd[i].v_min = old_val; // Restore the Vmin.
+
+
+		XX[0][0] = (test_vmin + test_vmax) / 4 * sd[i].n_coeff;
+		YY[0][0] = (test_vmin + test_vmax) / 4;
 	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = test_vmax / sd[i].n_coeff * sd[i].n_coeff;
-		YY[0][0] = test_vmax / sd[i].n_coeff;
+		
+		old_val = sd[i].v_max;
+		sd[i].v_max = 250;// Modify Vmax temporarily for the test.
+		XX[0][0] = (255 / sd[i].n_coeff) * sd[i].n_coeff;
+		YY[0][0] = (255 / sd[i].n_coeff);
 	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-		XX[0][0] = (test_vmin) / sd[i].n_coeff * sd[i].n_coeff;
-		YY[0][0] = test_vmin / sd[i].n_coeff;
+		sd[i].v_max = old_val; // Restore the Vmin.
+
+
+		XX[0][0] = test_vmin;
+		YY[0][0] = test_vmin;
 	    verify_case_SigmaDelta_step3(&sd[i], num_case++, "v_t0 = n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 		printf("Test passed.\n");
 
