@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <emmintrin.h>
 #include <tmmintrin.h>
+#include <simd_macro.h>
 
 #include "nrdef.h"
 #include "nrutil.h"

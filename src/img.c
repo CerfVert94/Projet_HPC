@@ -53,6 +53,36 @@ p_image create_image(char* filename) {
 	return tmp;
 }
 
+
+p_image create_image_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch) {
+	p_image tmp;
+	uint8** img;
+
+	/*alloc in memory for image*/
+	tmp = (p_image)malloc(sizeof(image));
+	if (!tmp) {error("Malloc error of image in");}
+	nrl -= BORD;
+	nrh += BORD;
+	ncl -= BORD;
+	nch += BORD;
+
+	tmp->nrl = nrl;
+	tmp->nrh = nrh;
+	tmp->ncl = ncl;
+	tmp->nch = nch;
+
+	tmp->I = ui8matrix(nrl, nrh, ncl, nch);
+	memset(&tmp->I[nrl][ncl], 0, NROW(nrh, nrl) * NCOL(nch, ncl) * sizeof(tmp->I[0][0]));
+	copy_ui8matrix_ui8matrix(X, nrl + BORD, nrh - BORD, ncl + BORD, nch - BORD, tmp->I);
+
+	tmp->M = ui8matrix(nrl, nrh, ncl, nch); 
+    tmp->O = ui8matrix(nrl, nrh, ncl, nch);
+    tmp->V = ui8matrix(nrl, nrh, ncl, nch);
+    tmp->E = ui8matrix(nrl, nrh, ncl, nch);
+	tmp->Omega = ui8matrix(nrl, nrh, ncl, nch);
+	return tmp;
+}
+
 void free_image(p_image image) {
 
 	free_ui8matrix(image->I, image->nrl, image->nrh, image->ncl, image->nch);

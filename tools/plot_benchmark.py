@@ -47,7 +47,7 @@ if __name__ == "__main__":
     best_labels = []
     fig = plt.figure()
     for i in range(0, len(labels) - 1):
-        if i >= 0 and np.average(data[ 1:, i]) < 2.5:
+        if i >= 0 and np.average(data[ 1:, i]) < 100:
             plt.plot(size, data[ :, i])
             plt.xlabel("Size (N x N)")
             plt.ylabel("Cycles per Point")

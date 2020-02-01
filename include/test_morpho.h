@@ -5,17 +5,17 @@
 
 
 
-void test_dilations (struct morpho_set *dilation_sets, const int nb_implementations, bool display);
-void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool display);
-void test_sequences (struct morpho_set *sequence_sets, const int nb_implementations, bool display);
+void test_dilations (struct morpho_set *dilation_sets, const int nb_implementations, bool logging);
+void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool logging);
+void test_sequences (struct morpho_set *sequence_sets, const int nb_implementations, bool logging);
 
 void test_implementation_erosion3  (struct morpho_set *morpho_set);
 void test_implementation_dilation3 (struct morpho_set *morpho_set);
-void test_implementation_erosion5  (struct morpho_set *morpho_set );
-void test_implementation_dilation5 (struct morpho_set *morpho_set );
+void test_implementation_erosion5  (struct morpho_set *morpho_set);
+void test_implementation_dilation5 (struct morpho_set *morpho_set);
 
-void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display);
-void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display);
+void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging);
+void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging);
 
 // void test_integration_erosion_5x5 (struct morpho_set *erosion_set);
 // void test_integration_dilation_5x5(struct morpho_set *dilation_set);

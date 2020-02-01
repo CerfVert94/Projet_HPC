@@ -24,7 +24,6 @@ double **init_benchmark_results(long nb_funcs, long size, long step)
 	if (!results)    
 		exit_on_error("malloc failed");
 
-	printf("Nb : %ld\n", (size / step) + 1); 
 	results[0] = (double *) malloc(sizeof(double) * nb_funcs * (size / step) + 1);
 	if (!results[0]) 
 		exit_on_error("malloc failed");
@@ -37,7 +36,14 @@ void free_benchmark_results(double **results, long nb_funcs)
 	free((char *)results[0]);
 	free((char **)results);
 }
-
+unsigned long long get_min_cycles(unsigned long long cycles[],long packet_size)
+{
+	int min_cycles = cycles[0];
+	for (long i = 1; i < packet_size; i++) 
+		if (min_cycles > cycles[i]) 
+			min_cycles = cycles[i];
+	return min_cycles;
+}
 unsigned long long get_cpu_cycles_of_morpho(struct morpho_set *ptr_mset, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
@@ -56,20 +62,43 @@ unsigned long long get_min_cpu_cycles_of_morpho(struct morpho_set *ptr_mset, lon
 		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
 		exit(EXIT_FAILURE);
 	}
+
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
 	for (int i = 0; i < packet_size; i++) {
 		cycles[i] = get_cpu_cycles_of_morpho(ptr_mset, X, nrl, nrh, ncl, nch, temp_buffer, Y);
 	}
+	min_cycles = get_min_cycles(cycles, packet_size);
+	free(cycles);
+	return min_cycles;
+}
+unsigned long long get_cpu_cycles_of_sd(struct complete_sd_set *csdset, p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
+{
+	unsigned long long begin = 0, end = 0, cycles = 0;
 
-	min_cycles = cycles[0];
-	for (long i = 1; i < packet_size; i++) 
-		if (min_cycles > cycles[i]) 
-			min_cycles = cycles[i];
+	begin = __rdtsc();
+	csdset->sd_step0(t0->M, t0->I, t0->V, t0->nrh, t0->nrh, t0->ncl, t0->nch, n_coeff, v_min, v_max);
+	csdset->sd_func(t0, t1, n_coeff, v_min, v_max);
+	end = __rdtsc();
+	return end - begin;
+}
+unsigned long long get_min_cpu_cycles_of_sd(struct complete_sd_set *csdset, long packet_size, p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
+{
+	unsigned long long min_cycles, *cycles;
+	int i;
+	if(packet_size <= 0) {
+		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
+		exit(EXIT_FAILURE);
+	}
+	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
+	for (int i = 0; i < packet_size; i++) 
+		cycles[i] = get_cpu_cycles_of_sd(csdset, t0, t1, n_coeff, v_min, v_max);
+
+	min_cycles = get_min_cycles(cycles, packet_size);
 	free(cycles);
 	return min_cycles;
 }
 
-unsigned long long get_cpu_cycles_of_sd(struct sd_set *sdset, uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max)
+unsigned long long get_cpu_cycles_of_sd_step(struct sd_set *sdset, uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max)
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
 
@@ -79,7 +108,7 @@ unsigned long long get_cpu_cycles_of_sd(struct sd_set *sdset, uint8** X, uint8**
 	return end - begin;
 }
 
-unsigned long long get_min_cpu_cycles_of_sd(struct sd_set *sdset, long packet_size, uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max)
+unsigned long long get_min_cpu_cycles_of_sd_step(struct sd_set *sdset, long packet_size, uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max)
 {
 	unsigned long long min_cycles, *cycles;
 	int i;
@@ -88,29 +117,25 @@ unsigned long long get_min_cpu_cycles_of_sd(struct sd_set *sdset, long packet_si
 		exit(EXIT_FAILURE);
 	}
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
-	for (int i = 0; i < packet_size; i++) {
-		cycles[i] = get_cpu_cycles_of_sd(sdset, X, Y, Z, nrl, nrh, ncl, nch, n_coeff, v_min, v_max);
-	}
+	for (int i = 0; i < packet_size; i++) 
+		cycles[i] = get_cpu_cycles_of_sd_step(sdset, X, Y, Z, nrl, nrh, ncl, nch, n_coeff, v_min, v_max);
 
-	min_cycles = cycles[0];
-	for (long i = 1; i < packet_size; i++) 
-		if (min_cycles > cycles[i]) 
-			min_cycles = cycles[i];
+	min_cycles = get_min_cycles(cycles, packet_size);
 	free(cycles);
 	return min_cycles;
 }
 
 
 
-double **benchmark_of_sd(struct sd_set     *sdsets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
+double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
 {
 	unsigned long long  min_cycles_sum, begin, end;
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
 	double **results;
 	uint8 **X, **Y, **Z;
-	const int n_coeff = 2;
-	const int v_min = 1;
-	const int v_max = 254;
+	uint8 n_coeff = 2;
+	uint8 v_min = 1;
+	uint8 v_max = 254;
 	
 	// Initialize to save the benchmark result.
 	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
@@ -122,10 +147,13 @@ double **benchmark_of_sd(struct sd_set     *sdsets, long nb_sets, long ls, long 
 		Z = ui8matrix        (0, size, 0, size); 
 		
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
+			n_coeff = sdsets[idx_set].n_coeff;
+			v_min   = sdsets[idx_set].v_min;
+			v_max   = sdsets[idx_set].v_max;
 			begin = __rdtsc();			
 			min_cycles_sum = 0;
 			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles_of_sd(&sdsets[idx_set], packet_size, X, Y, Z, 0, size, 0, size, N, v_min, v_max);
+				min_cycles_sum += get_min_cpu_cycles_of_sd_step(&sdsets[idx_set], packet_size, X, Y, Z, 0, size, 0, size, N, v_min, v_max);
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
@@ -227,3 +255,47 @@ double **benchmark_of_packed_morpho(struct morpho_set *msets, long nb_sets, long
 }
 
 
+double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
+{
+	unsigned long long  min_cycles_sum, begin, end;
+	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
+	double **results;
+	uint8 **X, **Y, **Z;
+	p_image t0, t1;
+	int n_coeff = 2;
+	int v_min = 1;
+	int v_max = 254;
+	
+	// Initialize to save the benchmark result.
+	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
+	
+	cnt = 0;
+	for (size = ls - 1; size < hs; size += step) {
+		X = ui8matrix_checker(0, size, 0, size, 3, 1); 
+		Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
+		Z = ui8matrix        (0, size, 0, size); 
+		t0 = create_image_from_ui8matrix(X, 0, size, 0, size);
+		t1 = create_image_from_ui8matrix(Y, 0, size, 0, size);
+		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
+			n_coeff = csdsets[idx_set].n_coeff;
+			v_min   = csdsets[idx_set].v_min;
+			v_max   = csdsets[idx_set].v_max;
+			
+			begin = __rdtsc();			
+			min_cycles_sum = 0;
+			for (idx_test = 0; idx_test < nb_tests; idx_test++)
+				min_cycles_sum += get_min_cpu_cycles_of_sd(&csdsets[idx_set], packet_size, t0, t1, n_coeff, v_min, v_max);
+			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
+			end = __rdtsc();
+			if ((size + 1) % 500 == 0 || size >= hs - 1) 
+				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles.\n",  csdsets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+		}
+		free_image(t0);
+		free_image(t1);
+		free_ui8matrix(X, 0, size, 0, size);
+		free_ui8matrix(Y, 0, size, 0, size);
+		free_ui8matrix(Z, 0, size, 0, size);
+		cnt++;
+	}
+	return results;
+}

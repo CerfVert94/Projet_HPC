@@ -17,7 +17,7 @@ FILE =  img.c mouvement.c nrutil.c vnrutil.c mutil.c morpho.c\
 		util.c mynrutil.c morpho_optim.c morpho_pack_optim.c benchmark.c
 
 ifneq ($(UNAME_S),Darwin)
-	FILE += morpho_optim_omp.c morph_main.c
+	FILE += morpho_optim_omp.c morpho_main.c
 else
 	FILE += main.c
 endif

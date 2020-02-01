@@ -21,6 +21,7 @@ typedef struct image {
 } image, *p_image;
 
 p_image create_image(char* filename);
+p_image create_image_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch);
 
 void free_image(p_image image);
 
