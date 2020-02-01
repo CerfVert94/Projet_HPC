@@ -5,9 +5,20 @@
 # Copyright (c) 2000-2013 Lionel Lacassagne
 # with a little help of Stephane Piskorski and Joel Falcou
 
+
+UNAME_S := $(shell uname -s)
+
+
+
+	
 # -- Lile list ----------
 FILE =  img.c main.c mouvement.c nrutil.c vnrutil.c mutil.c morpho.c\
-		img_SIMD.c mouvement_SIMD.c morpho_SIMD.c
+		img_SIMD.c mouvement_SIMD.c morpho_SIMD.c test_morpho.c test_mouvement.c\
+		util.c mynrutil.c morpho_pack_optim.c morpho_optim_omp.c benchmark.c
+
+ifneq ($(UNAME_S),Darwin)
+	FILE += morpho_optim.c
+endif
  
 # -- Paths ----------
 SRC_PATH = src
@@ -27,11 +38,13 @@ CC = gcc
 AR = ar -rc
 
 # -- Flags ----------
-C_DEBUG_FLAGS = -O0 -g
+C_DEBUG_FLAGS = -O3 -g
 C_CC_FLAGS = -std=c99
 C_OPTIMISATION_FLAGS = -O3 -fstrict-aliasing
-C_ARCH_FLAGS = -mssse3
-
+C_ARCH_FLAGS = -mssse3 
+ifneq ($(UNAME_S),Darwin)
+	C_ARCH_FLAGS += -fopenmp
+endif
 #C_OS_FLAGS = -D$(OS)
 C_CONFIG_FLAGS = -D$(CONFIG)
 C_INC_FLAGS = -I$(INC_PATH)
