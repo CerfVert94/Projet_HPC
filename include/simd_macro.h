@@ -17,7 +17,12 @@
 #define rightshift1a _mm_setr_epi8(-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)
 #define rightshift1b _mm_setr_epi8(0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
 
+// -------
+// operateurs
+// -------
 
+#define vector_and3(A, B, C)	(_mm_and_si128(_mm_and_si128(A, B), C))
+#define vector_or3(A, B, C)	(_mm_or_si128 (_mm_or_si128 (A, B), C))
 
 
 // -----------------------
@@ -77,4 +82,6 @@
 							   c = _mm_cmplt_epi8(a, b);\
 							   a = _mm_add_epi8(a, d);\
 							   b = _mm_add_epi8(b, d)
+
+
 #endif // __SIMD_MACRO_H__

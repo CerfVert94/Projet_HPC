@@ -10,7 +10,7 @@
 #define Vmax 254
 
 #define BORD 2
-#define vBORD BORD/16 +1
+#define vBORD (BORD/16 +1)
 
 #define max(a,b) (a >= b ? a : b)
 #define min(a,b) (a <= b ? a : b)
@@ -76,6 +76,8 @@ static inline long pack8(long n)
     return n < 0 ? n / 8 + roundup_over8(n % 8) : (n + 1) / 8 + roundup_over8((n + 1) % 8) - 1;
 }
 void packing_test(char *filename, pack_func_t pack_func, unpack_func_t unpack_func, const char *func_name, bool display);
+
+
 
 
 #define NROW(nrl, nrh)  (nrh - nrl + 1)
