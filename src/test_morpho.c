@@ -30,11 +30,11 @@ void test_erosions(char *filename, struct morpho_set *erosion_sets , const int n
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
 	uint8 **image;
 	long nrl, nrh, ncl, nch;
-    for (int i = 0; i < nb_sets; i++) {
+    image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
+    	
+	for (int i = 0; i < nb_sets; i++) 
         test_implementation_erosion3(&erosion_sets[i]);
-    	image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-		test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, &erosion_sets[i], logging);
-	}
+	test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 
 }
@@ -43,11 +43,11 @@ void test_dilations(char *filename, struct morpho_set *dilation_sets, const int 
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_dilation_naive", ui8matrix_dilation_naive};
 	uint8 **image;
 	long nrl, nrh, ncl, nch;
-    for (int i = 0; i < nb_sets; i++) {
+    image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
+    for (int i = 0; i < nb_sets; i++) 
 		test_implementation_dilation3(&dilation_sets[i]);
-    	image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-		test_intergration(image, nrl, nrh, ncl, nch, filename,  &naive_morpho_set, &dilation_sets[i], logging);
-	}
+	test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
+		
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 }
 void test_sequences(char *filename, struct morpho_set *sequence_sets, const int nb_sets, bool logging)
@@ -178,7 +178,7 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 
 
 
-void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets,bool logging)
+void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets,int nb_sets, bool logging)
 {
       
     long temp_nrh, temp_nch;
@@ -186,106 +186,52 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
     // struct struct_elem_dim *s = naive_morpho_set->s;
     uint8 **X, **Y, **Z,**temp_buffer;
 
+	assert((nrh - nrl + 1) > 10 && (nch - ncl + 1) > 10);
     // Test Input
     X = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 	// Middle Buffer
     temp_buffer = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// Test Output
-	Y = ui8matrix(nrl, nrh, ncl, nch);
-	// Valid Output
-	Z = ui8matrix(nrl, nrh, ncl, nch);
-
+	
     // Full zero intialization & copy image 
     memset_ui8matrix(X          , 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 	memset_ui8matrix(temp_buffer, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
     copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
+	
+    for(temp_nrh = nrh - 10; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = nch - 10; temp_nch < nch + 1; temp_nch++){
+			// Test Output
+			Y = ui8matrix(nrl, temp_nrh, ncl, temp_nch);
+			// Valid Output
+			Z = ui8matrix(nrl, temp_nrh, ncl, temp_nch);
+			for (int i = 0; i < nb_sets; i++) {
+				// if ((temp_nch + 1) % 10 == 0) {
+					printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets[i].func_name, filename);
+					printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
+				// }
 
-    for(temp_nrh = nrl; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = ncl; temp_nch < nch + 1; temp_nch++){
-            memset_ui8matrix(Z, 0, nrl, temp_nrh , ncl, temp_nch); 
-            naive_morpho_set->morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
-         
-			printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets->func_name, filename);
-			printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
+				memset_ui8matrix(Y, 0, nrl, temp_nrh, ncl, temp_nch); 
+				memset_ui8matrix(Z, 0, nrl, temp_nrh, ncl, temp_nch); 
+				naive_morpho_set->morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
+				morpho_sets[i].morpho_func(   X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
 
-			memset_ui8matrix          (Y, 0, nrl, temp_nrh, ncl, temp_nch); 
-			morpho_sets->morpho_func(X   , nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
-
-			if (logging) {
-				printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
-				display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%03u ", "Input");
-				display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets->func_name);
-				display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
+				if (logging) {
+					printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
+					display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%03u ", "Input");
+					display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets[i].func_name);
+					display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
+				}
+				// for (long row = nrl; row < temp_nrh; row++)
+				assert(!memcmp_ui8matrix(Y, Z, nrl, temp_nrh, ncl, temp_nch));
+				// if ((temp_nch + 1) % 10 == 0) 
+					printf("\tTest passed\n");
 			}
-			for (long row = nrl; row < temp_nrh; row++)
-				assert(!memcmp_ui8matrix(Y, Z, row, row, ncl, temp_nch));
-			printf("\tTest passed\n");
+			free_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch); 
+			free_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch); 
 		}
     }
-	free_ui8matrix(Y, nrl, nrh, ncl, nch); 
-	free_ui8matrix(Z, nrl, nrh, ncl, nch); 
 	free_ui8matrix(temp_buffer, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
     free_ui8matrix(X, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
 }
-/*
-void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
-{
-      
-    long nrl, ncl, nrh, nch, temp_nrh, temp_nch;
-	long packed_nrl, packed_ncl, packed_nrh, packed_nch;
-    // struct struct_elem_dim *s = naive_morpho_set->s;
-    uint8 **image, **X, **Y, **Z,**temp_buffer;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
-
-    image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-
-    // Test Input
-    X = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// Middle Buffer
-    temp_buffer = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-
-    // Full zero intialization & copy image 
-    memset_ui8matrix(X, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	memset_ui8matrix(temp_buffer, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	
-    copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
-	//octal_to_binary_ui8matrix(X, nrl, nrh, ncl, nch);
-
-    for(temp_nrh = nrl + 9; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = ncl + 9; temp_nch < nch + 1; temp_nch++){
-            // Test Output
-            Y = ui8matrix(nrl, temp_nrh, ncl, temp_nch);
-            // Valid Output
-            Z = ui8matrix(nrl, temp_nrh, ncl, temp_nch);
-            memset_ui8matrix(Z, 0, nrl, temp_nrh , ncl, temp_nch); 
-            naive_morpho_set->morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
-         
-            for (int i = 0; i < nb_implementations; i++){
-                printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets[i].func_name, filename);
-                printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
-
-				if (morpho_sets[i].pack_type == NO_PACK) {
-					memset_ui8matrix          (Y, 0, nrl, temp_nrh, ncl, temp_nch); 
-					morpho_sets[i].morpho_func(X   , nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
-				}
-                if (logging) {
-					printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
-                    display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%03u ", "Input");
-                    display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets[i].func_name);
-                    display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
-                }
-                assert(!memcmp_ui8matrix(Y, Z, nrl, temp_nrh, ncl, temp_nch));
-	            printf("\tTest passed\n");
-            }
-            free_ui8matrix(Y, nrl, temp_nrh , ncl, temp_nch); 
-            free_ui8matrix(Z, nrl, temp_nrh , ncl, temp_nch); 
-        }
-    }
-	free_ui8matrix(temp_buffer, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-    free_ui8matrix(X, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	free_ui8matrix(image, nrl, nrh, ncl, nch);
-}
-*/
 void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
 {
       
