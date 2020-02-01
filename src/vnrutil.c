@@ -1834,7 +1834,7 @@ void display_vui8vector(vuint8 *vX, int j0, int j1, char *format, char *name)
     vuint8 x;
     
     if(name != NULL)
-        printf("%s\n", name);
+        printf("%s", name);
     
     
     for(j=j0; j<=j1; j++) {
@@ -2130,4 +2130,22 @@ void display_vf32matrix(vfloat32 **vX, int i0, int i1, int j0, int j1, char *for
         printf("\n");
     }
     printf("\n");
+}
+
+/*-----------------------------*/
+void vui8matrix2ui8matrix(vuint8** X, uint8** Y, long nrl, long nrh, int v0, int v1) {
+/*-----------------------------*/
+
+    long i;
+    int v;
+    vuint8 vX;
+
+    for (i = nrl; i <= nrh; i++) {
+        for ( v = v0; v <= v1; v++) {
+            vX = _mm_load_si128((vuint8*) &X[i][v]);
+            Y[i] = (uint8*)&vX;
+
+        }
+    }
+
 }
