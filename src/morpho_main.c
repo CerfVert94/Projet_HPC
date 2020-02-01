@@ -36,11 +36,11 @@ void info(void)
 #endif
 }
 
-void launch_benchmark(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size) {
+void launch_benchmark(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     FILE *file;
     
     double **results;
-    long step = 100, k = 0, cnt = 0;
+    long k = 0, cnt = 0;
     
     results = benchmark_of_morpho(msets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
 
@@ -68,13 +68,13 @@ void launch_benchmark(const char *filename, struct morpho_set *msets, const int 
 }
 
 
-void launch_SigmaDelta_benchmark(const char *filename, struct sd_set *sdsets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size) {
+void launch_SD_step_benchmark(const char *filename, struct sd_set *sdsets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     FILE *file;
     
     double **results;
-    long step = 100, k = 0, cnt = 0;
+    long k = 0, cnt = 0;
     
-    results = benchmark_of_sd(sdsets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+    results = benchmark_of_sd_step(sdsets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
 
     file = fopen(filename, "w");
     if (!file)
@@ -98,11 +98,43 @@ void launch_SigmaDelta_benchmark(const char *filename, struct sd_set *sdsets, co
     free_benchmark_results(results, 1);
     fclose(file);
 }
-void launch_benchmark_compression(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size) {
+
+
+void launch_SD_benchmark(const char *filename, struct complete_sd_set *csdsets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     FILE *file;
     
     double **results;
-    long step = 100, k = 0, cnt = 0;
+    long k = 0, cnt = 0;
+    
+    results = benchmark_of_sd(csdsets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+
+    file = fopen(filename, "w");
+    if (!file)
+        exit_on_error("fopen failed");
+    k = 0;
+
+    fprintf(file, "#%*s", 4, "Size");
+    for (long i = 0; i < nb_sets; i++) {
+        fprintf(file, RALIGNED_STR, csdsets[i].func_name);
+    }
+
+    fputc('\n', file);
+    for (long size = min_size; size < max_size + 1; size += step) {
+        fprintf(file, "%*ld", 4, size);
+        for (long i = 0; i < nb_sets; i++) {
+            fprintf(file, RALIGNED_DOUBLE, results[i][k]);
+        }
+        fprintf(file, "\n");
+        k++;
+    }
+    free_benchmark_results(results, 1);
+    fclose(file);
+}
+void launch_benchmark_compression(const char *filename, struct morpho_set *msets, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    FILE *file;
+    
+    double **results;
+    long k = 0, cnt = 0;
     
     // results = benchmark_o_(msets, nb_sets, min_size, max_size, step, nb_tests, packet_size);
 
@@ -253,7 +285,7 @@ struct morpho_set dilation_sets[] = {
                                         // {.func_name = "ui8matrix_dilation_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_OMP               , .pack_type = NO_PACK},
                                         // {.func_name = "ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP               , .pack_type = NO_PACK},
                                         // {.func_name = "ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP               , .pack_type = NO_PACK},
-                                        {.func_name = "ui8matrix_dilation_hpacked_divide_row_and_conquer"            , .morpho_func = ui8matrix_dilation_hpacked_divide_row_and_conquer               , .pack_type = HPACK},
+                                        // {.func_name = "ui8matrix_dilation_hpacked_divide_row_and_conquer"            , .morpho_func = ui8matrix_dilation_hpacked_divide_row_and_conquer               , .pack_type = HPACK},
                                         };
 
 
@@ -306,33 +338,34 @@ struct morpho_set dilation_sets[] = {
                                         // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP               },
                                        };
     struct morpho_set sequence_sets[] = {
-                                        {.func_name = "ui8matrix_sequence_naive"                     , .morpho_func = ui8matrix_sequence_naive                        }, 
-                                        {.func_name = "ui8matrix_sequence_divide_row_and_conquer_OMP", .morpho_func = ui8matrix_sequence_divide_row_and_conquer_OMP   },
+                                        // {.func_name = "ui8matrix_sequence_naive"                     , .morpho_func = ui8matrix_sequence_naive                        }, 
+                                        // {.func_name = "ui8matrix_sequence_divide_row_and_conquer_OMP", .morpho_func = ui8matrix_sequence_divide_row_and_conquer_OMP   },
                                        };
     struct sd_set SDs_step0[] = {
-                                {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
                                 };  
     struct sd_set SDs_step1[] = {
-                                {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
                                 };
     struct sd_set SDs_step2[] = {
-                                {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
                                 };
     struct sd_set SDs_step3[] = {
-                                {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
                                 };
     struct sd_set SDs_step4[] = {
-                                {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
                                 };
-    struct sd_set naiveSDs[5] = {
-                                 {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
-                                 {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
-                                 {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
-                                 {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
-                                 {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4, .n_coeff = N, .v_min = Vmin, .v_max =Vmax}
+    struct sd_set SD_steps[5] = {
+                                 {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax}
                                 };
+    
     struct complete_sd_set completeSDs[] = {
-                                    {.func_name = "SigmaDelta_naive", .sd_step0 = SigmaDelta_step0, .sd_func = SigmaDelta, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
+                                    {.func_name = "SigmaDelta_naive", .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta, .n_coeff = N, .v_min = Vmin, .v_max = Vmax},
                                   };
 
 // -----------
@@ -354,8 +387,9 @@ int main(void)
     test_integration_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step2, 1, false);
     test_integration_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step3, 1, false);
     test_integration_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm",SDs_step4, 1, false);
-    test_integration_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, naiveSDs, 1, false);
-    // launch_SigmaDelta_benchmark("output/benchmark_SD.dat", SDs, 5, 1, 1, 200, 10000);
+    test_integration_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
+    launch_SD_step_benchmark("output/benchmark_SD_step.dat", SD_steps, 5, 1, 1, 200, 10000, 50);
+    launch_SD_benchmark("output/benchmark_SD.dat", completeSDs, 1, 1, 1, 200, 10000, 50);
     
     // long ncol = 20, nrow = 20;
     // long packed_nrl, packed_nrh, packed_ncl, packed_nch, bord;

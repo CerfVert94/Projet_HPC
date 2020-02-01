@@ -145,48 +145,39 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 
 
 
-void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool display)
+void test_erosions  (struct morpho_set *erosion_sets , const int nb_implementations, bool logging)
 {
     const long start_x = 280, start_y = 200, end_x=320, end_y=240;
     long x = 0, y = 0, nrl, nrh, ncl, nch;
     char filename[128];
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
-    for (int i = 0; i < nb_implementations; i++) {
-            test_implementation_erosion3(&erosion_sets[i]);
-    }
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, erosion_sets, nb_implementations, display);
-	
-  
-    // snprintf(filename, 128, "testcases/car{%ld}{%ld}.pgm",x,y);
+    for (int i = 0; i < nb_implementations; i++) 
+        test_implementation_erosion3(&erosion_sets[i]);
+
+    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, erosion_sets, nb_implementations, logging);
+
 }
-void test_dilations(struct morpho_set *dilation_sets, const int nb_implementations, bool display)
+void test_dilations(struct morpho_set *dilation_sets, const int nb_implementations, bool logging)
 {
     const long start_x = 280, start_y = 200, end_x=320, end_y=240;
     long x = 0, y = 0, nrl, nrh, ncl, nch;
     char filename[128];
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_dilation_naive", ui8matrix_dilation_naive};
-    for (int i = 0; i < nb_implementations; i++) {
-        if (dilation_sets[i].pack_type == NO_PACK)
-			test_implementation_dilation3(&dilation_sets[i]);
-		
-        
-    }
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
-	// test_packed_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, display);
-  
-    // snprintf(filename, 128, "testcases/car{%ld}{%ld}.pgm",x,y);
+    for (int i = 0; i < nb_implementations; i++) 
+		test_implementation_dilation3(&dilation_sets[i]);
+
+    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, dilation_sets, nb_implementations, logging);
 }
-void test_sequences(struct morpho_set *sequence_sets, const int nb_implementations, bool display)
+void test_sequences(struct morpho_set *sequence_sets, const int nb_implementations, bool logging)
 {
     const long start_x = 280, start_y = 200, end_x=0, end_y=240;
     long x = 0, y = 0, nrl, nrh, ncl, nch;
     char filename[128];
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive};
-    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, sequence_sets, nb_implementations, display);
-    // snprintf(filename, 128, "testcases/car{%ld}{%ld}.pgm",x,y);
+    test_intergration("../car3/car_3000.pgm", &naive_morpho_set, sequence_sets, nb_implementations, logging);
 }
 
-void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display)
+void test_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
 {
       
     long nrl, ncl, nrh, nch, temp_nrh, temp_nch;
@@ -226,7 +217,7 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
 					memset_ui8matrix          (Y, 0, nrl, temp_nrh, ncl, temp_nch); 
 					morpho_sets[i].morpho_func(X   , nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);
 				}
-                if (display) {
+                if (logging) {
 					printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
                     display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%03u ", "Input");
                     display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets[i].func_name);
@@ -244,7 +235,7 @@ void test_intergration(char *filename, struct morpho_set *naive_morpho_set, stru
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 }
 
-void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool display)
+void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets, const int nb_implementations, bool logging)
 {
       
     long nrl, ncl, nrh, nch, temp_nrh, temp_nch;
@@ -290,7 +281,7 @@ void test_packed_intergration(char *filename, struct morpho_set *naive_morpho_se
 				// Get packed output
 				morpho_sets[i].morpho_func(packedX,  packed_nrl,  packed_nrh,  packed_ncl,  packed_nch, temp_packed_buffer, packedY);	
 				unfcpack_ui8matrix_ui8matrix(packedY, nrl, temp_nrh, ncl, temp_nch, packed_nrl,  packed_nrh,  packed_ncl,  packed_nch, bord, Y);
-                if (display) {
+                if (logging) {
 					printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
                     display_ui8matrix(X, nrl, temp_nrh, ncl, temp_nch, "%u ", "Input");
                     display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%u ", morpho_sets[i].func_name);

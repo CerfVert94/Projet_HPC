@@ -237,7 +237,7 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
 }
-void test_integration_SigmaDelta(char *filename0, char *filename1, struct complete_sd_set *sd, struct sd_set sd_step0_to_step4_naive[5], int nb_sets, bool logging)
+void test_integration_SigmaDelta(char *filename0, char *filename1, struct complete_sd_set *sd, int nb_sets, bool logging)
 {
 	long nrl0, ncl0, nrh0, nch0;
 	long nrl1, ncl1, nrh1, nch1;
@@ -246,6 +246,14 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
     uint8 **X, **Y, **Z;
 	bool sd_output_is_valid = false;
 	uint8 n_coeff, v_min, v_max;
+
+	struct sd_set sd_step0_to_step4_naive[5] = {
+                                 {.func_name = "SigmaDelta_step0", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step1", .sd_func = SigmaDelta_step1_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
+                                 {.func_name = "SigmaDelta_step2", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step3", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax},
+                                 {.func_name = "SigmaDelta_step4", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax}
+                                };
 
 	t0 = create_image(filename0);
 	t1 = create_image(filename1);

@@ -34,7 +34,7 @@ void routine_FrameDifference(p_image t0, p_image t1) {
 }
 
 /*-----------------------------*/
-void SigmaDelta_step0(uint8** M  , uint8** I, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_step0_naive(uint8** M  , uint8** I, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------*/
 	copy_ui8matrix_ui8matrix(I, nrl, nrh, ncl, nch, M);
 	long i, j;
@@ -45,7 +45,7 @@ void SigmaDelta_step0(uint8** M  , uint8** I, uint8** V, long nrl, long nrh, lon
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step1(uint8** M_1, uint8** I, uint8** M, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_step1_naive(uint8** M_1, uint8** I, uint8** M, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
 
@@ -63,7 +63,7 @@ void SigmaDelta_step1(uint8** M_1, uint8** I, uint8** M, long nrl, long nrh, lon
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step2(uint8** M  , uint8** I, uint8** O, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_step2_naive(uint8** M  , uint8** I, uint8** O, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
 
@@ -75,7 +75,7 @@ void SigmaDelta_step2(uint8** M  , uint8** I, uint8** O, long nrl, long nrh, lon
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step3(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_step3_naive(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
 	int16 v_0;
@@ -96,7 +96,7 @@ void SigmaDelta_step3(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, lon
 }
 
 /*-----------------------------------------*/
-void SigmaDelta_step4(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_step4_naive(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
 
@@ -112,12 +112,12 @@ void SigmaDelta_step4(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long 
 }
 
 /*-----------------------------------------*/
-void SigmaDelta(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+void SigmaDelta_naive(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
-	SigmaDelta_step1(t0->M, t1->I, t1->M, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step2(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step3(t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
-	SigmaDelta_step4(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step1_naive(t0->M, t1->I, t1->M, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step2_naive(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step3_naive(t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
+	SigmaDelta_step4_naive(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 }
 
 /*-------*/
@@ -130,8 +130,8 @@ void test_mouvement() {
 	printf("Nrh: %ld\n", t0->nrh);
 	printf("Nch: %ld\n", t0->nch);
 
-	SigmaDelta_step0(t0->I, t0->M, t0->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, N, Vmin, Vmax);
-	SigmaDelta(t0, t1, N, Vmin, Vmax);
+	SigmaDelta_step0_naive(t0->I, t0->M, t0->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, N, Vmin, Vmax);
+	SigmaDelta_naive(t0, t1, N, Vmin, Vmax);
 	for (long i = t1->nrl; i < 50; i++) { 
 		for (long j = t1->ncl; j < 50; j++) {
 			printf("%d ", t1->E[i][j]);
