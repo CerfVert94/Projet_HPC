@@ -11,6 +11,7 @@
 
 #include "nrdef.h"
 #include "nrutil.h"
+#include "mynrutil.h"
 #include "util.h"
 
 #include "img.h"
@@ -38,7 +39,7 @@ p_image create_image(char* filename) {
 
 	tmp->I = ui8matrix(nrl, nrh, ncl, nch);
 	// printf("%ld %ld\n", nrh, nrl);
-	memset(&tmp->I[nrl][ncl], 0, NROW(nrh, nrl) * NCOL(nch, ncl) * sizeof(tmp->I[0][0]));
+	memset_ui8matrix(tmp->I, 0, nrl, nrh, ncl, nch);
 	
 	copy_ui8matrix_ui8matrix(img, rl, rh, cl, ch, tmp->I);
 
@@ -72,7 +73,7 @@ p_image create_image_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, lon
 	tmp->nch = nch;
 
 	tmp->I = ui8matrix(nrl, nrh, ncl, nch);
-	memset(&tmp->I[nrl][ncl], 0, NROW(nrh, nrl) * NCOL(nch, ncl) * sizeof(tmp->I[0][0]));
+	memset_ui8matrix(tmp->I, 0, nrl, nrh, ncl, nch);
 	copy_ui8matrix_ui8matrix(X, nrl + BORD, nrh - BORD, ncl + BORD, nch - BORD, tmp->I);
 
 	tmp->M = ui8matrix(nrl, nrh, ncl, nch); 
