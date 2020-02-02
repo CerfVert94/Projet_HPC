@@ -7,6 +7,7 @@
 
 #include "nrdef.h"
 #include "nrutil.h"
+#include "mynrutil.h"
 
 #include "util.h"
 #include "img.h"
@@ -37,10 +38,11 @@ void routine_FrameDifference(p_image t0, p_image t1) {
 void SigmaDelta_step0_naive(uint8** M  , uint8** I, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------*/
 	copy_ui8matrix_ui8matrix(I, nrl, nrh, ncl, nch, M);
+	// display_ui8matrix(M, nrl, nrh, ncl, nch, "%u", "M_NAIVE");
 	long i, j;
 	for (i = nrl; i <= nrh; i++) {
 		for (j = ncl; j <= nch; j++)
-			V[i][j] = 1;
+			V[i][j] = v_min;
 	}
 }
 
@@ -59,8 +61,8 @@ void SigmaDelta_step1_naive(uint8** M_1, uint8** I, uint8** M, long nrl, long nr
 				M[i][j] = M_1[i][j];
 		}
 	}
-
 }
+
 
 /*-----------------------------------------*/
 void SigmaDelta_step2_naive(uint8** M  , uint8** I, uint8** O, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
@@ -73,13 +75,12 @@ void SigmaDelta_step2_naive(uint8** M  , uint8** I, uint8** O, long nrl, long nr
 	}
 
 }
-
 /*-----------------------------------------*/
 void SigmaDelta_step3_naive(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
 	int16 v_0;
-
+	int16 n_o = 0;
 	for (i = nrl; i <= nrh; i++) {
 		for (j = ncl; j <= nch; j++) {
 			
@@ -94,7 +95,6 @@ void SigmaDelta_step3_naive(uint8** V_1, uint8** O, uint8** V, long nrl, long nr
 	}
 
 }
-
 /*-----------------------------------------*/
 void SigmaDelta_step4_naive(uint8** O, uint8** V, uint8** E, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
@@ -118,27 +118,4 @@ void SigmaDelta_naive(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 
 	SigmaDelta_step2_naive(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 	SigmaDelta_step3_naive(t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 	SigmaDelta_step4_naive(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
-}
-
-/*-------*/
-void test_mouvement() {
-/*-------*/
-	
-	p_image t0 = create_image("../car3/car_3000.pgm");
-	p_image t1 = create_image("../car3/car_3001.pgm");
-
-	printf("Nrh: %ld\n", t0->nrh);
-	printf("Nch: %ld\n", t0->nch);
-
-	SigmaDelta_step0_naive(t0->I, t0->M, t0->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, N, Vmin, Vmax);
-	SigmaDelta_naive(t0, t1, N, Vmin, Vmax);
-	for (long i = t1->nrl; i < 50; i++) { 
-		for (long j = t1->ncl; j < 50; j++) {
-			printf("%d ", t1->E[i][j]);
-		}
-		printf("\n");
-	}
-
-	free_image(t0);
-	free_image(t1);
 }
