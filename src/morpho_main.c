@@ -274,8 +274,8 @@ int main(void)
     long nb_sets;
     nb_sets = 27; 
 
-    // test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 2, false);
-    // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 2, 1, 1, 200, 5000, 10);
+    test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 2, false);
+    launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 2, 1, 1, 200, 5000, 10);
     // test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 3, false);
     // launch_SD_step_benchmark("output/benchmark_sdstep1.dat"             , SDs_step1, 3, 1, 1, 200, 5000, 10);
     // test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 3, false);

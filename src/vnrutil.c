@@ -68,7 +68,7 @@ void s2v(int si0, int si1, int sj0, int sj1, int c, int *vi0, int *vi1, int *vj0
 void v2m(int vi0, int vi1, int vj0, int vj1, int c, int *mi0, int *mi1, int *mj0, int *mj1)
 /* ------------------------------------------------------------------------------------- */
 {
-    // conversion indices vectoriels en indices scalaires pour malloc alignŽs
+    // conversion indices vectoriels en indices scalaires pour malloc alignï¿½s
     *mi0 = vi0;
     *mi1 = vi1;
     
@@ -2131,58 +2131,47 @@ void display_vf32matrix(vfloat32 **vX, int i0, int i1, int j0, int j1, char *for
     }
     printf("\n");
 }
-/* ----------------------------------------------------- */
-void display_vfloat32(vfloat32 x, char *format, char *name)
-/* ----------------------------------------------------- */
-{
-    int i;
-    vfloat32 T[1];
-    float32 *p = (float32*) T;
+// /* ----------------------------------------------------- */
+// void display_vfloat32(vfloat32 x, char *format, char *name)
+// /* ----------------------------------------------------- */
+// {
+//     int i;
+//     vfloat32 T[1];
+//     float32 *p = (float32*) T;
     
-    //vec_st(x, 0, T);
-    _mm_store_ps((float*)T, x);
+//     //vec_st(x, 0, T);
+//     _mm_store_ps((float*)T, x);
     
-    if(name != NULL) printf("%s", name);
+//     if(name != NULL) printf("%s", name);
     
-    for(i=0; i<4; i++)
-        printf(format, p[i]);
+//     for(i=0; i<4; i++)
+//         printf(format, p[i]);
 
-    printf("\n");
-}
-/*--------------------------------------------------------------------------------*/
-void vui8vector2ui8scalar(vuint8* X, uint8* Y, long nrl, long nrh, int v0, int v1) {
+//     printf("\n");
+// }
 /*--------------------------------------------------------------------------------*/
 
-    int i;
-    vuint8* vX;
-    uint8* p = (uint8*) vX;
 
-    _mm_store_si128((uint8*)vX, X);
-    _mm_store_si128(())
+// /*-----------------------------------------------------------------*/
+// void vui8matrix2ui8matrix(vuint8** X, uint8** Y, long nrl, long nrh) {
+// /*-----------------------------------------------------------------*/
 
+//     long i;
+//     int v;
 
-}
+//     vuint8 vX;
 
-/*-----------------------------------------------------------------*/
-void vui8matrix2ui8matrix(vuint8** X, uint8** Y, long nrl, long nrh) {
-/*-----------------------------------------------------------------*/
+//     for (i = nrl; i <= nrh; i++) {
+//         // for (v = v0; v <= v1; v++) {
+//             vX = _mm_load_si128((vuint8*) &X[i][v]);
+//             // vui8vector2ui8scalar()
+//         }
+//     }
 
-    long i;
-    int v;
+//     for(int j = nrl; j <= nrh; j++){
+//         if (j % 16 == 0)
+//             printf("%4d", Y[0][j]);
+//     }
+//     puts("");
 
-    vuint8 vX;
-
-    for (i = nrl; i <= nrh; i++) {
-        for (v = v0; v <= v1; v++) {
-            vX = _mm_load_si128((vuint8*) &X[i][v]);
-            vui8vector2ui8scalar()
-        }
-    }
-
-    for(int j = nrl; j <= nrh; j++){
-        if (j % 16 == 0)
-            printf("%4d", Y[0][j]);
-    }
-    puts("");
-
-}
+// }

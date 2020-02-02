@@ -17,6 +17,7 @@
 
 #include "vnrdef.h"
 #include "vnrutil.h"
+#include "myvnrutil.h"
 
 #include "img.h"
 #include "img_SIMD.h"
@@ -126,10 +127,22 @@ void test2_SIMD_img() {
 	
 	//p_image t = create_image("../car3/car_3000.pgm");
 	p_vimage vt = create_vimage("../car3/car_3000.pgm");
-	uint8** test = ui8matrix(vt->nrl, vt->nrh, vt-> ncl, vt->nch);
+	uint8** test; //ui8matrix(vt->nrl, vt->nrh, vt-> ncl, vt->nch);
+	long nrl, nrh, ncl, nch;
+	uint8** u8img = LoadPGM_ui8matrix("../car3/car_3000.pgm",&nrl, &nrh, &ncl, &nrh);
+	long nrl_prime= 0, nrh_prime = 0, ncl_prime = 0, nch_prime = 0;
 
 
-    display_vui8vector(vt->I[0], vt->v0, vt->v1, "%4d", "vT"); puts("");
-    vui8matrix2ui8matrix(vt->I, test, vt->nrl, vt->nrh, vt->v0, vt->v1);
-    display_ui8vector((uint8*) test[2], vt->ncl, vt->nch, "%4d", "v"); puts("");
+	printf("v0 ~ v1 : %d %d\n",  vt->v0, vt->v1);
+	display_ui8matrix(u8img, 0, 5, 0, 31, "%4u", "image"); puts("");
+	display_vui8matrix(vt->I, 0, 1, 0, 1, "%4u", "vimage");
+    // display_vui8vector(vt->I[0], vt->v0, vt->v1, "%4u", "vT"); puts("");
+    test = vui8matrix_to_ui8matrix(vt->I, 0, 5, 0, 1, &nrl_prime, &nrh_prime, &ncl_prime, &nch_prime);
+	
+    printf("%ld %ld %ld %ld\n", nrl_prime, nrh_prime, ncl_prime, nch_prime);
+	display_ui8matrix(test, nrl_prime, nrh_prime, ncl_prime, nch_prime, "%4u", "image"); puts("");
+	
+	free_ui8matrix(u8img, nrl, nrh, ncl, nch);
+	// display_vui8vector(vt->I[0], vt->v0, vt->v1, "%4u", "vT"); puts("");
+    // display_ui8vector((uint8*) test[2], vt->ncl, vt->nch, "%4d", "v"); puts("");
 }
