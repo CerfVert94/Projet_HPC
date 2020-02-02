@@ -11,6 +11,7 @@ struct morpho_set{
     char func_name[128];
     void (*morpho_func)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
     enum {NO_PACK, HPACK, VPACK}pack_type;
+    instruction_type instr_type;
 };
 
 

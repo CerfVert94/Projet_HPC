@@ -3,10 +3,11 @@
 #include <img.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 //#include <malloc.h>
+#include <util.h>
 #include <morpho.h>
 
-#include <util.h>
 
 #define SE_NRL -1
 #define SE_NRH  1

@@ -5,7 +5,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include <stdbool.h>
+typedef enum {SCALAR, SIMD} instruction_type;
 #define Vmin 1
 #define Vmax 254
 

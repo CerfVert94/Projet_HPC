@@ -8,14 +8,17 @@
 #define THRESHOLD 20
 #define N 2
 
+
 struct sd_set{
     char func_name[128];
     void (*sd_func)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max);
     uint8 n_coeff; 
     uint8 v_min; 
     uint8 v_max; 
+    instruction_type instr_type;
     // enum {SD_STEP0, SD_STEP1, SD_STEP2, SD_STEP3, SD_STEP4}sd_type;
 };
+
 struct complete_sd_set{
     char func_name[128];
     void (*sd_step0)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max);
@@ -23,8 +26,8 @@ struct complete_sd_set{
     uint8 n_coeff;
     uint8 v_min; 
     uint8 v_max; 
+    instruction_type instr_type;
 };
-
 
 
 void routine_FrameDifference(p_image t, p_image t1);

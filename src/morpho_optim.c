@@ -1,10 +1,11 @@
-#include "nrdef.h"
-#include "nrutil.h"
-#include <img.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include "nrdef.h"
+#include "nrutil.h"
+#include "util.h"
+#include <img.h>
 #include <morpho.h>
-#include <util.h>
 
 #define scalar_and3(input, col)                  (input[col - 1] & input[col + 0] & input[col + 1])
 #define scalar_and5(input, col) (input[col - 2] & input[col - 1] & input[col + 0] & input[col + 1] & input[col + 2])

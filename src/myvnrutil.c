@@ -13,7 +13,7 @@
 #include "myvnrutil.h"
 #include "mynrutil.h"
 
-uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, long *nrl, long *nrh, int *ncl, int *nch)
+uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, long *nrl, long *nrh, long *ncl, long *nch)
 /*--------------------------------------------------------------------------------*/
 {
     int i, j, card;

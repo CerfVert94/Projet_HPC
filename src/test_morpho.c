@@ -1,13 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <nrdef.h>
 #include <nrutil.h>
 #include <mynrutil.h>
+#include <util.h>
 #include <img.h>
 #include <morpho.h>
-#include <stdbool.h>
 #include <test_morpho.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <util.h>
 #include <mutil.h>
 #include <string.h>
 #include <assert.h>

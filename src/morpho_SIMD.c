@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <emmintrin.h>
 #include <tmmintrin.h>
 #include <simd_macro.h>
