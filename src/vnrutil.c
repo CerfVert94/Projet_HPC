@@ -39,6 +39,7 @@ void s2v1D(int sj0, int sj1, int c, int *vj0, int *vj1)
         *vj0 = sj0/c;
     }
     *vj1 = sj1/c; 
+    
 }
 /* ------------------------------------------------- */
 void v2m1D(int vj0, int vj1, int c, int *mj0, int *mj1)

@@ -2,10 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <nrdef.h>
-#include <nrutil.h>
-#include <util.h>
-#include <img.h>
+#include "nrdef.h"
+#include "vnrdef.h"
+#include "nrutil.h"
+#include "mynrutil.h"
+#include "vnrutil.h"
+#include "myvnrutil.h"
+#include "util.h"
+#include "img.h"
+#include "img_SIMD.h"
 #include <morpho.h>
 #include <mouvement.h>
 #include <test_morpho.h>
@@ -28,6 +33,7 @@ void launch_morpho_benchmark(const char *filename, struct morpho_set *morphos, c
 
 void launch_SD_step_benchmark(const char *filename, struct sd_set *sd_steps, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     double **results;
+	
     results = benchmark_of_sd_step(sd_steps, nb_sets, min_size, max_size, step, nb_tests, packet_size);
     save_benchmark(filename, sd_steps, sizeof(struct sd_set), nb_sets, results, min_size, max_size, step);
 }

@@ -7,11 +7,16 @@
 #include <stdio.h>
 
 #include "nrdef.h"
+#include "vnrdef.h"
 #include "nrutil.h"
 #include "mynrutil.h"
+#include "vnrutil.h"
+#include "myvnrutil.h"
 
 #include "util.h"
 #include "img.h"
+#include "img_SIMD.h"
+
 
 #include "mouvement.h"
 

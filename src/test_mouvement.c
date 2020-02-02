@@ -1,17 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <math.h>
 
 #include "nrdef.h"
+#include "vnrdef.h"
 #include "nrutil.h"
 #include "mynrutil.h"
+#include "vnrutil.h"
+#include "myvnrutil.h"
 #include "util.h"
 #include "img.h"
+#include "img_SIMD.h"
 #include "mouvement.h"
-#include <stdbool.h>
 #include "test_mouvement.h"
-#include <assert.h>
 
 const char *nom_func;
 
@@ -131,29 +134,54 @@ void verify_case_SigmaDelta_step4(struct sd_set *sd, int num_case, const char *s
 void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct sd_set *sd, bool logging)
 /*---------------------------------------------------*/
 {
+	uint8 **X, **Y, **Z;
 	long nrl0, ncl0, nrh0, nch0;
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
-    uint8 **X, **Y, **Z;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
+	if (sd->instr_type == SCALAR) {
+			
+		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+		printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
+		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 
-    X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
-	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
-	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
-
-	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
-			if (logging) {
-				printf("[row, col] = [%ld, %ld]\n", row, col);
-				printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
+		for (long row = nrl1; row < nrh1 + 1; row++)
+			for (long col = ncl1; col < nch1 + 1; col++){
+				if (logging) {
+					printf("[row, col] = [%ld, %ld]\n", row, col);
+					printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
+				}
+				assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 			}
-			assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
-		}
-	printf("Test passed.\n");
-	
+		printf("Test passed.\n");
+		
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 **vX, **vY, **vZ;
+		int v0 = 0, v1 = 0;
+		int w0 = 0, w1 = 0;
+		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(nrl1, nrh1, v0, v1);
+		printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
+		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		for (long row = nrl1; row < nrh1 + 1; row++)
+			for (long col = ncl1; col < nch1 + 1; col++){
+				if (logging) {
+					printf("[row, col] = [%ld, %ld]\n", row, col);
+					printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
+				}
+				assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+			}
+		printf("Test passed.\n");
+
+	}
 	free_ui8matrix(X, nrl0, nrh0, ncl0, nch0);
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
@@ -167,7 +195,7 @@ void test_integration_SigmaDelta_step1(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
+	
 
     X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
@@ -178,7 +206,7 @@ void test_integration_SigmaDelta_step1(char *filename0, char *filename1, struct 
 	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[M_t0 = %u] [I_t0 = %u] => [M_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
@@ -200,7 +228,7 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
+	
 
     X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
@@ -211,7 +239,7 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[M_t1 = %u] [I_t1 = %u] => [O_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
@@ -232,7 +260,7 @@ void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
+	
 
     X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
@@ -242,7 +270,7 @@ void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct 
 	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[V_t0 = %u] [O_t1 = %u] => [V_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
@@ -263,7 +291,7 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
-	uint8 **packedX, **packedY, **temp_packed_buffer, **unpacked;
+	
 
     X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
@@ -274,7 +302,7 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	
 	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[O_t1 = %u] [V_t1 = %u] => [E_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
@@ -338,7 +366,7 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
 	
 	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = nrl1; col < nrh1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++){
 				X = t_naive0->M; Y = t_naive0->I; Z = t_naive0->V;
 				assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 				X = t_naive0->M; Y = t_naive1->I; Z = t_naive1->M;
@@ -371,24 +399,40 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
-	
-	uint8 M_t0[1][1] = {{0}};
-	uint8 I_t0[1][1] = {{0}};
-	uint8 V_t0[1][1] = {{0}};
-	uint8 i_t0 = 0;
-	
-	uint8 *X[1] = {M_t0[0]}, **XX = X;
-	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
-	uint8 *Z[1] = {V_t0[0]}, **ZZ = Z;
-	
 	const uint8 lower_limit = 127;
 	const uint8 upper_limit = 128;
     int num_case = 0;
+	uint8 i_t0 = rand() % 255 + 1;          
 	
 	printf("Implementation test for %s\n", sd->func_name);
-	I_t0[0][0] = i_t0 = rand() % 255 + 1;
-	sd->sd_func(XX,YY,ZZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
-	assert(SD_step0_produces_valid_output(M_t0[0][0], i_t0, V_t0[0][0], logging));
+	if (sd->instr_type == SCALAR) {
+		uint8 M_t0[1][1] = {{0}}; uint8 *X[1] = {M_t0[0]}, **XX = X;
+		uint8 I_t0[1][1] = {{0}}; uint8 *Y[1] = {I_t0[0]}, **YY = Y;
+		uint8 V_t0[1][1] = {{0}}; uint8 *Z[1] = {V_t0[0]}, **ZZ = Z;
+		
+		I_t0[0][0] = i_t0;
+	
+		sd->sd_func(XX,YY,ZZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+		assert(SD_step0_produces_valid_output(M_t0[0][0], i_t0, V_t0[0][0], logging));
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 vM_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vM_t0[0]}, **vXX = vX;
+		vuint8 vI_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vY[1] = {vI_t0[0]}, **vYY = vY;
+		vuint8 vV_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vV_t0[0]}, **vZZ = vZ;
+		vuint8 vi_t0 = _mm_setzero_si128();
+		long nrl, nrh, ncl, nch;
+		vI_t0[0][0] = vi_t0 = _mm_set1_epi8(i_t0);
+		sd->vec_sd_func(vXX,vYY,vZZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+		// display_vui8matrix(vZZ, 0,0,0,0, "%4u", "V_t0");
+		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **YY = vui8matrix_to_ui8matrix(vYY, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **ZZ = vui8matrix_to_ui8matrix(vZZ, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		// display_ui8matrix(ZZ, nrl, nrh, ncl, nch, "%4u", "V_t0");
+		assert(SD_step0_produces_valid_output(XX[0][0], i_t0, ZZ[0][0], logging));
+		free_ui8matrix(XX, nrl, nrh, ncl, nch);
+		free_ui8matrix(YY, nrl, nrh, ncl, nch);
+		free_ui8matrix(ZZ, nrl, nrh, ncl, nch);
+	}
 	printf("Test passed.\n");
 }
 /*---------------------------------------------------*/

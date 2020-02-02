@@ -12,6 +12,7 @@
 struct sd_set{
     char func_name[128];
     void (*sd_func)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max);
+    void (*vec_sd_func)(vuint8** X, vuint8** Y, vuint8** Z, long nrl, long nrh, int v0, int v1, uint8 n_coeff, uint8 v_min, uint8 v_max);
     uint8 n_coeff; 
     uint8 v_min; 
     uint8 v_max; 
@@ -23,6 +24,9 @@ struct complete_sd_set{
     char func_name[128];
     void (*sd_step0)(uint8** X, uint8** Y, uint8** Z, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max);
     void (*sd_func)(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+
+    void (*vec_sd_step0)(vuint8** X, vuint8** Y, vuint8** Z, long nrl, long nrh, int v0, int v1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+    void (*vec_sd_func)(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
     uint8 n_coeff;
     uint8 v_min; 
     uint8 v_max; 

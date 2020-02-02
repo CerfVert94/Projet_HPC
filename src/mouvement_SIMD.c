@@ -32,13 +32,13 @@ void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long 
 
 	for (i = nrl; i <= nrh; i++)
 		for (j = vmin; j <= vmax; j++ ) {
-			vX = _mm_load_si128((vuint8*) &X[i][j]);
-			_mm_store_si128((vuint8*) &Y[i][j], vX);
+			vX = _mm_load_si128(&X[i][j]);
+			_mm_store_si128((vuint8*)&Y[i][j], vX);
 		}
 }
 
 /*---------------------------------------------------------------------------------------------*/
-void SigmaDelta_step0_SIMD(vuint8** I, vuint8** M, vuint8** V, long nrl, long nrh, int v0, int v1) {
+void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	//copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
 	copy_vui8matrix_vui8matrix(I, nrl, nrh, v0, v1, M);
@@ -50,7 +50,7 @@ void SigmaDelta_step0_SIMD(vuint8** I, vuint8** M, vuint8** V, long nrl, long nr
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void SigmaDelta_step1_SIMD(vuint8** I, vuint8** M_1, vuint8** M, long nrl, long nrh, int v0, int v1) {
+void SigmaDelta_step1_SIMD(vuint8** I, vuint8** M_1, vuint8** M, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------------------------------------------------------------*/
 
 	vuint8 vI, vM_1, vM, TMP;
@@ -88,7 +88,7 @@ void SigmaDelta_step1_SIMD(vuint8** I, vuint8** M_1, vuint8** M, long nrl, long 
 	
 
 /*---------------------------------------------------------------------------------------------*/
-void SigmaDelta_step2_SIMD(vuint8** O, vuint8** M, vuint8** I, long nrl, long nrh, int v0, int v1) {
+void SigmaDelta_step2_SIMD(vuint8** O, vuint8** M, vuint8** I, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 
 	vuint8 vI, vM, vO;
@@ -109,7 +109,7 @@ void SigmaDelta_step2_SIMD(vuint8** O, vuint8** M, vuint8** I, long nrl, long nr
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void SigmaDelta_step3_SIMD(vuint8** V, vuint8** V_1, vuint8** O, long nrl, long nrh, int v0, int v1) {
+void SigmaDelta_step3_SIMD(vuint8** V, vuint8** V_1, vuint8** O, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------------------------------------------------------------*/
 
 	vuint8 t_1V, vO, NvO, vV, TMP;
@@ -151,7 +151,7 @@ void SigmaDelta_step3_SIMD(vuint8** V, vuint8** V_1, vuint8** O, long nrl, long 
 }
 
 /*---------------------------------------------------------------------------------------------*/
-void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nrh, int v0, int v1) {
+void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 
 	vuint8 vO, vV, tE;
@@ -182,11 +182,11 @@ void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nr
 
 void test_step0_SIMD() {
 
-	p_vimage vT_1 = create_vimage("../car3/car_3000.pgm");
-	p_vimage vT   = create_vimage("../car3/car_3001.pgm");
+	// p_vimage vT_1 = create_vimage("../car3/car_3000.pgm");
+	// p_vimage vT   = create_vimage("../car3/car_3001.pgm");
 
-	SigmaDelta_step0_SIMD(vT_1->I, vT_1->M, vT_1->V, vT_1->nrl, vT_1->nrh, vT_1->v0, vT_1->v1);
-	SigmaDelta_step1_SIMD(vT->I, vT_1->M, vT->M, vT->nrl, vT->nrh, vT->v0, vT->v1);
+	// SigmaDelta_step0_SIMD(vT_1->I, vT_1->M, vT_1->V, vT_1->nrl, vT_1->nrh, vT_1->v0, vT_1->v1);
+	// SigmaDelta_step1_SIMD(vT->I, vT_1->M, vT->M, vT->nrl, vT->nrh, vT->v0, vT->v1);
 }
 
 

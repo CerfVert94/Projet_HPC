@@ -59,12 +59,12 @@ p_vimage create_vimage(char* filename) {
 	card = card_vuint8();
     s2v1D(ncl, nch, card, &v0, &v1);
     v2m1D(v0, v1, card, &m0, &m1);
-    printf("rl:%3ld rh:%3ld\n", rl, rh);
-    printf("cl:%3ld ch:%3ld\n", cl, ch);
-    printf("nrl:%3ld nrh:%3ld\n", nrl, nrh);
-    printf("ncl:%3ld nch:%3ld\n", ncl, nch);
-    printf("v0:%3d v1:%3d\n", v0, v1);
-    printf("m0:%3d m1:%3d\n", m0, m1);
+    // printf("rl:%3ld rh:%3ld\n", rl, rh);
+    // printf("cl:%3ld ch:%3ld\n", cl, ch);
+    // printf("nrl:%3ld nrh:%3ld\n", nrl, nrh);
+    // printf("ncl:%3ld nch:%3ld\n", ncl, nch);
+    // printf("v0:%3d v1:%3d\n", v0, v1);
+    // printf("m0:%3d m1:%3d\n", m0, m1);
     tmp->v0 = v0;
     tmp->v1 = v1;
     tmp->m0 = m0;
