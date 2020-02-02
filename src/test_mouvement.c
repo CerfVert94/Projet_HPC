@@ -374,6 +374,7 @@ void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
 	uint8 M_t0[1][1] = {{0}};
 	uint8 I_t0[1][1] = {{0}};
 	uint8 V_t0[1][1] = {{0}};
+	uint8 i_t0 = 0;
 	
 	uint8 *X[1] = {M_t0[0]}, **XX = X;
 	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
@@ -384,8 +385,9 @@ void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
     int num_case = 0;
 	
 	printf("Implementation test for %s\n", sd->func_name);
+	I_t0[0][0] = i_t0 = rand() % 255 + 1;
 	sd->sd_func(XX,YY,ZZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
-	assert(SD_step0_produces_valid_output(M_t0[0][0], I_t0[0][0], V_t0[0][0], logging));
+	assert(SD_step0_produces_valid_output(M_t0[0][0], i_t0, V_t0[0][0], logging));
 	printf("Test passed.\n");
 }
 /*---------------------------------------------------*/
