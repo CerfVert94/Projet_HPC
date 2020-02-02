@@ -25,6 +25,12 @@ void memset_ui8matrix(uint8 **X, uint8 value, long nrl, long nrh, long ncl, long
       memset((uint8*)(&X[nrl][ncl]- NR_END), value, sizeof(**X) * (nrh - nrl + 1) * (nch - ncl + 1));
 }
 /* ------------------------------------------------------------------------- */
+void memcpy_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch, uint8 **Y)
+/* ------------------------------------------------------------------------- */
+{ 
+      memcpy((uint8*)(&Y[nrl][ncl]- NR_END),(uint8*)(&X[nrl][ncl]- NR_END),  sizeof(uint8) * (nrh - nrl + 1) * (nch - ncl + 1));
+}
+/* ------------------------------------------------------------------------- */
 int memcmp_ui8matrix(uint8 **X, uint8 **Y, long nrl, long nrh, long ncl, long nch)
 /* ------------------------------------------------------------------------- */
 { 
