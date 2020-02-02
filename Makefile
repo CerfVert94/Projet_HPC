@@ -12,12 +12,12 @@ UNAME_S := $(shell uname -s)
 
 	
 # -- Lile list ----------
-FILE =  img.c mouvement.c nrutil.c vnrutil.c mutil.c morpho.c\
+FILE =  img.c mouvement.c mouvement_optim.c nrutil.c vnrutil.c mutil.c morpho.c\
 		img_SIMD.c mouvement_SIMD.c morpho_SIMD.c test_morpho.c test_mouvement.c\
-		util.c mynrutil.c morpho_optim.c morpho_pack_optim.c benchmark.c
+		util.c mynrutil.c myvnrutil.c morpho_optim.c morpho_pack_optim.c benchmark.c
 
-ifneq ($(UNAME_S),Darwin)
-	FILE += morpho_optim_omp.c morpho_main.c
+ifneq ($(UNAME_S),Darwin)#
+	FILE += morpho_optim_omp.c morpho_main.c 
 else
 	FILE += main.c
 endif
