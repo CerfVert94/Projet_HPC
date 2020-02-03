@@ -32,11 +32,15 @@ void test_erosions(char *filename, struct morpho_set *erosion_sets , const int n
 {
     struct morpho_set naive_morpho_set = {.func_name = "ui8matrix_erosion_naive", ui8matrix_erosion_naive};
 	uint8 **image;
+	vuint **vimage;
 	long nrl, nrh, ncl, nch;
-    image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-    	
-	for (int i = 0; i < nb_sets; i++) 
+	int i0, i1, j0, j1;
+
+    image  = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
+		
+	for (int i = 0; i < nb_sets; i++) {
         test_implementation_erosion3(&erosion_sets[i]);
+	}
 	test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 
@@ -178,6 +182,52 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 	mset->morpho_func(W, 0, 0, 0, 0, tempZ, Z);
 	return Z[0][0] == 1;
 }
+bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
+{
+	vuint8 vX[5][3] = {{_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},};
+
+	vuint8 vTempX[5][3] = {{_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},};	
+
+	vuint8 *vY[5] = {vX[0] + 2, vX[1] + 2, vX[2] + 2, vX[3] + 2, vX[4] + 2};
+	vuint8 *vTempY[5] = {vTempX[0] + 2, vTempX[1] + 2, vTempX[2] + 2, vTempX[3] + 2, vTempX[4] + 2};
+	vuint8 **vZ = vY + 2;
+	vuint8 **vTempZ = vTempY + 2;
+	uint8 *z = (uint8*)&vZ[0][0];
+
+	mset->vec_morpho_func(vW, 0, 0, 0, 0, vTempZ, vZ);
+	return z[0] == 1;
+}
+	// uint8 *x;
+	// x = &X[1][1];
+	// x[0]= W[0][0];
+	// x[1]= W[0][1];
+	// x[2]= W[0][2];
+	// x[3]= W[0][3];
+	// x[4]= W[0][4];
+
+
+
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  0  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  10  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  210  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  3210  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  43210  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15   4321  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15    432  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15     43  */
+	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15      4  */
+	
+// }
 
 
 
@@ -322,6 +372,32 @@ uint8**  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nc
 		for (int j = ncl; j < nch + 1; j++) {
 			// Get the j-th column from the row.
 			m[i][j] = get_column_at(extracted_bits, (j - ncl));
+		}
+	}
+
+}
+
+vuint8**  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, long nch, uint32 perm)
+{
+	/**
+	 * Convert the permutation to a matrix format.
+	 * 
+	 * For example: 
+	 * perm = 0b111000111
+	 * =>
+	 * X = {1,1,1,
+	 *      0,0,0,
+	 *      1,1,1};
+	 **/
+	uint32 extracted_bits = 0;
+	uint8 *m;
+	for (int i = nrl; i < nrh + 1; i++) {
+		// Extract (i) th ~ (i + nrow) th bits from permutation.
+		extracted_bits = extract_bits_from_permutation(perm, (i - nrl), (nch - ncl + 1)); 
+		m = (uint8*)&vM[i][0];
+		for (int j = ncl; j < nch + 1; j++) {
+			// Get the j-th column from the row.
+			m[j] = get_column_at(extracted_bits, (j - ncl));
 		}
 	}
 
