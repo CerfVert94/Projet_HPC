@@ -6,6 +6,9 @@
 #include <mynrutil.h>
 #include <util.h>
 #include <img.h>
+#include "vnrdef.h"
+#include "vnrutil.h"
+#include <img_SIMD.h>
 #include <morpho.h>
 #include <test_morpho.h>
 #include <mutil.h>
@@ -347,11 +350,15 @@ uint8 **ui8matrix_checker(long nrl, long nrh, long ncl, long nch, const long chk
 				for (long x = 0; x < chkr_size; x++) {
 					// Check bound :
 					if ((row + y) >= nrl && (col + x) >= ncl &&
-					    (row + y) <= nrh && (col + x) <= nch)
+					    (row + y) <= nrh && (col + x) <= nch) {
+						Y[row + y][col + x] = xor_mask;
 						Y[row + y][col + x] ^= xor_mask;
+					}
 			}
 		}
 	}
+	// display_ui8matrix(Y, nrl, nrh, ncl, nch, "%u", "CHekcer");
+	// getchar();
 	return Y;
 }
 

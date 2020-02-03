@@ -314,16 +314,16 @@ void SigmaDelta_step4_InLU_O3_NoIf(uint8** O, uint8** V, uint8** E, long nrl, lo
 	}
 	switch (r) {
 		case 2:
-		for (i = nrl; i <= nrh; i++) {
+			for (i = nrl; i <= nrh; i++) {
 			E_row0 = E[i + 0];O_row0 = O[i + 0]; V_row0 = V[i + 0];
-			E_row0[nch + 0] = O_row0[nch + 0] >= V_row0[j + 0];
-			E_row0[nch - 1] = O_row0[nch - 1] >= V_row0[j - 1];
+			E_row0[nch + 0] = O_row0[nch + 0] >= V_row0[nch + 0];
+			E_row0[nch - 1] = O_row0[nch - 1] >= V_row0[nch - 1];
 		}
 		break;
 		case 1:
 		for (i = nrl; i <= nrh; i++) {
 			E_row0 = E[i + 0];O_row0 = O[i + 0]; V_row0 = V[i + 0];
-			E_row0[nch + 0] = O_row0[nch + 0] >= V_row0[j + 0];
+			E_row0[nch + 0] = O_row0[nch + 0] >= V_row0[nch + 0];
 		}
 		break;
 		case 0:

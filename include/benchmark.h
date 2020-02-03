@@ -21,6 +21,19 @@ unsigned long long get_min_cpu_cycles_of_sd_step      (struct sd_set       *sdse
 unsigned long long get_cpu_cycles_of_sd               (struct complete_sd_set *sdset                  , p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
 unsigned long long get_min_cpu_cycles_of_sd           (struct complete_sd_set *sdset, long packet_size, p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
 
+
+unsigned long long get_cpu_cycles_of_vec_morpho           (struct morpho_set *ptr_mset                  , vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+unsigned long long get_min_cpu_cycles_of_vec_morpho       (struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+
+unsigned long long get_cpu_cycles_of_vec_packed_morpho    (struct morpho_set *ptr_mset                  , vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+unsigned long long get_min_cpu_cycles_of_vec_packed_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+
+unsigned long long get_cpu_cycles_of_vec_sd_step          (struct sd_set       *sdset                  , vuint8 **vX, vuint8 **vY, vuint8 **vZ, int i0, int i1, int j0, int j1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+unsigned long long get_min_cpu_cycles_of_vec_sd_step      (struct sd_set       *sdset, long packet_size, vuint8 **vX, vuint8 **vY, vuint8 **vZ, int i0, int i1, int j0, int j1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+
+unsigned long long get_cpu_cycles_of_vec_sd               (struct complete_sd_set *sdset                  , p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+unsigned long long get_min_cpu_cycles_of_vec_sd           (struct complete_sd_set *sdset, long packet_size, p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+
 double **benchmark_of_morpho        (struct morpho_set      *msets , long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size);
 double **benchmark_of_packed_morpho (struct morpho_set      *msets , long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size);
 double **benchmark_of_sd_step       (struct sd_set          *sdsets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size);

@@ -25,6 +25,7 @@ typedef struct vimage {
 } vimage, *p_vimage;
 
 p_vimage create_vimage(char* filename);
+p_vimage create_vimage_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch);
 
 void free_vimage(p_vimage image);
 

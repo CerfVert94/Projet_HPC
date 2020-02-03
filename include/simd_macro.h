@@ -83,5 +83,11 @@
 							   a = _mm_add_epi8(a, d);\
 							   b = _mm_add_epi8(b, d)
 
+#define vec16_cmplt(a, b, c, d) a = _mm_sub_epi16(a, d);\
+							   b = _mm_sub_epi16(b, d);\
+							   c = _mm_cmplt_epi16(a, b);\
+							   a = _mm_add_epi16(a, d);\
+							   b = _mm_add_epi16(b, d)
+
 
 #endif // __SIMD_MACRO_H__

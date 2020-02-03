@@ -5,6 +5,9 @@
 #include "nrutil.h"
 #include <util.h>
 #include <img.h>
+#include "vnrdef.h"
+#include "vnrutil.h"
+#include <img_SIMD.h>
 #include <morpho.h>
 
 #define scalar_and3(input, col)                  (input[col - 1] & input[col + 0] & input[col + 1])

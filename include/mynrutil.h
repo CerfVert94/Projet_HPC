@@ -28,4 +28,5 @@ int memcmp_ui8matrix(uint8 **X, uint8 **Y, long nrl, long nrh, long ncl, long nc
 void memcpy_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch, uint8 **Y);
 uint8** filled_ui8matrix(long nrl, long nrh, long ncl, long nch, uint8 value);
 
+
 #endif // __NRUTL_H__

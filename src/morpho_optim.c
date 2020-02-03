@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "nrdef.h"
 #include "nrutil.h"
+#include "vnrdef.h"
+#include "vnrutil.h"
+#include <img_SIMD.h>
 #include "util.h"
 #include <img.h>
 #include <morpho.h>

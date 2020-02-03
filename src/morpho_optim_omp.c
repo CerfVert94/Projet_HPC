@@ -5,6 +5,9 @@
 #include "nrdef.h"
 #include "nrutil.h"
 #include <util.h>
+#include "vnrdef.h"
+#include "vnrutil.h"
+#include <img_SIMD.h>
 #include <img.h>
 #include <omp.h>
 //#include <malloc.h>

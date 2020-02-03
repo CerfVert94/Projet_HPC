@@ -15,6 +15,44 @@
 #include "myvnrutil.h"
 #include "mynrutil.h"
 #include "util.h"
+
+
+vuint8 **ui8matrix_to_vui8matrix(uint8 **X , long  nrl, long  nrh, long ncl, long nch, int *i0, int *i1, int *j0, int *j1)
+{
+    uint8   **Y;
+    vuint8 **vY;
+    vuint8 x;
+	uint8 *p = (uint8*) &x;
+
+    int row, v, card, col, bord, sj1;
+    *i0 = nrl;
+    *i1 = nrh;
+    card = card_vuint8();
+    s2v1D(ncl, nch, card, j0, j1);
+
+    vY =       vui8matrix(nrl, nrh, *j0       , *j1);
+    Y  = filled_ui8matrix(nrl, nrh, *j0 * card, (*j1 + 1) * card, 0);
+    copy_ui8matrix_ui8matrix(X, nrl, nrh, ncl, nch, Y);
+   
+    sj1 = nch - (nch % card);
+    for (row = nrl; row < nrh + 1; row++) {
+        for (v = *j0; v < *j1 + 1 ; v++){
+            col = v * card;
+            
+            x = _mm_set_epi8(X[row][col + 15], X[row][col + 14], X[row][col + 13], X[row][col + 12],
+                             X[row][col + 11], X[row][col + 10], X[row][col +  9], X[row][col +  8],
+                             X[row][col +  7], X[row][col +  6], X[row][col +  5], X[row][col +  4],
+                             X[row][col +  3], X[row][col +  2], X[row][col +  1], X[row][col +  0]);            
+            _mm_store_si128(&vY[row][v], x);
+        }
+        x = _mm_setzero_si128();
+        for (v = sj1; v < nch + 1; v++) 
+        	p[v - sj1] = X[row][v];
+        _mm_store_si128(&vY[row][*j1], x);
+    }
+    free_ui8matrix(Y, nrl, nrh, *j0 * card, (*j1 + 1) * card);
+    return vY;
+}
 uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, long *nrl, long *nrh, long *ncl, long *nch)
 /*--------------------------------------------------------------------------------*/
 {
@@ -24,8 +62,9 @@ uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, l
     card = card_vuint8();
     *nrl = i0;        *nrh = i1;
     *ncl = j0 * card; *nch = (j0 + (j1 - j0 + 1)) * card - 1;
-    
-    uint8 **Y = filled_ui8matrix(*nrl, *nrh, *ncl, *nch, 0);
+    // v2m1D(i0, i1, card, ncl, nch);
+    // printf("%d %d %d %d\n", *nrl,*nrh,*ncl,*nch);
+    uint8 **Y = filled_ui8matrix(i0, i1, *ncl, *nch, 0);
 
     
     for(i=i0; i<=i1; i++) {
@@ -62,13 +101,6 @@ vuint8 **LoadPGM_vui8matrix(char *filename, long *nrl, long *nrh, int *v0, int *
 	card = card_vuint8();
     s2v1D(ncl, nch, card, v0, v1);
     v2m1D(*v0, *v1, card, &m0, &m1);
-	// printf("Img:%d %d\n", *v0, *v1);
-    // printf("rl:%3ld rh:%3ld\n", rl, rh);
-    // printf("cl:%3ld ch:%3ld\n", cl, ch);
-    // printf("nrl:%3ld nrh:%3ld\n", *nrl, *nrh);
-    // printf("ncl:%3ld nch:%3ld\n", ncl, nch);
-    // printf("v0:%3d v1:%3d\n", *v0, *v1);
-    // printf("m0:%3d m1:%3d\n", m0, m1);
     
     z = (*v1-vBORD)*card;
     r = ch-z;

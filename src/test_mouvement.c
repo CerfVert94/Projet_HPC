@@ -16,6 +16,7 @@
 #include "mouvement.h"
 #include "test_mouvement.h"
 
+#define DUP16(X) X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
 const char *nom_func;
 
 /*---------------------------------------------------*/
@@ -86,6 +87,31 @@ void verify_case_SigmaDelta_step1(struct sd_set *sd, int num_case, const char *s
 	assert(SD_step1_produces_valid_output(X[0][0], Y[0][0], Z[0][0], logging) == true);
 }
 
+/*---------------------------------------------------*/
+void verify_case_Vec_SigmaDelta_step1(struct sd_set *sd, int num_case, const char *str_case, vuint8 **vX, vuint8 **vY, vuint8 **vZ, vuint8 x, vuint8 y, bool logging)
+/*---------------------------------------------------*/
+{
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
+	vX[0][0] = x;
+	vY[0][0] = y;
+	sd->vec_sd_func(vX, vY, vZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+	if(logging){
+		display_vui8matrix(vX, 0, 0, 0, 0, "%4u", "M_t0");
+		display_vui8matrix(vY, 0, 0, 0, 0, "%4u", "I_t1");
+		display_vui8matrix(vZ, 0, 0, 0, 0, "%4u", "M_t1");
+	}
+	long i0, i1, j0, j1;
+	uint8 **X = vui8matrix_to_ui8matrix(vX, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Y = vui8matrix_to_ui8matrix(vY, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Z = vui8matrix_to_ui8matrix(vZ, 0,0,0,0, &i0, &i1, &j0, &j1);
+
+	assert(SD_step1_produces_valid_output(X[0][0], Y[0][0], Z[0][0], logging) == true);
+	free_ui8matrix(X, i0, i1, j0, j1);
+	free_ui8matrix(Y, i0, i1, j0, j1);
+	free_ui8matrix(Z, i0, i1, j0, j1);
+}
+
 
 /*---------------------------------------------------*/
 void verify_case_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *str_case, uint8 **X, uint8 **Y, uint8 **Z, uint8 x, uint8 y, bool logging)
@@ -102,6 +128,56 @@ void verify_case_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *s
 }
 
 /*---------------------------------------------------*/
+void verify_case_Vec_SigmaDelta_step2(struct sd_set *sd, int num_case, const char *str_case, vuint8 **vX, vuint8 **vY, vuint8 **vZ, vuint8 x, vuint8 y, bool logging)
+/*---------------------------------------------------*/
+{
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
+	vX[0][0] = x;
+	vY[0][0] = y;
+	sd->vec_sd_func(vX, vY, vZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+	if(logging) {
+		display_vui8matrix(vX, 0, 0, 0, 0, "%4u", "M_t1");
+		display_vui8matrix(vY, 0, 0, 0, 0, "%4u", "I_t1");
+		display_vui8matrix(vZ, 0, 0, 0, 0, "%4u", "O_t1");
+		// getchar();
+	}
+	long i0, i1, j0, j1;
+	uint8 **X = vui8matrix_to_ui8matrix(vX, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Y = vui8matrix_to_ui8matrix(vY, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Z = vui8matrix_to_ui8matrix(vZ, 0,0,0,0, &i0, &i1, &j0, &j1);
+	assert(SD_step2_produces_valid_output(X[0][0], Y[0][0], Z[0][0], logging) == true);
+	free_ui8matrix(X, i0, i1, j0, j1);
+	free_ui8matrix(Y, i0, i1, j0, j1);
+	free_ui8matrix(Z, i0, i1, j0, j1);
+}
+
+/*---------------------------------------------------*/
+void verify_case_Vec_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *str_case, vuint8 **V_t0, vuint8 **O_t1, vuint8 **V_t1, vuint8 v_t0, vuint8 o_t1, bool logging)
+/*---------------------------------------------------*/
+{
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
+	V_t0[0][0] = v_t0;
+	O_t1[0][0] = o_t1;
+	sd->vec_sd_func(V_t0, O_t1, V_t1, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+
+	if(logging){
+		display_vui8matrix(V_t0, 0, 0, 0, 0, "%4u", "V_t0");
+		display_vui8matrix(O_t1, 0, 0, 0, 0, "%4u", "O_t1");
+		display_vui8matrix(V_t1, 0, 0, 0, 0, "%4u", "V_t1");
+	}
+	
+	long i0, i1, j0, j1;
+	uint8 **X = vui8matrix_to_ui8matrix(V_t0, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Y = vui8matrix_to_ui8matrix(O_t1, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Z = vui8matrix_to_ui8matrix(V_t1, 0,0,0,0, &i0, &i1, &j0, &j1);
+	assert(SD_step3_produces_valid_output(X[0][0], Y[0][0], Z[0][0], sd->n_coeff, sd->v_min, sd->v_max, logging) == true);
+	free_ui8matrix(X, i0, i1, j0, j1);
+	free_ui8matrix(Y, i0, i1, j0, j1);
+	free_ui8matrix(Z, i0, i1, j0, j1);
+}
+/*---------------------------------------------------*/
 void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *str_case, uint8 **V_t0, uint8 **O_t1, uint8 **V_t1, uint8 v_t0, uint8 o_t1, bool logging)
 /*---------------------------------------------------*/
 {
@@ -114,6 +190,7 @@ void verify_case_SigmaDelta_step3(struct sd_set *sd, int num_case, const char *s
 		printf("\t[V_t0 = %u] [O_t1 = %u] => [V_t1 = %u]\n", V_t0[0][0], O_t1[0][0], V_t1[0][0]);
 	assert(SD_step3_produces_valid_output(V_t0[0][0], O_t1[0][0], V_t1[0][0], sd->n_coeff, sd->v_min, sd->v_max, logging) == true);
 }
+
 
 /*---------------------------------------------------*/
 void verify_case_SigmaDelta_step4(struct sd_set *sd, int num_case, const char *str_case, uint8 **X, uint8 **Y, uint8 **Z, uint8 x, uint8 y, bool logging)
@@ -129,6 +206,31 @@ void verify_case_SigmaDelta_step4(struct sd_set *sd, int num_case, const char *s
 	assert(SD_step4_produces_valid_output(X[0][0], Y[0][0], Z[0][0], logging) == true);
 }
 
+/*---------------------------------------------------*/
+void verify_case_Vec_SigmaDelta_step4(struct sd_set *sd, int num_case, const char *str_case, vuint8 **vX, vuint8 **vY, vuint8 **vZ, vuint8 x, vuint8 y, bool logging)
+/*---------------------------------------------------*/
+{
+	if(logging)
+		printf("Case %d : %s\n", num_case, str_case);
+	vX[0][0] = x;
+	vY[0][0] = y;
+	sd->vec_sd_func(vX, vY, vZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
+	if(logging) {
+		display_vui8matrix(vX, 0, 0, 0, 0, "%4u", "O_t1");
+		display_vui8matrix(vY, 0, 0, 0, 0, "%4u", "V_t1");
+		display_vui8matrix(vZ, 0, 0, 0, 0, "%4u", "E_t1");
+	}
+	long i0, i1, j0, j1;
+	uint8 **X = vui8matrix_to_ui8matrix(vX, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Y = vui8matrix_to_ui8matrix(vY, 0,0,0,0, &i0, &i1, &j0, &j1);
+	uint8 **Z = vui8matrix_to_ui8matrix(vZ, 0,0,0,0, &i0, &i1, &j0, &j1);
+	assert(SD_step4_produces_valid_output(X[0][0], Y[0][0], Z[0][0], logging) == true);
+	free_ui8matrix(X, i0, i1, j0, j1);
+	free_ui8matrix(Y, i0, i1, j0, j1);
+	free_ui8matrix(Z, i0, i1, j0, j1);
+	
+}
+
 
 /*---------------------------------------------------*/
 void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct sd_set *sd, bool logging)
@@ -138,50 +240,39 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 	long nrl0, ncl0, nrh0, nch0;
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
+	vuint8 **vX, **vY, **vZ;
+	int v0 = 0, v1 = 0;
+	int w0 = 0, w1 = 0;
+	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
 	if (sd->instr_type == SCALAR) {
-			
 		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
 		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
 		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-		printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
 		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
-
-		for (long row = nrl1; row < nrh1 + 1; row++)
-			for (long col = ncl1; col < nch1 + 1; col++){
-				if (logging) {
-					printf("[row, col] = [%ld, %ld]\n", row, col);
-					printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
-				}
-				assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
-			}
-		printf("Test passed.\n");
-		
 	}
 	else if (sd->instr_type == SIMD) {
-		vuint8 **vX, **vY, **vZ;
-		int v0 = 0, v1 = 0;
-		int w0 = 0, w1 = 0;
 		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
 		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
 		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
 		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-		printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
 		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
 		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
 		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
 		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		for (long row = nrl1; row < nrh1 + 1; row++)
-			for (long col = ncl1; col < nch1 + 1; col++){
-				if (logging) {
-					printf("[row, col] = [%ld, %ld]\n", row, col);
-					printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
-				}
-				assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
-			}
-		printf("Test passed.\n");
-
+		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
 	}
+	for (long row = nrl1; row < nrh1 + 1; row++) 
+		for (long col = ncl1; col < nch1 + 1; col++){
+			if (logging) {
+				printf("[row, col] = [%ld, %ld]\n", row, col);
+				printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
+			}
+			assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
+		}
+	printf("Test passed.\n");
 	free_ui8matrix(X, nrl0, nrh0, ncl0, nch0);
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
@@ -195,17 +286,33 @@ void test_integration_SigmaDelta_step1(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
+	vuint8 **vX, **vY, **vZ;
+	int v0 = 0, v1 = 0;
+	int w0 = 0, w1 = 0;
 	
 
-    X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
-	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-
 	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
-	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
-
-	for (long row = nrl1; row < nrh1 + 1; row++)
+	if (sd->instr_type == SCALAR) {
+		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	}
+	else if (sd->instr_type == SIMD) {
+		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(nrl1, nrh1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+	}
+	for (long row = nrl1; row < nrh1 + 1; row++) 
 		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
@@ -213,8 +320,7 @@ void test_integration_SigmaDelta_step1(char *filename0, char *filename1, struct 
 			}
 			assert(SD_step1_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 		}
-	printf("Test passed.\n");
-		
+	printf("Test passed.\n");	
 	free_ui8matrix(X, nrl0, nrh0, ncl0, nch0);
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
@@ -228,17 +334,35 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
+	vuint8 **vX, **vY, **vZ;
+	int v0 = 0, v1 = 0;
+	int w0 = 0, w1 = 0;
 	
 
-    X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
-	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-	
 	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
-	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	if (sd->instr_type == SCALAR) {
+    	X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+		
+		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	}
+	else if (sd->instr_type == SIMD) {
+		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(nrl1, nrh1, v0, v1);
 
-	for (long row = nrl1; row < nrh1 + 1; row++)
+		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
+		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+	}
+	for (long row = nrl1; row < nrh1 + 1; row++) {
 		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
@@ -246,8 +370,8 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 			}
 			assert(SD_step2_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 		}
-	printf("Test passed.\n");
-	
+	}
+	printf("Test passed.\n");		
 	free_ui8matrix(X, nrl0, nrh0, ncl0, nch0);
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
 	free_ui8matrix(Z, nrl1, nrh1, ncl1, nch1);
@@ -260,17 +384,36 @@ void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct 
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
     uint8 **X, **Y, **Z;
+	vuint8 **vX, **vY, **vZ;
+	int v0 = 0, v1 = 0;
+	int w0 = 0, w1 = 0;
 	
 
-    X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
-	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
-	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 
+	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
+	if (sd->instr_type == SCALAR) {
+		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	}
+	else
+	{
+		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(nrl1, nrh1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
+		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+	}
 	for (long row = nrl1; row < nrh1 + 1; row++)
-		for (long col = ncl1; col < nch1 + 1; col++){
+		for (long col = ncl1; col < nch1 + 1; col++) {
 			if (logging) {
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[V_t0 = %u] [O_t1 = %u] => [V_t1 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
@@ -290,17 +433,35 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	long nrl0, ncl0, nrh0, nch0;
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
+	vuint8 **vX, **vY, **vZ;
+	int v0 = 0, v1 = 0;
+	int w0 = 0, w1 = 0;
     uint8 **X, **Y, **Z;
 	
 
-    X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
-	Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
-	
+
 	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
-	
-	sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	if (sd->instr_type == SCALAR) {
+		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		Z = ui8matrix(nrl1, nrh1, ncl1, nch1);
+		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
+	}
+	else
+	{
+		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(nrl1, nrh1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
+		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+	}
 	for (long row = nrl1; row < nrh1 + 1; row++)
 		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
@@ -309,7 +470,7 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 			}
 			assert(SD_step4_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 		}
-
+	
 	printf("Test passed.\n");
 	free_ui8matrix(X, nrl0, nrh0, ncl0, nch0);
 	free_ui8matrix(Y, nrl1, nrh1, ncl1, nch1);
@@ -320,10 +481,13 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
 	long nrl0, ncl0, nrh0, nch0;
 	long nrl1, ncl1, nrh1, nch1;
 	long nrl2, ncl2, nrh2, nch2;
-	p_image t0, t1, t_naive0, t_naive1;
+	int v0, v1, w0, w1;
     uint8 **X, **Y, **Z;
+    vuint8 **vX, **vY, **vZ;
 	bool sd_output_is_valid = false;
 	uint8 n_coeff, v_min, v_max;
+	p_image t0, t1, t_naive0, t_naive1;
+	p_vimage vec_t0, vec_t1;
 
 	struct sd_set sd_step0_to_step4_naive[5] = {
                                  {.func_name = "SigmaDelta_step0_naive", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax},
@@ -333,25 +497,66 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
                                  {.func_name = "SigmaDelta_step4_naive", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax}
                                 };
 	// printf("dasf\n");
-
-	t0 = create_image(filename0);
-	t1 = create_image(filename1);
+	
 	t_naive0 = create_image(filename0);
 	t_naive1 = create_image(filename1);
-	
+	t0 = create_image(filename0);
+	t1 = create_image(filename1);
 	nrl0 = t0->nrl; nrl1 = t1->nrl;
 	nrh0 = t0->nrh; nrh1 = t1->nrh;
 	ncl0 = t0->ncl; ncl1 = t1->ncl;
 	nch0 = t0->nch; nch1 = t1->nch;
-	assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
-	
-		
+			
 	n_coeff = sd->n_coeff;
 	v_min   = sd->v_min;
 	v_max   = sd->v_max;
-	X = t0->M; Y = t0->I; Z = t0->V;
-	sd->sd_step0(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
-	sd->sd_func(t0, t1, n_coeff, v_min, v_max);
+	if (sd->instr_type == SCALAR) {
+		
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && ncl1 == ncl0 && nch1 == nch0);
+		
+		X = t0->M; Y = t0->I; Z = t0->V;
+		sd->sd_step0(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
+		sd->sd_func(t0, t1, n_coeff, v_min, v_max);
+	}
+	else {
+		vec_t0 = create_vimage(filename0);
+		vec_t1 = create_vimage(filename1);
+		nrl0 = vec_t0->nrl; nrl1 = vec_t1->nrl;
+		nrh0 = vec_t0->nrh; nrh1 = vec_t1->nrh;
+		v0 = vec_t0->v0;      w0 = vec_t1->v0;
+		v1 = vec_t0->v1;      w1 = vec_t1->v1;
+		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
+		vX = vec_t0->M; vY = vec_t0->I; vZ = vec_t0->V;
+
+		sd->vec_sd_step0(vX, vY, vZ, nrl0, nrh0, v0, v1, n_coeff, v_min, v_max);
+		sd->vec_sd_func(vec_t0, vec_t1, n_coeff, v_min, v_max);
+		
+		uint8 *vi, *vm, *vo, *vv, *ve;
+		int card = card_vuint8(), v0;
+		for (long row = vec_t1->nrl; row < vec_t1->nrh + 1; row++) {
+			// Prologue
+			long col = vec_t1->v0 * card;
+			for (int v = vec_t1->v0; v < vec_t1->v1 + 1; v ++) {
+				vi = (uint8 *)&vec_t1->I[row][v];
+				vm = (uint8 *)&vec_t1->M[row][v];
+				vo = (uint8 *)&vec_t1->O[row][v];
+				vv = (uint8 *)&vec_t1->V[row][v];
+				ve = (uint8 *)&vec_t1->E[row][v];
+				for (long k = 0;  k < card; k++, col++){
+					if (vec_t1->ncl <= col && col <= vec_t1->nch) {
+						 t1->I[row][col] = 0; t1->I[row][col] = vi[k];
+						 t1->M[row][col] = 0; t1->M[row][col] = vm[k];
+						 t1->O[row][col] = 0; t1->O[row][col] = vo[k];
+						 t1->V[row][col] = 0; t1->V[row][col] = vv[k];
+						 t1->E[row][col] = 0; t1->E[row][col] = ve[k];
+					}
+				}
+			}
+		}
+		free_vimage(vec_t1);
+		free_vimage(vec_t0);
+	}
+	
 
 	X = t_naive0->M; Y = t_naive0->I; Z = t_naive0->V;
 	sd_step0_to_step4_naive[0].sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, n_coeff, v_min, v_max);
@@ -400,7 +605,7 @@ void test_integration_SigmaDelta(char *filename0, char *filename1, struct comple
 void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
 	const uint8 lower_limit = 127;
-	const uint8 upper_limit = 128;
+	const uint8 upper_limit = 129;
     int num_case = 0;
 	uint8 i_t0 = rand() % 255 + 1;          
 	
@@ -421,7 +626,8 @@ void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
 		vuint8 vV_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vV_t0[0]}, **vZZ = vZ;
 		vuint8 vi_t0 = _mm_setzero_si128();
 		long nrl, nrh, ncl, nch;
-		vI_t0[0][0] = vi_t0 = _mm_set1_epi8(i_t0);
+		vI_t0[0][0] = vi_t0 = _mm_set_epi8(i_t0, i_t0, i_t0, i_t0, i_t0, i_t0, i_t0, i_t0,										   
+										   i_t0, i_t0, i_t0, i_t0, i_t0, i_t0, i_t0, i_t0);
 		sd->vec_sd_func(vXX,vYY,vZZ, 0, 0, 0, 0, sd->n_coeff, sd->v_min, sd->v_max);
 		// display_vui8matrix(vZZ, 0,0,0,0, "%4u", "V_t0");
 		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
@@ -438,30 +644,54 @@ void test_implementation_SigmaDelta_step0(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step1(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
-	
-	uint8 M_t0[1][1] = {{0}};
-	uint8 I_t0[1][1] = {{0}};
-	uint8 M_t1[1][1] = {{0}};
-	
-	uint8 *X[1] = {M_t0[0]}, **XX = X;
-	uint8 *Y[1] = {I_t0[0]}, **YY = Y;
-	uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
-	
 	const uint8 lower_limit = 127;
-	const uint8 upper_limit = 128;
-    int num_case = 0;
-
+	const uint8 upper_limit = 129;
+    int num_case = 0;     
+	
 	printf("Implementation test for %s\n", sd->func_name);
-
-	XX[0][0] = lower_limit;
-	YY[0][0] = upper_limit;
-	verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 < I_t0 => M_t1 = M_t0 + 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	XX[0][0] = upper_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 > I_t0 => M_t1 = M_t0 - 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	XX[0][0] = lower_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 = I_t0 => M_t1 = M_t0    ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	if (sd->instr_type == SCALAR) {
+		uint8 M_t0[1][1] = {{0}};
+		uint8 I_t0[1][1] = {{0}};
+		uint8 M_t1[1][1] = {{0}};
+		
+		uint8 *X[1] = {M_t0[0]}, **XX = X;
+		uint8 *Y[1] = {I_t0[0]}, **YY = Y;
+		uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
+		
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+		verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 < I_t0 => M_t1 = M_t0 + 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 > I_t0 => M_t1 = M_t0 - 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 = I_t0 => M_t1 = M_t0    ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 vM_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vM_t0[0]}, **vXX = vX;
+		vuint8 vI_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vY[1] = {vI_t0[0]}, **vYY = vY;
+		vuint8 vM_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vM_t1[0]}, **vZZ = vZ;
+		long nrl, nrh, ncl, nch;
+	
+		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **YY = vui8matrix_to_ui8matrix(vYY, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **ZZ = vui8matrix_to_ui8matrix(vZZ, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		
+		vXX[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		verify_case_Vec_SigmaDelta_step1(sd, num_case++, "M_t0 < I_t0 => M_t1 = M_t0 + 1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		vXX[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step1(sd, num_case++, "M_t0 > I_t0 => M_t1 = M_t0 - 1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		vXX[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step1(sd, num_case++, "M_t0 = I_t0 => M_t1 = M_t0    ", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		
+		free_ui8matrix(XX, nrl, nrh, ncl, nch);
+		free_ui8matrix(YY, nrl, nrh, ncl, nch);
+		free_ui8matrix(ZZ, nrl, nrh, ncl, nch);
+	}
 	printf("Test passed.\n");
 
 }
@@ -470,30 +700,58 @@ void test_implementation_SigmaDelta_step1(struct sd_set *sd, bool logging) {
 void test_implementation_SigmaDelta_step2(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
 	
-	uint8 M_t1[1][1] = {{0}};
-	uint8 I_t1[1][1] = {{0}};
-	uint8 O_t1[1][1] = {{0}};
-	
-	uint8 *X[1] = {M_t1[0]}, **XX = X;
-	uint8 *Y[1] = {I_t1[0]}, **YY = Y;
-	uint8 *Z[1] = {O_t1[0]}, **ZZ = Z;
-	
 	const uint8 lower_limit = 127;
-	const uint8 upper_limit = 128;
+	const uint8 upper_limit = 129;
 	int num_case = 0;
-    
 	printf("Implementation test for %s\n", sd->func_name);
-	XX[0][0] = lower_limit;
-	YY[0][0] = upper_limit;
-	verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 < I_t1 => O_t1 = -(M_t1 - I_t1)", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	if (sd->instr_type == SCALAR) {
+		uint8 M_t1[1][1] = {{0}};
+		uint8 I_t1[1][1] = {{0}};
+		uint8 O_t1[1][1] = {{0}};
+		
+		uint8 *X[1] = {M_t1[0]}, **XX = X;
+		uint8 *Y[1] = {I_t1[0]}, **YY = Y;
+		uint8 *Z[1] = {O_t1[0]}, **ZZ = Z;
+		
+		
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+		verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 < I_t1 => O_t1 = -(M_t1 - I_t1)", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = upper_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 > I_t1 => O_t1 = M_t1 - I_t1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 > I_t1 => O_t1 = M_t1 - I_t1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = lower_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 = I_t1 => O_t1 = M_t1 - I_t1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step2(sd, num_case++, "M_t1 = I_t1 => O_t1 = M_t1 - I_t1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 vM_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vM_t1[0]}, **vXX = vX;
+		vuint8 vI_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vY[1] = {vI_t1[0]}, **vYY = vY;
+		vuint8 vO_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vO_t1[0]}, **vZZ = vZ;
+		long nrl, nrh, ncl, nch;
+	
+		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **YY = vui8matrix_to_ui8matrix(vYY, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **ZZ = vui8matrix_to_ui8matrix(vZZ, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		verify_case_Vec_SigmaDelta_step2(sd, num_case++, "M_t1 < I_t1 => O_t1 = -(M_t1 - I_t1)", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step2(sd, num_case++, "M_t1 > I_t1 => O_t1 = M_t1 - I_t1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step2(sd, num_case++, "M_t1 = I_t1 => O_t1 = M_t1 - I_t1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+	
+		free_ui8matrix(XX, nrl, nrh, ncl, nch);
+		free_ui8matrix(YY, nrl, nrh, ncl, nch);
+		free_ui8matrix(ZZ, nrl, nrh, ncl, nch);
+	}
 	printf("Test passed.\n");
 }
 
@@ -501,15 +759,6 @@ void test_implementation_SigmaDelta_step2(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step3(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
-	
-	uint8 V_t0[1][1] = {{0}};
-	uint8 O_t1[1][1] = {{0}};
-	uint8 V_t1[1][1] = {{0}};
-	
-	uint8 *X[1] = {V_t0[0]}, **XX = X;
-	uint8 *Y[1] = {O_t1[0]}, **YY = Y;
-	uint8 *Z[1] = {V_t1[0]}, **ZZ = Z;
-	
 	const uint8 lower_limit = 1;
 	const uint8 upper_limit = 254;
     const uint8 test_vmin = 0;
@@ -522,83 +771,174 @@ void test_implementation_SigmaDelta_step3(struct sd_set *sd, bool logging) {
 	printf("Implementation test for %s\n", sd->func_name);
 	assert(0 < sd->v_min < sd->v_max && sd->v_min < sd->v_max && sd->v_max < 255);
 	assert(sd->n_coeff <= 4);
-	XX[0][0] = test_vmin;
-	YY[0][0] = test_vmin + 1;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = test_vmax - 1;
-	YY[0][0] = test_vmax;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	if(sd->instr_type == SCALAR) {
+		uint8 V_t0[1][1] = {{0}};
+		uint8 O_t1[1][1] = {{0}};
+		uint8 V_t1[1][1] = {{0}};
+		
+		uint8 *X[1] = {V_t0[0]}, **XX = X;
+		uint8 *Y[1] = {O_t1[0]}, **YY = Y;
+		uint8 *Z[1] = {V_t1[0]}, **ZZ = Z;
+		XX[0][0] = test_vmin;
+		YY[0][0] = test_vmin + 1;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	old_val = sd->v_min;
-	sd->v_min = 10; // Modify Vmin temporarily for the test.
-	XX[0][0] = test_vmin;
-	YY[0][0] = test_vmax;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	sd->v_min = old_val; // Restore the Vmin.
+		XX[0][0] = test_vmax - 1;
+		YY[0][0] = test_vmax;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = test_vmin + 3;
-	YY[0][0] = test_vmin;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		old_val = sd->v_min;
+		sd->v_min = 10; // Modify Vmin temporarily for the test.
+		XX[0][0] = test_vmin;
+		YY[0][0] = test_vmax;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		sd->v_min = old_val; // Restore the Vmin.
 
-	XX[0][0] = test_vmax;
-	YY[0][0] = test_vmin;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = test_vmin + 3;
+		YY[0][0] = test_vmin;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	old_val = sd->v_min;
-	sd->v_min = 10; // Modify Vmin temporarily for the test.
-	XX[0][0] = test_vmin + 1;
-	YY[0][0] = test_vmin;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	sd->v_min = old_val; // Restore the Vmin.
+		XX[0][0] = test_vmax;
+		YY[0][0] = test_vmin;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+
+		old_val = sd->v_min;
+		sd->v_min = 10; // Modify Vmin temporarily for the test.
+		XX[0][0] = test_vmin + 1;
+		YY[0][0] = test_vmin;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		sd->v_min = old_val; // Restore the Vmin.
 
 
-	XX[0][0] = (test_vmin + test_vmax) / 4 * sd->n_coeff;
-	YY[0][0] = (test_vmin + test_vmax) / 4;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = (test_vmin + test_vmax) / 4 * sd->n_coeff;
+		YY[0][0] = (test_vmin + test_vmax) / 4;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / no      clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		
+		old_val = sd->v_max;
+		sd->v_max = 250;// Modify Vmax temporarily for the test.
+		XX[0][0] = (255 / sd->n_coeff) * sd->n_coeff;
+		YY[0][0] = (255 / sd->n_coeff);
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		sd->v_max = old_val; // Restore the Vmin.
+
+		XX[0][0] = test_vmin;
+		YY[0][0] = test_vmin;
+		verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		printf("Test passed.\n");
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 vV_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vV_t0[0]}, **vXX = vX;
+		vuint8 vO_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vY[1] = {vO_t1[0]}, **vYY = vY;
+		vuint8 vV_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vV_t1[0]}, **vZZ = vZ;
+		long nrl, nrh, ncl, nch;
 	
-	old_val = sd->v_max;
-	sd->v_max = 250;// Modify Vmax temporarily for the test.
-	XX[0][0] = (255 / sd->n_coeff) * sd->n_coeff;
-	YY[0][0] = (255 / sd->n_coeff);
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / maximum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	sd->v_max = old_val; // Restore the Vmin.
+		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **YY = vui8matrix_to_ui8matrix(vYY, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **ZZ = vui8matrix_to_ui8matrix(vZZ, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmin));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmin + 1));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / no      clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmax - 1));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmax));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / maximum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		old_val = sd->v_min;
+		sd->v_min = 10; // Modify Vmin temporarily for the test.
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmin));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmax));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 < n * o_t1 / minimum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		sd->v_min = old_val; // Restore the Vmin.
+
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmin + 3));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmin));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / no      clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmax));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmin));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / maximum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		old_val = sd->v_min;
+		sd->v_min = 10; // Modify Vmin temporarily for the test.
+		vXX[0][0] = _mm_set_epi8(DUP16(test_vmin + 1));
+		vYY[0][0] = _mm_set_epi8(DUP16(test_vmin));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 > n * o_t1 / minimum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		sd->v_min = old_val; // Restore the Vmin.
 
 
-	XX[0][0] = test_vmin;
-	YY[0][0] = test_vmin;
-	verify_case_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / minimum clamping", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
-	printf("Test passed.\n");
+		vXX[0][0] = _mm_set_epi8(DUP16((test_vmin + test_vmax) / 4 * sd->n_coeff));
+		vYY[0][0] = _mm_set_epi8(DUP16((test_vmin + test_vmax) / 4));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / no      clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		
+		old_val = sd->v_max;
+		sd->v_max = 250;// Modify Vmax temporarily for the test.
+		vXX[0][0] = _mm_set_epi8(DUP16((255 / sd->n_coeff) * sd->n_coeff));
+		vYY[0][0] = _mm_set_epi8(DUP16((255 / sd->n_coeff)));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / maximum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		sd->v_max = old_val; // Restore the Vmin.
+
+		vXX[0][0] = _mm_set_epi8(DUP16((test_vmin)));
+		vYY[0][0] = _mm_set_epi8(DUP16((test_vmin)));
+		verify_case_Vec_SigmaDelta_step3(sd, num_case++, "v_t0 = n * o_t1 / minimum clamping", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		printf("Test passed.\n");
+	}
 }
 
 /*---------------------------------------------------*/
 void test_implementation_SigmaDelta_step4(struct sd_set *sd, bool logging) {
 /*---------------------------------------------------*/
-	uint8 O_t1[1][1] = {{0}};
-	uint8 V_t1[1][1] = {{0}};
-	uint8 E_t1[1][1] = {{0}};
 	
-	uint8 *X[1] = {O_t1[0]}, **XX = X;
-	uint8 *Y[1] = {V_t1[0]}, **YY = Y;
-	uint8 *Z[1] = {E_t1[0]}, **ZZ = Z;
 	
 	const uint8 lower_limit = 127;
-	const uint8 upper_limit = 128;
+	const uint8 upper_limit = 129;
 	int num_case = 0;
     
 	printf("Implementation test for %s\n", sd->func_name);
 
-	XX[0][0] = lower_limit;
-	YY[0][0] = upper_limit;
-	verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 0", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	if(sd->instr_type == SCALAR) {
+		uint8 O_t1[1][1] = {{0}};
+		uint8 V_t1[1][1] = {{0}};
+		uint8 E_t1[1][1] = {{0}};
+		
+		uint8 *X[1] = {O_t1[0]}, **XX = X;
+		uint8 *Y[1] = {V_t1[0]}, **YY = Y;
+		uint8 *Z[1] = {E_t1[0]}, **ZZ = Z;
+		XX[0][0] = lower_limit;
+		YY[0][0] = upper_limit;
+		verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 0", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = upper_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = upper_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
 
-	XX[0][0] = lower_limit;
-	YY[0][0] = lower_limit;
-	verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 = V_t1 => E_t1 = 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+		XX[0][0] = lower_limit;
+		YY[0][0] = lower_limit;
+		verify_case_SigmaDelta_step4(sd, num_case++, "O_t1 = V_t1 => E_t1 = 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+	}
+	else if (sd->instr_type == SIMD) {
+		vuint8 vO_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vO_t1[0]}, **vXX = vX;
+		vuint8 vV_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vY[1] = {vV_t1[0]}, **vYY = vY;
+		vuint8 vE_t1[1][1] = {{_mm_setzero_si128()}}; vuint8 *vZ[1] = {vE_t1[0]}, **vZZ = vZ;
+		long nrl, nrh, ncl, nch;
+	
+		uint8 **XX = vui8matrix_to_ui8matrix(vXX, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **YY = vui8matrix_to_ui8matrix(vYY, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		uint8 **ZZ = vui8matrix_to_ui8matrix(vZZ, 0, 0, 0, 0, &nrl, &nrh, &ncl, &nch);
+		vXX[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		verify_case_Vec_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 0", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] = _mm_set_epi8(DUP16(upper_limit));
+		vYY[0][0] = _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step4(sd, num_case++, "O_t1 < V_t1 => E_t1 = 1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+
+		vXX[0][0] =  _mm_set_epi8(DUP16(lower_limit));
+		vYY[0][0] =  _mm_set_epi8(DUP16(lower_limit));
+		verify_case_Vec_SigmaDelta_step4(sd, num_case++, "O_t1 = V_t1 => E_t1 = 1", vXX, vYY, vZZ, vXX[0][0], vYY[0][0], logging);
+		
+	}
 	printf("Test passed.\n");
 
 }

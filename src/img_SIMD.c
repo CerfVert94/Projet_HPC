@@ -95,7 +95,72 @@ p_vimage create_vimage(char* filename) {
 
 	return tmp;
 }
+p_vimage create_vimage_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch) {
+	p_vimage tmp;
+	int card, v0, v1, m0, m1;
 
+	/*alloc in memory for image*/
+	tmp = (p_vimage)malloc(sizeof(vimage));
+	if (!tmp) {error("Malloc error of image in");}
+	nrl -= BORD;
+	nrh += BORD;
+	ncl -= BORD;
+	nch += BORD;
+
+	tmp->nrl = nrl;
+	tmp->nrh = nrh;
+	tmp->ncl = ncl;
+	tmp->nch = nch;
+	card = card_vuint8();
+    s2v1D(ncl, nch, card, &v0, &v1);
+    v2m1D(v0, v1, card, &m0, &m1);
+    tmp->v0 = v0;
+    tmp->v1 = v1;
+    tmp->m0 = m0;
+    tmp->m1 = m1;
+
+	// ui8matrix(nrl, nrh, ncl, nch);
+	// memset_ui8matrix(tmp->I, 0, nrl, nrh, ncl, nch);
+	// tmp->I = vui8matrix(nrl - BORD, nrh + BORD, v0, v1);
+
+	// printf("%d %d %d %d", nrl, nrh, v0, v1);getchar();
+    int z = (v1-vBORD)*card;
+    int r = (nch - BORD) -z;
+	card = card_vuint8();
+	uint8 *p;
+	vuint8 x;
+	int l;
+	tmp->I = vui8matrix(nrl, nrh, v0, v1); 
+
+	for (int i = nrl; i < nrh + 1; i++) {
+		for (int j = v0; j < v1 + 1; j++){
+			tmp->I[i][j] = _mm_setzero_si128();
+		}
+	}
+	for (int i = nrl + BORD; i < nrh - BORD + 1; i++) {
+		int l;
+		p = (uint8*)&x;
+		for (int j = v0 + vBORD; j < v1; j++){
+			// printf("%d\n", j);
+			l = j * card;
+			// printf("%d ~ %d\n", l, l + 15);
+			for (int k = 0; k < card; k++)
+				p[k] = X[i][l + k];
+			_mm_store_si128((vuint8*)&tmp->I[i][j], x);
+		}
+		l = v1 * card;
+		for (int j = 0; j < card && l < nch - BORD + 1; j++, l++) {
+			p[j] = X[i][l + j];
+		}
+		_mm_store_si128((vuint8*)&tmp->I[i][v1 + 1], x);
+	}
+	tmp->M = vui8matrix(nrl, nrh, v0, v1); 
+    tmp->O = vui8matrix(nrl, nrh, v0, v1);
+    tmp->V = vui8matrix(nrl, nrh, v0, v1);
+    tmp->E = vui8matrix(nrl, nrh, v0, v1);
+	tmp->Omega = vui8matrix(nrl, nrh, v0, v1);
+	return tmp;
+}
 /*-----------------------------*/
 void free_vimage(p_vimage vimage) {
 /*-----------------------------*/

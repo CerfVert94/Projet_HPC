@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 //#include <malloc.h>
+#include "vnrdef.h"
+#include "vnrutil.h"
+#include <img_SIMD.h>
 #include <util.h>
 #include <morpho.h>
 
