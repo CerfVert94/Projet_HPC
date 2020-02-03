@@ -92,7 +92,7 @@ p_vimage create_vimage(char* filename) {
     tmp->V = vui8matrix(nrl, nrh, v0, v1);
     tmp->E = vui8matrix(nrl, nrh, v0, v1);
 	tmp->Omega = vui8matrix(nrl, nrh, v0, v1);
-
+	free_ui8matrix(img,rl,rh,cl,ch);
 	return tmp;
 }
 p_vimage create_vimage_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, long nch) {

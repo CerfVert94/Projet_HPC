@@ -70,10 +70,16 @@ void free_benchmark_results(double **results, long nb_funcs)
 }
 unsigned long long get_min_cycles(unsigned long long cycles[],long packet_size)
 {
-	int min_cycles = cycles[0];
-	for (long i = 1; i < packet_size; i++) 
+	unsigned long long min_cycles = cycles[0];
+
+	// printf("cycles0 : %llu\n",cycles[0]);
+	for (long i = 1; i < packet_size; i++) {
+
+	// printf("cycles%d : %llu\n",i,cycles[i]);
 		if (min_cycles > cycles[i]) 
 			min_cycles = cycles[i];
+	}
+	// printf("min : %llu\n",min_cycles);
 	return min_cycles;
 }
 unsigned long long get_cpu_cycles_of_morpho(struct morpho_set *ptr_mset, uint8 **X,  long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
@@ -205,8 +211,10 @@ unsigned long long get_min_cpu_cycles_of_vec_sd(struct complete_sd_set *csdset, 
 		exit(EXIT_FAILURE);
 	}
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
-	for (int i = 0; i < packet_size; i++) 
+	for (int i = 0; i < packet_size; i++){
 		cycles[i] = get_cpu_cycles_of_vec_sd(csdset, t0, t1, n_coeff, v_min, v_max);
+		
+	}
 
 	min_cycles = get_min_cycles(cycles, packet_size);
 	free(cycles);
@@ -328,7 +336,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
 		}
 	
 		free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
@@ -374,7 +382,7 @@ double **benchmark_of_packed_morpho(struct morpho_set *morphos, long nb_sets, lo
 			unfcpack_ui8matrix_ui8matrix(Y, 0, size, 0, size, packed_nrl, packed_nrh, packed_ncl, packed_nch, bord, Z);
 			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles.\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
 		}
 	
 		// free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
@@ -441,7 +449,7 @@ double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls,
 				end = __rdtsc();
 			}
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles.\n",  csdsets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  csdsets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
 		}
 		free_image(t0);
 		free_image(t1);
