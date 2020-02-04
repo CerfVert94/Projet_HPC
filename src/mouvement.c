@@ -59,9 +59,9 @@ void SigmaDelta_step1_naive(uint8** M_1, uint8** I, uint8** M, long nrl, long nr
 
 	for (i = nrl; i <= nrh; i++) {
 		for (j = ncl; j <= nch; j++) {
-			if (M_1[i][j] < I[i][j])
+			if ((M_1[i][j] < I[i][j]) && (M_1[i][j] <= Vmax))
 				M[i][j] = M_1[i][j] + 1;
-			else if (M_1[i][j] > I[i][j])
+			else if ((M_1[i][j] > I[i][j]) && (M_1[i][j] >= Vmin))
 				M[i][j] = M_1[i][j] - 1;
 			else
 				M[i][j] = M_1[i][j];
@@ -85,18 +85,17 @@ void SigmaDelta_step2_naive(uint8** M  , uint8** I, uint8** O, long nrl, long nr
 void SigmaDelta_step3_naive(uint8** V_1, uint8** O, uint8** V, long nrl, long nrh, long ncl, long nch, uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*-----------------------------------------*/
 	long i, j;
-	int16 v_0;
-	int16 n_o = 0;
+	uint8 v_0;
 	for (i = nrl; i <= nrh; i++) {
 		for (j = ncl; j <= nch; j++) {
 			
-			if (V_1[i][j] < (n_coeff * O[i][j]))
+			if ((V_1[i][j] < (n_coeff * O[i][j])) && V_1[i][j] <= Vmax)
 				v_0 = V_1[i][j] + 1;
-			else if (V_1[i][j] > (n_coeff * O[i][j]))
+			else if ((V_1[i][j] > (n_coeff * O[i][j])) && V_1[i][j] >= Vmin)
 				v_0 = V_1[i][j] - 1;
 			else
 				v_0 = V_1[i][j];
-			 V[i][j] = max(min(v_0, v_max), v_min);
+			V[i][j] = max(min(v_0, v_max), v_min);
 		}
 	}
 
