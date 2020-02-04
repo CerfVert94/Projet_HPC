@@ -252,17 +252,19 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 	}
 	else if (sd->instr_type == SIMD) {
-		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
-		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
-		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
-		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
-		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
-		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+		int i0, i1, j0, j1;
+
+		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
+		assert(j0 == i0 && j1 == i1 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(i0, i1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, i0, i1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Y = vui8matrix_to_ui8matrix(vY, j0, j1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, j0, j1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		free_vui8matrix(vX, i0, i1, v0, v1);
+		free_vui8matrix(vY, i0, i1, v0, v1);
+		free_vui8matrix(vZ, i0, i1, v0, v1);
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++) 
 		for (long col = ncl1; col < nch1 + 1; col++){
@@ -300,17 +302,18 @@ void test_integration_SigmaDelta_step1(char *filename0, char *filename1, struct 
 		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 	}
 	else if (sd->instr_type == SIMD) {
-		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
-		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
-		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
-		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
-		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
-		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+		int i0, i1, j0, j1;
+		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
+		assert(i0 == j0 && j1 == i1 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(i0, i1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, i0, i1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, i0, i1, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, i0, i1, v0, v1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, i0, i1, v0, v1, &nrl1, &nrh1, &ncl1, &nch1);
+		free_vui8matrix(vX, i0, i1, v0, v1);
+		free_vui8matrix(vY, i0, i1, v0, v1);
+		free_vui8matrix(vZ, i0, i1, v0, v1);
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++) 
 		for (long col = ncl1; col < nch1 + 1; col++){
@@ -349,18 +352,18 @@ void test_integration_SigmaDelta_step2(char *filename0, char *filename1, struct 
 		sd->sd_func(X, Y, Z, nrl1, nrh1, ncl1, nch1, sd->n_coeff, sd->v_min, sd->v_max);
 	}
 	else if (sd->instr_type == SIMD) {
-		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
-		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
-		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
-		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-
-		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
-		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
-		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
-		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+		int i0, i1, j0, j1;
+		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
+		assert(i0 == j0 && j1 == i1 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(i0, i1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, i0, i1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, i0, i1, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
+		free_vui8matrix(vX, i0, i1, v0, v1);
+		free_vui8matrix(vY, i0, i1, v0, v1);
+		free_vui8matrix(vZ, i0, i1, v0, v1);
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++) {
 		for (long col = ncl1; col < nch1 + 1; col++){
@@ -400,17 +403,18 @@ void test_integration_SigmaDelta_step3(char *filename0, char *filename1, struct 
 	}
 	else
 	{
-		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
-		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
-		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
-		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
-		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
-		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
-		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+		int i0, i1, j0, j1;
+		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
+		assert(i0 == j0 && j1 == i1 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(i0, i1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, i0, i1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, i0, i1, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);	
+		free_vui8matrix(vX, i0, i1, v0, v1);
+		free_vui8matrix(vY, i0, i1, v0, v1);
+		free_vui8matrix(vZ, i0, i1, v0, v1);
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++)
 		for (long col = ncl1; col < nch1 + 1; col++) {
@@ -450,17 +454,18 @@ void test_integration_SigmaDelta_step4(char *filename0, char *filename1, struct 
 	}
 	else
 	{
-		vX = LoadPGM_vui8matrix(filename0, &nrl0, &nrh0, &v0, &v1);
-		vY = LoadPGM_vui8matrix(filename1, &nrl1, &nrh1, &w0, &w1);
-		assert(nrl1 == nrl0 && nrh1 == nrh0 && v0 == w0 && v1 == w1);
-		vZ = vui8matrix(nrl1, nrh1, v0, v1);
-		sd->vec_sd_func(vX, vY, vZ, nrl1, nrh1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
-		X = vui8matrix_to_ui8matrix(vX, nrl0, nrh0, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
-		Y = vui8matrix_to_ui8matrix(vY, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		Z = vui8matrix_to_ui8matrix(vZ, nrl1, nrh1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
-		free_vui8matrix(vX, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vY, nrl0, nrh0, v0, v1);
-		free_vui8matrix(vZ, nrl0, nrh0, v0, v1);
+		int i0, j0, j1, i1;
+		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
+		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
+		assert(i0 == j0 && j1 == i1 && v0 == w0 && v1 == w1);
+		vZ = vui8matrix(i0, i1, v0, v1);
+		sd->vec_sd_func(vX, vY, vZ, i0, i1, v0, v1, sd->n_coeff, sd->v_min, sd->v_max);
+		X = vui8matrix_to_ui8matrix(vX, i0, i1, v0, v1, &nrl0, &nrh0, &ncl0, &nch0);
+		Y = vui8matrix_to_ui8matrix(vY, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		Z = vui8matrix_to_ui8matrix(vZ, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		free_vui8matrix(vX, i0, i1, v0, v1);
+		free_vui8matrix(vY, i0, i1, v0, v1);
+		free_vui8matrix(vZ, i0, i1, v0, v1);
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++)
 		for (long col = ncl1; col < nch1 + 1; col++){

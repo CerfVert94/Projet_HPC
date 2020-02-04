@@ -168,7 +168,7 @@ unsigned long long get_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, vui
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
 	begin = __rdtsc();
-	ptr_mset->vec_morpho_func(vX, i0, i1, j0, j1, temp_vBuffer, vY);
+	ptr_mset->vec_morpho_func(vX, i0, i1, j0, j1, /*temp_vBuffer,*/ vY);
 	end = __rdtsc();
 	return end - begin;
 }
