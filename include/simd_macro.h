@@ -14,15 +14,18 @@
 
 #define leftshift1a  _mm_setr_epi8(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1)
 #define leftshift1b  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0)
+
 #define rightshift1a _mm_setr_epi8(-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)
 #define rightshift1b _mm_setr_epi8(15,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
 
-// -------
-// operateurs
-// -------
 
-#define vector_and3(A, B, C)	(_mm_and_si128(_mm_and_si128(A, B), C))
-#define vector_or3(A, B, C)	(_mm_or_si128 (_mm_or_si128 (A, B), C))
+#define leftshift2a  _mm_setr_epi8(2,3,4,5,6,7,8,9,10,11,12,13,14,15,-1,-1)
+#define leftshift2b  _mm_setr_epi8(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,1)
+
+#define rightshift2a _mm_setr_epi8(-1,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13)
+#define rightshift2b _mm_setr_epi8(14,15,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1)
+
+
 
 
 // -----------------------
@@ -32,15 +35,29 @@
 #define vec_border(a,b) b
 #define vec_middle(a,b) a
 
-#define vec_left1(v0, v1)  _mm_or_si128(_mm_shuffle_epi8(v0, leftshift1a), _mm_shuffle_epi8(v1, leftshift1b))
-#define vec_left2(v0, v1) v1
+#define vec_left1(v0, v1)  (_mm_or_si128(_mm_shuffle_epi8(v0, leftshift1a), _mm_shuffle_epi8(v1, leftshift1b)))
+#define vec_left2(v0, v1)  (_mm_or_si128(_mm_shuffle_epi8(v0, leftshift2a), _mm_shuffle_epi8(v1, leftshift2b)))
 #define vec_left3(v0, v1) v1
 #define vec_left4(v0, v1) v1
 
-#define vec_right1(v1, v2) _mm_or_si128(_mm_shuffle_epi8(v2, rightshift1a), _mm_shuffle_epi8(v1, rightshift1b))
-#define vec_right2(v1, v2) v1
+#define vec_right1(v1, v2) (_mm_or_si128(_mm_shuffle_epi8(v2, rightshift1a), _mm_shuffle_epi8(v1, rightshift1b)))
+#define vec_right2(v1, v2) (_mm_or_si128(_mm_shuffle_epi8(v2, rightshift2a), _mm_shuffle_epi8(v1, rightshift2b)))
 #define vec_right3(v1, v2) v1
 #define vec_right4(v1, v2) v1 
+
+// ----------
+// operateurs
+// ----------
+
+#define vector_and3(A, B, C)	       (_mm_and_si128(_mm_and_si128(A, B), C))
+#define vector_and3_row(A, B, C)	   (vector_and3(vec_right1(A, B), B, vec_left1(B, C)))
+#define vector_and5(A, B, C, D, E)     (vector_and3(vector_and3(A,B,C), D, E))
+#define vector_and5_row(A, B, C, D, E) (vector_and3(vect_right2(A, C),vector_and3_row(B, C, D), vect_left2(C, E)))
+
+#define vector_or3(A, B, C)	    	   (_mm_or_si128(_mm_or_si128(A, B),C))
+#define vector_or3_row(A, B, C)	  	   (vector_or3(vec_right1(A, B), B, vec_left1(B, C)))
+#define vector_or5(A, B, C, D, E)      (vector_or3(vector_or3(A,B,C), D, E))
+#define vector_or5_row(A, B, C, D, E)  (vector_or3(vect_right2(A, C),vector_or3_row(B, C, D), vect_left2(C, E)))
 
 // -------
 //   MIN

@@ -18,7 +18,15 @@ void ui8matrix_erosion_SSE_naive(vuint8** X, long nrl, long nrh, long v0, long v
 void ui8matrix_dilation_SSE_naive(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
 
 void ui8matrix_erosion_SSE_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
-void ui8matrix_dilatation_SSE_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+void ui8matrix_dilation_SSE_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+
+void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+
+void ui8matrix_edilation_dilation_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+
+
 
 void test_functions_morpho_SIMD(); 
 
