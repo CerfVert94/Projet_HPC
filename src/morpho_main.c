@@ -174,7 +174,7 @@ struct morpho_set dilations[] = {
 
     
     struct morpho_set erosions[] = {
-                                        // {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive          },.instr_type = SCALAR, 
+                                        {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive          ,.instr_type = SCALAR, },
                                         {.func_name = "ui8matrix_erosion_LU3x3_O1xO1"                , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1                   ,.instr_type = SCALAR},
                                         {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3                   ,.instr_type = SCALAR},
                                         {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3                   ,.instr_type = SCALAR},
@@ -322,13 +322,37 @@ int main(void)
     // test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 4, false);
     // launch_SD_step_benchmark("output/benchmark_sdstep4.dat"             , SDs_step4, 4, 1, 1, 200, 5000, 100);
     // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
-    launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       19, 1, 1, 200, 5000, 100);
-    launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
+    // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       19, 1, 1, 200, 5000, 100);
+    // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
     // test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
     // test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , nb_sets, 1, 1, 10, 1000, 10);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , nb_sets, 1, 1, 200, 1000, 1);
 
+    int max = (1 << 9); // 2^9 
+    
+    for (int i = 0; i < max; i++){
+        printf("%x\n",i);
+        vuint8 **m = vui8matrix_permutation(NULL, -1, 1, -1, 1, i);
+        
+
+        for (int row = -1; row <= 1; row++)
+        {
+            uint8 *p;
+            int i = 0;
+            for (int v = -1; v <= 1; v++)  {
+                p = (uint8*)&m[row][v];
+                for(i=0; i<16; i++)
+                    printf("%u", p[i]);
+            }
+            printf("\n");
+        }
+        
+        getchar();
+        
+        free_vui8matrix(m, -1, 1, -1, 1);
+    }
+    
     return 0;    
 }
 
