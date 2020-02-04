@@ -14,8 +14,8 @@
 
 #pragma message("  include  morpho_SIMD.h")
 
-void ui8matrix_erosion_SSE_naive(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
-void ui8matrix_dilation_SSE_naive(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
+void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y);
+void ui8matrix_dilation_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y);
 
 void ui8matrix_erosion_SSE_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
 void ui8matrix_dilation_SSE_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
@@ -25,8 +25,6 @@ void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, 
 
 void ui8matrix_edilation_dilation_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
 void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y);
-
-
 
 void test_functions_morpho_SIMD(); 
 

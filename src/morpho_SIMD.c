@@ -33,7 +33,7 @@
 
 
 /*------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_SIMD_naive(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
 
 	long row, col, x, y, i;
@@ -72,7 +72,14 @@ void ui8matrix_erosion_SIMD_naive(vuint8** X, long nrl, long nrh, long v0, long 
 
 			//Row operator
 			vTMP = vector_and3_row(vY_1, vY, vY1);
-
+			// if(row == 1 && col == 1) {
+    		// 	display_vuint8(vY_1, "%4d", NULL); printf(" ");
+    		// 	display_vuint8(vY, "%4d", NULL); printf("\n");
+    		// 	display_vuint8(vY1, "%4d", NULL); printf("\n\n");
+    		// 	display_vuint8(vec_right1(vY_1, vY), "%4d", NULL); printf("\n");
+    		// 	display_vuint8(vY, "%4d", NULL); printf("\n");
+    		// 	display_vuint8(vec_left1(vY, vY1), "%4d", NULL); printf("\n\n");
+    		// }
 			_mm_store_si128((vuint8*) &Y[row][col], vTMP);	
 		}
 	}
@@ -80,7 +87,7 @@ void ui8matrix_erosion_SIMD_naive(vuint8** X, long nrl, long nrh, long v0, long 
 } 
 
 /*------------------------------------------------------------------------------------*/
-void ui8matrix_dilation_SIMD_naive(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_dilation_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*------------------------------------------------------------------------------------*/
 
 	long row, col, x, y, i;
@@ -124,7 +131,7 @@ void ui8matrix_dilation_SIMD_naive(vuint8** X, long nrl, long nrh, long v0, long
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_SIMD_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_erosion_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*---------------------------------------------------------------------------------------------------------*/
 	
 	long row, col, x, y, i;
@@ -176,7 +183,7 @@ void ui8matrix_erosion_SIMD_RR_row (vuint8** X, long nrl, long nrh, long v0, lon
 }
 
 /*-------------------------------------------------------------------------------------------------*/
-void ui8matrix_dilation_SIMD_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_dilation_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*-------------------------------------------------------------------------------------------------*/
 	
 	long row, col, x, y, i;

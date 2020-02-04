@@ -657,7 +657,7 @@ void test_implementation_SigmaDelta_step1(struct sd_set *sd, bool logging) {
 		uint8 *X[1] = {M_t0[0]}, **XX = X;
 		uint8 *Y[1] = {I_t0[0]}, **YY = Y;
 		uint8 *Z[1] = {M_t1[0]}, **ZZ = Z;
-		
+	
 		XX[0][0] = lower_limit;
 		YY[0][0] = upper_limit;
 		verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 < I_t0 => M_t1 = M_t0 + 1", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
@@ -667,6 +667,7 @@ void test_implementation_SigmaDelta_step1(struct sd_set *sd, bool logging) {
 		XX[0][0] = lower_limit;
 		YY[0][0] = lower_limit;
 		verify_case_SigmaDelta_step1(sd, num_case++, "M_t0 = I_t0 => M_t1 = M_t0    ", XX, YY, ZZ, XX[0][0], YY[0][0], logging);
+
 	}
 	else if (sd->instr_type == SIMD) {
 		vuint8 vM_t0[1][1] = {{_mm_setzero_si128()}}; vuint8 *vX[1] = {vM_t0[0]}, **vXX = vX;

@@ -17,6 +17,22 @@
 #include "util.h"
 
 
+
+/*---------------------------------------------------------------------------------------------*/
+void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y) {
+/*---------------------------------------------------------------------------------------------*/
+	long i;
+	int j;
+
+	vuint8 vX;
+
+	for (i = nrl; i <= nrh; i++)
+		for (j = vmin; j <= vmax; j++ ) {
+			vX = _mm_load_si128(&X[i][j]);
+			_mm_store_si128((vuint8*)&Y[i][j], vX);
+		}
+}
+
 vuint8 **ui8matrix_to_vui8matrix(uint8 **X , long  nrl, long  nrh, long ncl, long nch, int *i0, int *i1, int *j0, int *j1)
 {
     uint8   **Y;

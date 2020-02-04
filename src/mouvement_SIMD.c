@@ -22,20 +22,6 @@
 #include "util.h"
 
 
-/*---------------------------------------------------------------------------------------------*/
-void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y) {
-/*---------------------------------------------------------------------------------------------*/
-	long i;
-	int j;
-
-	vuint8 vX;
-
-	for (i = nrl; i <= nrh; i++)
-		for (j = vmin; j <= vmax; j++ ) {
-			vX = _mm_load_si128(&X[i][j]);
-			_mm_store_si128((vuint8*)&Y[i][j], vX);
-		}
-}
 
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
