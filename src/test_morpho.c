@@ -153,11 +153,11 @@ void test_implementation_dilation5(struct morpho_set *dilation_set)
 	uint8 **X;
 	
 	X = ui8matrix(-2, 2, -2, 2);
-	max = (1 << (size * size)) - 1; // 2^25
+	max = (1 << (size * size)); // 2^25
 
 	// Loop 1: Get permutations :
 	printf("Implementation test : %s\n", dilation_set->func_name);
-	for (perm = 0; perm < max + 1; perm++) {
+	for (perm = 0; perm < max; perm++) {
 		ui8matrix_permutation(X, STRUCTURING_ELEMENT_DIM(dilation_set->s), perm);
 		
 		if (perm % (max / PROGRESS_FACTOR) == 0)
@@ -188,15 +188,13 @@ bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
 					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
 					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
 					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
 					   {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},};
 
 	vuint8 vTempX[5][3] = {{_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
-					      {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},};	
+					       {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					       {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					       {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},
+					       {_mm_setzero_si128(),_mm_setzero_si128(),_mm_setzero_si128()},};	
 
 	vuint8 *vY[5] = {vX[0] + 2, vX[1] + 2, vX[2] + 2, vX[3] + 2, vX[4] + 2};
 	vuint8 *vTempY[5] = {vTempX[0] + 2, vTempX[1] + 2, vTempX[2] + 2, vTempX[3] + 2, vTempX[4] + 2};
@@ -250,8 +248,8 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 	memset_ui8matrix(temp_buffer, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
     copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
 	
-    for(temp_nrh = nrh - 10; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = nch - 10; temp_nch < nch + 1; temp_nch++){
+    for(temp_nrh = nrh - 20; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = nch - 20; temp_nch < nch + 1; temp_nch++){
 			// Test Output
 			Y = ui8matrix(nrl, temp_nrh, ncl, temp_nch);
 			// Valid Output
@@ -365,16 +363,9 @@ uint8**  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nc
 	 *            0,0,0,
 	 *            1,1,1};
 	 **/
-	uint32 extracted_bits = 0;
-	for (int i = nrl; i < nrh + 1; i++) {
-		// Extract (i) th ~ (i + nrow) th bits from permutation.
-		extracted_bits = extract_bits_from_permutation(perm, (i - nrl), (nch - ncl + 1)); 
-		for (int j = ncl; j < nch + 1; j++) {
-			// Get the j-th column from the row.
-			m[i][j] = get_column_at(extracted_bits, (j - ncl));
-		}
-	}
-
+	uint8 *x = &m[nrl][ncl];
+	for (long i = 0; i < (nrh - nrl + 1) * (nch - ncl + 1); i++)
+		x[i] = (perm >> i) & 0x1;
 }
 
 vuint8**  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, long nch, uint32 perm)
@@ -385,22 +376,44 @@ vuint8**  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, lon
 	 * For example: 
 	 * perm = 0b111000111
 	 * =>
-	 * X = {1,1,1,
-	 *      0,0,0,
-	 *      1,1,1};
+	 * X = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
+	 *     {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
+	 *     {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},{1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
 	 **/
-	uint32 extracted_bits = 0;
-	uint8 *m;
-	for (int i = nrl; i < nrh + 1; i++) {
-		// Extract (i) th ~ (i + nrow) th bits from permutation.
-		extracted_bits = extract_bits_from_permutation(perm, (i - nrl), (nch - ncl + 1)); 
-		m = (uint8*)&vM[i][0];
-		for (int j = ncl; j < nch + 1; j++) {
-			// Get the j-th column from the row.
-			m[j] = get_column_at(extracted_bits, (j - ncl));
-		}
-	}
+	int card = card_vuint8();
+	assert(-card < ncl && nch < card * 2);
+	
+	int ncl0 = (card - 1) + (ncl < 0 ? ncl : 0) + 1;
+	int nch0 = (card - 1);
 
+	int ncl1 = (ncl >= 0    ? ncl : 0       );
+	int nch1 = (nch <  card ? nch : card - 1);
+
+	int ncl2 = (ncl >= card ? ncl - card : 0 );
+	int nch2 = (nch >= card ? nch - card : 0 ) - 1;
+	int row, col, row_cnt = 0, col_cnt = 0, ncol = (nch - ncl + 1);
+	vuint8 **m = vui8matrix(nrl, nrh, -1, 1);
+	zero_vui8matrix(m, nrl, nrh, -1, 1);
+	uint8 *v;
+
+	row_cnt = 0;
+	for (row = nrl; row < nrh + 1; row++, row_cnt += ncol) {
+		col_cnt = 0;
+		v = (uint8 *)&m[row][-1];
+
+		for (col = ncl0; col < nch0 + 1; col++) 
+			v[col] = (perm >> (row_cnt +col_cnt++)) & 0x1;
+
+		v = (uint8 *)&m[row][ 0];
+		for (col = ncl1; col < nch1 + 1; col++) 
+			v[col] = (perm >> (row_cnt +col_cnt++)) & 0x1;
+
+
+		v = (uint8 *)&m[row][ 1];
+		for (col = ncl2; col < nch2 + 1; col++) 
+			v[col] = (perm >> (row_cnt +col_cnt++)) & 0x1;
+	}
+	return m;
 }
 
 
