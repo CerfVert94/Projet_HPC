@@ -19,6 +19,7 @@
 #include "img_SIMD.h"
 
 #include <morpho.h>
+#include <morpho_SIMD.h>
 #include <mouvement.h>
 #include <mouvement_SIMD.h>
 //#include "mymacro.h"
@@ -123,6 +124,8 @@ void make_testsets(){
 }
 
 struct morpho_set dilations[] = {
+                                        {.func_name = "ui8matrix_dilation_SIMD_naive"                   , .vec_morpho_func = ui8matrix_dilation_SIMD_naive                     , .pack_type = NO_PACK, .instr_type = SIMD},
+                                        
                                         // {.func_name = "ui8matrix_dilation_naive"                   , .morpho_func = ui8matrix_dilation_naive                     , .pack_type = NO_PACK, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_LU3x3_O1xO1"                , .morpho_func = ui8matrix_dilation_LU3x3_O1xO1                   , .pack_type = NO_PACK, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3                   , .pack_type = NO_PACK, .instr_type = SCALAR},
@@ -174,6 +177,7 @@ struct morpho_set dilations[] = {
 
     
     struct morpho_set erosions[] = {
+                                        {.func_name = "ui8matrix_erosion_SIMD_naive"                   , .vec_morpho_func = ui8matrix_erosion_SIMD_naive                     , .pack_type = NO_PACK, .instr_type = SIMD},
                                         {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive          ,.instr_type = SCALAR, },
                                         {.func_name = "ui8matrix_erosion_LU3x3_O1xO1"                , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1                   ,.instr_type = SCALAR},
                                         {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3                   ,.instr_type = SCALAR},
@@ -293,7 +297,7 @@ int main(void)
     long m0, m1, v0, v1;
     
     long nb_sets;
-    nb_sets = 27; 
+    nb_sets = 1; 
     
 
 	// uint8 **img = LoadPGM_ui8matrix("../car3/car_3000.pgm", &nrl, &nrh, &ncl, &nch);
@@ -325,33 +329,11 @@ int main(void)
     // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       19, 1, 1, 200, 5000, 100);
     // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
     // test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
-    // test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
+    test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , nb_sets, 1, 1, 10, 1000, 10);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , nb_sets, 1, 1, 200, 1000, 1);
 
-    int max = (1 << 9); // 2^9 
     
-    for (int i = 0; i < max; i++){
-        printf("%x\n",i);
-        vuint8 **m = vui8matrix_permutation(NULL, -1, 1, -1, 1, i);
-        
-
-        for (int row = -1; row <= 1; row++)
-        {
-            uint8 *p;
-            int i = 0;
-            for (int v = -1; v <= 1; v++)  {
-                p = (uint8*)&m[row][v];
-                for(i=0; i<16; i++)
-                    printf("%u", p[i]);
-            }
-            printf("\n");
-        }
-        
-        getchar();
-        
-        free_vui8matrix(m, -1, 1, -1, 1);
-    }
     
     return 0;    
 }

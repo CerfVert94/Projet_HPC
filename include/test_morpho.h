@@ -37,8 +37,9 @@ static inline uint8 get_column_at(uint8 col_vals, long icol) {
 
 // uint8 **rand_ui8matrix(long size);
 uint8 **ui8matrix_checker(long nrl, long nrh, long ncl, long nch, const long chkr_size, const uint8 xor_mask);
-uint8**  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nch, uint32 perm);
-vuint8**  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, long nch, uint32 perm);
+void  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nch, uint32 perm);
+void  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, long nch, uint32 perm);
 
+bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW);
 
 #endif /*  __TEST_MORPHO_H__ */
