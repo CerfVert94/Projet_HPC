@@ -40,9 +40,9 @@ void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, 
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 
 
-	vuint8 v_1X_1, v_1X, v_1X1; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
-	vuint8 vX_1  , vX  , vX1  ; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
-	vuint8 v1X_1 , v1X , v1X1 ; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
+	vuint8 v0_0, v0_1, v0_2; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
+	vuint8 v1_0, v1_1, v1_2; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
+	vuint8 v2_0, v2_1, v2_2; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vTMP;
@@ -51,39 +51,41 @@ void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1, 
 	for (row = nrl; row <= nrh; row++) {
 		for (col = v0; col <= v1; col++) {
 
-			v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-			vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-			v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-			v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-			vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-			v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v0_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+			v1_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+			v2_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+
+			v0_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+			v1_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+			v2_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+
+			v0_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
 
 
 			//Column -1 "and" operator
-			vY_1 = vector_and3(v_1X_1, vX_1, v1X_1);
+			vY_1 = vector_and3(v0_0, v1_0, v2_0);
 			//Column  0 "and" operator 
-			vY   = vector_and3(v_1X,   vX,   v1X);
+			vY   = vector_and3(v0_1, v1_1, v2_1);
 			//Column  1 "and" operator
-			vY1  = vector_and3(v_1X1,  vX1,  v1X1);
+			vY1  = vector_and3(v0_2, v1_2, v2_2);
 
 			//Row operator
 			vTMP = vector_and3_row1shift(vY_1, vY, vY1);
 			/*if(row == 3 && col == 1) {
 				printf("SIMD\n");
-    			display_vuint8(v_1X_1, "%4d", NULL); printf("\n");
-    			display_vuint8(vX_1, "%4d", NULL); printf("\n");
-    			display_vuint8(v1X_1, "%4d", NULL); printf("\n");
+    			display_vuint8(v0_0, "%4d", NULL); printf("\n");
+    			display_vuint8(v1_0, "%4d", NULL); printf("\n");
+    			display_vuint8(v2_0, "%4d", NULL); printf("\n");
     			display_vuint8(vY_1, "%4d", NULL); printf("\n\n");
-    			display_vuint8(v_1X, "%4d", NULL); printf("\n");
-    			display_vuint8(vX, "%4d", NULL); printf("\n");
-    			display_vuint8(v1X, "%4d", NULL); printf("\n");
+    			display_vuint8(v0_1, "%4d", NULL); printf("\n");
+    			display_vuint8(v1_1, "%4d", NULL); printf("\n");
+    			display_vuint8(v2_1, "%4d", NULL); printf("\n");
     			display_vuint8(vY, "%4d", NULL); printf("\n\n");
-    			display_vuint8(v_1X1, "%4d", NULL); printf("\n");
-    			display_vuint8(vX1, "%4d", NULL); printf("\n");
-    			display_vuint8(v1X1, "%4d", NULL); printf("\n");
+    			display_vuint8(v0_2, "%4d", NULL); printf("\n");
+    			display_vuint8(v1_2, "%4d", NULL); printf("\n");
+    			display_vuint8(v2_2, "%4d", NULL); printf("\n");
     			display_vuint8(vY1, "%4d", NULL); printf("\n\n");
 
     			display_vuint8(vec_right1(vY_1, vY), "%4d", NULL); printf("\n");
@@ -105,9 +107,10 @@ void ui8matrix_dilation_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1,
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8 vX_1  , vX  , vX1  ;
-	vuint8 v1X_1 , v1X , v1X1 ;
+
+	vuint8 v0_0, v0_1, v0_2; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
+	vuint8 v1_0, v1_1, v1_2; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
+	vuint8 v2_0, v2_1, v2_2; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vTMP;
@@ -116,30 +119,33 @@ void ui8matrix_dilation_SIMD_naive(vuint8** X, int nrl, int nrh, int v0, int v1,
 	for (row = nrl; row <= nrh; row++) {
 		for (col = v0; col <= v1; col++) {
 
-			v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-			vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-			v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-			v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-			vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-			v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v0_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+			v1_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+			v2_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+
+			v0_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+			v1_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+			v2_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+
+			v0_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
 
 
-			//Column -1 "and" operator
-			vY_1 = vector_or3(v_1X_1, vX_1, v1X_1);
-			//Column  0 "and" operator 
-			vY   = vector_or3(v_1X,   vX,   v1X);
-			//Column  1 "and" operator
-			vY1  = vector_or3(v_1X1,  vX1,  v1X1);
+			//Column -1 "or" operator
+			vY_1 = vector_or3(v0_0, v1_0, v2_0);
+			//Column  0 "or" operator 
+			vY   = vector_or3(v0_1, v1_1, v2_1);
+			//Column  1 "or" operator
+			vY1  = vector_or3(v0_2, v1_2, v2_2);
 
 			//Row operator
-			vTMP = vector_or3_row1shift(vY_1, vY, vY1);
+			vTMP = vector_and3_row1shift(vY_1, vY, vY1);
 
-			_mm_store_si128((vuint8*) &Y[row][col], vTMP);		
+			_mm_store_si128((vuint8*) &Y[row][col], vTMP);	
 		}
 	}
+
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -149,9 +155,9 @@ void ui8matrix_erosion_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 	
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8 vX_1  , vX  , vX1  ;
-	vuint8 v1X_1 , v1X , v1X1 ;
+	vuint8 v0_0, v0_1, v0_2; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
+	vuint8 v1_0, v1_1, v1_2; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
+	vuint8 v2_0, v2_1, v2_2; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vTMP;
@@ -160,26 +166,27 @@ void ui8matrix_erosion_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1
 	for (row = nrl; row <= nrh; row++) {
 
 		col = 0;
-		v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-		vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-		v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-		v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-		vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-		v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
+		v0_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+		v1_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+		v2_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+
+		v0_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+		v1_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+		v2_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
 
 		//Column -1 "and" operator
-		vY_1 = vector_and3(v_1X_1, vX_1, v1X_1);
+		vY_1 = vector_and3(v0_0, v1_0, v2_0);
 		//Column  0 "and" operator 
-		vY   = vector_and3(v_1X,   vX,   v1X);	
+		vY   = vector_and3(v0_1, v1_1, v2_1);
 
 		for (col = v0; col <= v1; col++) {	
 
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v0_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
 
 			//Column  1 "and" operator
-			vY1  = vector_and3(v_1X1,  vX1,  v1X1);
+			vY1  = vector_and3(v0_2, v1_2, v2_2);
 
 			//Row operator
 			vTMP = vector_and3_row1shift(vY_1, vY, vY1);
@@ -201,37 +208,38 @@ void ui8matrix_dilation_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 	
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8 vX_1  , vX  , vX1  ;
-	vuint8 v1X_1 , v1X , v1X1 ;
+	vuint8 v0_0, v0_1, v0_2; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
+	vuint8 v1_0, v1_1, v1_2; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
+	vuint8 v2_0, v2_1, v2_2; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vTMP;
 
-	// Dilation
+	// Erosion
 	for (row = nrl; row <= nrh; row++) {
 
 		col = 0;
-		v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-		vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-		v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-		v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-		vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-		v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
+		v0_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+		v1_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+		v2_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
 
-		//Column -1 "and" operator
-		vY_1 = vector_or3(v_1X_1, vX_1, v1X_1);
-		//Column  0 "and" operator 
-		vY   = vector_or3(v_1X,   vX,   v1X);
+		v0_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+		v1_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+		v2_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+
+		//Column -1 "or" operator
+		vY_1 = vector_or3(v0_0, v1_0, v2_0);
+		//Column  0 "or" operator 
+		vY   = vector_or3(v0_1, v1_1, v2_1);
 
 		for (col = v0; col <= v1; col++) {	
 
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v0_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
 
-			//Column  1 "and" operator
-			vY1  = vector_or3(v_1X1,  vX1,  v1X1);
+			//Column  1 "or" operator
+			vY1  = vector_or3(v0_2, v1_2, v2_2);
 
 			//Row operator
 			vTMP = vector_or3_row1shift(vY_1, vY, vY1);
@@ -253,11 +261,11 @@ void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, int nrl, int nrh, int v0, int
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 
-	vuint8 v_2X_1, v_2X, v_2X1;
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8   vX_1,   vX,   vX1;
-	vuint8  v1X_1,  v1X,  v1X1;
-	vuint8  v2X_1,  v2X,  v2X1;
+	vuint8  v0_0, v0_1, v0_2;
+	vuint8  v1_0, v1_1, v1_2;
+	vuint8  v2_0, v2_1, v2_2;
+	vuint8  v3_0, v3_1, v3_2;
+	vuint8  v4_0, v4_1, v4_2;
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vSHIFT1, vSHIFT2;
@@ -267,35 +275,37 @@ void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, int nrl, int nrh, int v0, int
 	for (row = nrl; row <= nrh; row++) {
 		for (col = v0; col <= v1; col++) {
 
-			v_2X_1  = _mm_load_si128((vuint8*) &X[row-2][col-1]);
-			v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-			vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-			v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-			v2X_1	= _mm_load_si128((vuint8*) &X[row+2][col-1]);
-			v_2X    = _mm_load_si128((vuint8*) &X[row-2][col  ]);
-			v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-			vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-			v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-			v2X 	= _mm_load_si128((vuint8*) &X[row+2][col  ]);
-			v_2X1   = _mm_load_si128((vuint8*) &X[row-2][col+1]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
-			v2X1    = _mm_load_si128((vuint8*) &X[row+2][col+1]);
+			v0_0 = _mm_load_si128((vuint8*) &X[row-2][col-1]);
+			v1_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+			v2_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+			v3_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+			v4_0 = _mm_load_si128((vuint8*) &X[row+2][col-1]);
+
+			v0_1 = _mm_load_si128((vuint8*) &X[row-2][col  ]);
+			v1_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+			v2_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+			v3_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+			v4_1 = _mm_load_si128((vuint8*) &X[row+2][col  ]);
+
+			v0_2 = _mm_load_si128((vuint8*) &X[row-2][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v3_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v4_2 = _mm_load_si128((vuint8*) &X[row+2][col+1]);
 
 
 
 			//Column -1 "and" operator
-			vY_1 = vector_and5(v_2X_1, v_1X_1, vX_1, v1X_1, v2X_1);
+			vY_1 = vector_and5(v0_0, v1_0, v2_0, v3_0, v4_0);
 			//Column  0 "and" operator 
-			vY   = vector_and5(v_2X,   v_1X,   vX,   v1X,   v2X);
+			vY   = vector_and5(v0_1, v1_1, v2_1, v3_1, v4_1);
 			//Column  1 "and" operator
-			vY1  = vector_and5(v_2X1,  v_1X1,  vX1,  v1X1,  v2X1);
+			vY1  = vector_and5(v0_2, v1_2, v2_2, v3_2, v4_2);
 
 
 
 			//Row operator
-			vSHIFT1 = vector_and3_row1shift(vY_1, vY,   vY1);
+			vSHIFT1 = vector_and3_row1shift(vY_1, vY, vY1);
 			/*if(row == 3 && col == 1) {
 				printf("SIMD_FO\n");
     			display_vuint8(v_2X_1, "%4d", NULL); printf("\n");
@@ -387,8 +397,8 @@ void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, int nrl, int nrh, int v0, i
 			vY1  = vector_or5(v0_2, v1_2, v2_2, v3_2, v4_2);
 
 			//Row operator
-			vSHIFT1 = vector_or3_row1shift(vY_1, vY,   vY1);
-			vSHIFT2 = vector_or3_row2shift(vY_1, vY,   vY1);
+			vSHIFT1 = vector_or3_row1shift(vY_1, vY, vY1);
+			vSHIFT2 = vector_or3_row2shift(vY_1, vY, vY1);
 			vSHIFT1 = _mm_or_si128(vSHIFT1, vSHIFT2);
 
 			_mm_store_si128((vuint8*) &Y[row][col], vSHIFT1);	
@@ -404,11 +414,11 @@ void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, int
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 	
-	vuint8 v_2X_1, v_2X, v_2X1;
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8   vX_1,   vX,   vX1;
-	vuint8  v1X_1,  v1X,  v1X1;
-	vuint8  v2X_1,  v2X,  v2X1;
+	vuint8  v0_0, v0_1, v0_2;
+	vuint8  v1_0, v1_1, v1_2;
+	vuint8  v2_0, v2_1, v2_2;
+	vuint8  v3_0, v3_1, v3_2;
+	vuint8  v4_0, v4_1, v4_2;
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vSHIFT1, vSHIFT2;
@@ -417,32 +427,33 @@ void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, int
 	for (row = nrl; row <= nrh; row++) {
 
 		col = 0;
-		v_2X_1  = _mm_load_si128((vuint8*) &X[row-2][col-1]);
-		v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-		vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-		v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-		v2X_1	= _mm_load_si128((vuint8*) &X[row+2][col-1]);
-		v_2X    = _mm_load_si128((vuint8*) &X[row-2][col  ]);
-		v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-		vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-		v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-		v2X 	= _mm_load_si128((vuint8*) &X[row+2][col  ]);
+		v0_0 = _mm_load_si128((vuint8*) &X[row-2][col-1]);
+		v1_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+		v2_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+		v3_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+		v4_0 = _mm_load_si128((vuint8*) &X[row+2][col-1]);
+
+		v0_1 = _mm_load_si128((vuint8*) &X[row-2][col  ]);
+		v1_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+		v2_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+		v3_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+		v4_1 = _mm_load_si128((vuint8*) &X[row+2][col  ]);
 
 		//Column -1 "and" operator
-		vY_1 = vector_and5(v_2X_1, v_1X_1, vX_1, v1X_1, v2X_1);
+		vY_1 = vector_and5(v0_0, v1_0, v2_0, v3_0, v4_0);
 		//Column  0 "and" operator 
-		vY   = vector_and5(v_2X,   v_1X,   vX,   v1X,   v2X);	
+		vY   = vector_and5(v0_1, v1_1, v2_1, v3_1, v4_1);
 
 		for (col = v0; col <= v1; col++) {	
 
-			v_2X1   = _mm_load_si128((vuint8*) &X[row-2][col+1]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
-			v2X1    = _mm_load_si128((vuint8*) &X[row+2][col+1]);
+			v0_2 = _mm_load_si128((vuint8*) &X[row-2][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v3_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v4_2 = _mm_load_si128((vuint8*) &X[row+2][col+1]);
 
 			//Column  1 "and" operator
-			vY1  = vector_and5(v_2X1,  v_1X1,  vX1,  v1X1,  v2X1);
+			vY1  = vector_and5(v0_2, v1_2, v2_2, v3_2, v4_2);
 
 			//Row operator
 			vSHIFT1 = vector_and3_row1shift(vY_1, vY,   vY1);
@@ -492,11 +503,11 @@ void ui8matrix_dilation_dilation_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, i
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 	
-	vuint8 v_2X_1, v_2X, v_2X1;
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8   vX_1,   vX,   vX1;
-	vuint8  v1X_1,  v1X,  v1X1;
-	vuint8  v2X_1,  v2X,  v2X1;
+	vuint8  v0_0, v0_1, v0_2;
+	vuint8  v1_0, v1_1, v1_2;
+	vuint8  v2_0, v2_1, v2_2;
+	vuint8  v3_0, v3_1, v3_2;
+	vuint8  v4_0, v4_1, v4_2;
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vSHIFT1, vSHIFT2;
@@ -505,32 +516,33 @@ void ui8matrix_dilation_dilation_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, i
 	for (row = nrl; row <= nrh; row++) {
 
 		col = 0;
-		v_2X_1  = _mm_load_si128((vuint8*) &X[row-2][col-1]);
-		v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-		vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-		v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-		v2X_1	= _mm_load_si128((vuint8*) &X[row+2][col-1]);
-		v_2X    = _mm_load_si128((vuint8*) &X[row-2][col  ]);
-		v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-		vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-		v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-		v2X 	= _mm_load_si128((vuint8*) &X[row+2][col  ]);
+		v0_0 = _mm_load_si128((vuint8*) &X[row-2][col-1]);
+		v1_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+		v2_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+		v3_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+		v4_0 = _mm_load_si128((vuint8*) &X[row+2][col-1]);
+
+		v0_1 = _mm_load_si128((vuint8*) &X[row-2][col  ]);
+		v1_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+		v2_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+		v3_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+		v4_1 = _mm_load_si128((vuint8*) &X[row+2][col  ]);
 
 		//Column -1 "or" operator
-		vY_1 = vector_or5(v_2X_1, v_1X_1, vX_1, v1X_1, v2X_1);
+		vY_1 = vector_or5(v0_0, v1_0, v2_0, v3_0, v4_0);
 		//Column  0 "or" operator 
-		vY   = vector_or5(v_2X,   v_1X,   vX,   v1X,   v2X);	
+		vY   = vector_or5(v0_1, v1_1, v2_1, v3_1, v4_1);
 
 		for (col = v0; col <= v1; col++) {	
 
-			v_2X1   = _mm_load_si128((vuint8*) &X[row-2][col+1]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
-			v2X1    = _mm_load_si128((vuint8*) &X[row+2][col+1]);
+			v0_2 = _mm_load_si128((vuint8*) &X[row-2][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v3_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v4_2 = _mm_load_si128((vuint8*) &X[row+2][col+1]);
 
 			//Column  1 "or" operator
-			vY1  = vector_or5(v_2X1,  v_1X1,  vX1,  v1X1,  v2X1);
+			vY1  = vector_or5(v0_2, v1_2, v2_2, v3_2, v4_2);
 
 			//Row operator
 			vSHIFT1 = vector_or3_row1shift(vY_1, vY,   vY1);
