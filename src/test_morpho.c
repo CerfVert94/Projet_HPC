@@ -64,36 +64,59 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	uint8 **X, **tempBuffer, **Z;
 	int card = card_vuint8();
 	int i0, i1, j0, j1;
-	assert((i1 - i0 + 1) > 20 && (j1 - j0 + 1) > 1);
-
+	assert((nrh - nrl + 1) > 20 && (nch - ncl + 1) > 1);
+	// octal_to_binary_ui8matrix(image, nrl, nrh, ncl, nch);
 	// scalar image to vector image
-	vimage = ui8matrix_to_vui8matrix(image, nrl, nrh, nrl, nrh, &i0, &i1, &j0, &j1);
+	vimage = ui8matrix_to_vui8matrix(image, nrl, nrh, ncl, nch, &i0, &i1, &j0, &j1);
+	
 	// Test Input
-	X		   =  ui8matrix(ncl - 2, nch + 2, nrl - 2, nrh + 2);
-	tempBuffer =  ui8matrix(ncl - 2, nch + 2, nrl - 2, nrh + 2);
-	Z		   =  ui8matrix(ncl    , nch    , nrl    , nrh    );
+	X		   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	tempBuffer =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	Z		   =  ui8matrix(nrl    , nrh    , ncl    , nch    );
     vX 		   = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
     vY 		   = vui8matrix( i0    ,  i1    ,  j0    ,  j1    );
     // Full zero intialization & copy image 
 	zero_vui8matrix(vX, i0 - 2, i1 + 2, j0 - 1, j1 + 1);
+	zero_vui8matrix(vY, i0    , i1    , j0    , j1    );
+	memset_ui8matrix(X, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	memset_ui8matrix(Z, 0, nrl    , nrh    , ncl    , nch    );
 	// zero_vui8matrix(vTempBuffer, nrl - 2, nrh + 2, j0, j1 + 1);
+	copy_ui8matrix_ui8matrix(image, nrl, nrh, ncl, nch, X);
     copy_vui8matrix_vui8matrix(vimage, i0, i1, j0, j1, vX);
 
+	naive_morpho->morpho_func(X, nrl, 15, ncl, nch, tempBuffer, Z);
 	int v0, v1;
 	for (long i = nrh - 20; i < nrh + 1; i++){
-		for (long j = ncl - 20; j < nch + 1; j++){
+		for (long j =  nch - 20; j < nch + 1; j++){
+	
+	
 			naive_morpho->morpho_func(X, nrl, i, ncl, j, tempBuffer, Z);
 			s2v1D((int)ncl, (int)j, card, &v0, &v1);
 			for (int k = 0; k < nb_sets; k++) {
-				morpho_sets->vec_morpho_func(vX, nrl, i, v0, v1 + 1, vZ);
+				printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets[k].func_name, filename);
+				printf("\tTesting for %ld x %ld\n", i + 1, j + 1);
 
+				int l = 0;
+				uint8 **Y;
+				long nrl_, nrh_, ncl_, nch_;
+				morpho_sets->vec_morpho_func(vX, nrl, i, v0, v1 , vY);
+				Y = vui8matrix_to_ui8matrix(vY, nrl, i, v0, v1, &nrl_, &nrh_, &ncl_, &nch_);
+				
+				for (int l = nrl_; l < nrh_ + 1; l++)
+					assert(!memcmp_ui8matrix(Z, Y, l, l, ncl_, j));
+
+				printf("Test passed\n");
+				free_ui8matrix(Y,nrl_, nrh_, ncl_, nch_);
 			}			
+
 		}
 	}	
 	free_ui8matrix(         X, ncl - 2, nch + 2, nrl - 2, nrh + 2);
 	free_ui8matrix(tempBuffer, ncl - 2, nch + 2, nrl - 2, nrh + 2);
 	free_ui8matrix(         Z, ncl    , nch    , nrl    , nrh    );
     free_vui8matrix(vX, i0 - 2, i1 + 2, j0 - 1, j1 + 1);
+    free_vui8matrix(vY, i0    ,  i1    ,  j0    ,  j1    );
+	free_vui8matrix(vimage, i0, i1, j0, j1);
 }
 
 
@@ -106,14 +129,15 @@ void test_erosions(char *filename, struct morpho_set *erosion_sets , const int n
 	int i0, i1, j0, j1;
 
     image  = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-	vimage  = LoadPGM_vui8matrix(filename, &i0, &i1, &j0, &j1);
+	// vimage  = LoadPGM_vui8matrix(filename, &i0, &i1, &j0, &j1);
 		
 	for (int i = 0; i < nb_sets; i++) {
         test_implementation_erosion3(&erosion_sets[i]);
 	}
-	test_intergration(     image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
-	// test_vec_intergration(vimage, image,  i0,  i1,  j0,  j1, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
+	test_intergration(    image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
+	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
+
 
 }
 void test_dilations(char *filename, struct morpho_set *dilation_sets, const int nb_sets, bool logging)
@@ -124,7 +148,8 @@ void test_dilations(char *filename, struct morpho_set *dilation_sets, const int 
     image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
     for (int i = 0; i < nb_sets; i++) 
 		test_implementation_dilation3(&dilation_sets[i]);
-	// test_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
+	test_intergration(    image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
+	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
 		
 	free_ui8matrix(image, nrl, nrh, ncl, nch);
 }

@@ -329,7 +329,7 @@ int main(void)
     // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       19, 1, 1, 200, 5000, 100);
     // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
     test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
-    // test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
+    test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , nb_sets, 1, 1, 10, 1000, 10);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , nb_sets, 1, 1, 200, 1000, 1);
 
