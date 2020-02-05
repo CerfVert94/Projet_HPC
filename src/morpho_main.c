@@ -253,13 +253,14 @@ struct morpho_set dilations[] = {
                                 {.func_name = "SigmaDelta_step2_naive", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
                                 {/*Best :0.33*/.func_name = "SigmaDelta_step2_InLU_O3_bitop", .sd_func = SigmaDelta_step2_InLU_O3_bitop, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SCALAR},
                                 {              .func_name = "SigmaDelta_step2_ExLU_O3_bitop", .sd_func = SigmaDelta_step2_ExLU_O3_bitop, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SCALAR},
-                                // {.func_name = "SigmaDelta_step2_SIMD", .vec_sd_func = SigmaDelta_step2_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                {.func_name = "SigmaDelta_step2_SIMD", .vec_sd_func = SigmaDelta_step2_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                {.func_name = "SigmaDelta_step2_InLU_O3_SIMD", .vec_sd_func = SigmaDelta_step2_InLU_O3_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 }
                                 ;
     struct sd_set SDs_step3[] = {
-                                // {.func_name = "SigmaDelta_step3_naive", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
-                                // {/*Best :2.94*/.func_name = "SigmaDelta_step3_InLU_O3_NoIf", .sd_func = SigmaDelta_step3_InLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
-                                // {              .func_name = "SigmaDelta_step3_ExLU_O3_NoIf", .sd_func = SigmaDelta_step3_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
+                                {.func_name = "SigmaDelta_step3_naive", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
+                                {/*Best :2.94*/.func_name = "SigmaDelta_step3_InLU_O3_NoIf", .sd_func = SigmaDelta_step3_InLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
+                                {              .func_name = "SigmaDelta_step3_ExLU_O3_NoIf", .sd_func = SigmaDelta_step3_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax, .instr_type = SCALAR},
                                 {.func_name = "SigmaDelta_step3_SIMD", .vec_sd_func = SigmaDelta_step3_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 };
     struct sd_set SDs_step4[] = {
@@ -271,25 +272,25 @@ struct morpho_set dilations[] = {
                                 
                                 
     struct sd_set SD_steps[] =  {
-                                 {.func_name = "SigmaDelta_step0_naive", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
-                                 {.func_name = "SigmaDelta_step1_naive", .sd_func = SigmaDelta_step1_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
-                                 {.func_name = "SigmaDelta_step2_naive", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
-                                 {.func_name = "SigmaDelta_step3_naive", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
-                                 {.func_name = "SigmaDelta_step4_naive", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step0_naive", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step1_naive", .sd_func = SigmaDelta_step1_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step2_naive", .sd_func = SigmaDelta_step2_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step3_naive", .sd_func = SigmaDelta_step3_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step4_naive", .sd_func = SigmaDelta_step4_naive, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
                                  {.func_name = "SigmaDelta_step0_mem", .sd_func = SigmaDelta_step0_mem, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
                                  {/*Best :0.22*/.func_name = "SigmaDelta_step1_InLU_O3_NoIf", .sd_func = SigmaDelta_step1_InLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
-                                 {              .func_name = "SigmaDelta_step1_ExLU_O3_NoIf", .sd_func = SigmaDelta_step1_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
+                                //  {              .func_name = "SigmaDelta_step1_ExLU_O3_NoIf", .sd_func = SigmaDelta_step1_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
                                  {/*Best :0.33*/.func_name = "SigmaDelta_step2_InLU_O3_bitop", .sd_func = SigmaDelta_step2_InLU_O3_bitop, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
-                                 {              .func_name = "SigmaDelta_step2_ExLU_O3_bitop", .sd_func = SigmaDelta_step2_ExLU_O3_bitop, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
+                                //  {              .func_name = "SigmaDelta_step2_ExLU_O3_bitop", .sd_func = SigmaDelta_step2_ExLU_O3_bitop, .n_coeff = N, .v_min = Vmin, .v_max=Vmax ,.instr_type = SCALAR},
                                  {/*Best :2.94*/.func_name = "SigmaDelta_step3_InLU_O3_NoIf", .sd_func = SigmaDelta_step3_InLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
-                                 {              .func_name = "SigmaDelta_step3_ExLU_O3_NoIf", .sd_func = SigmaDelta_step3_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
+                                //  {              .func_name = "SigmaDelta_step3_ExLU_O3_NoIf", .sd_func = SigmaDelta_step3_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
                                  {/*Best :0.18*/.func_name = "SigmaDelta_step4_InLU_O3_NoIf", .sd_func = SigmaDelta_step4_InLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
-                                 {              .func_name = "SigmaDelta_step4_ExLU_O3_NoIf", .sd_func = SigmaDelta_step4_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
-                                 {.func_name = "SigmaDelta_step0_SIMD", .vec_sd_func = SigmaDelta_step0_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                 {.func_name = "SigmaDelta_step1_SIMD", .vec_sd_func = SigmaDelta_step1_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                 {.func_name = "SigmaDelta_step2_SIMD", .vec_sd_func = SigmaDelta_step2_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                 {.func_name = "SigmaDelta_step3_SIMD", .vec_sd_func = SigmaDelta_step3_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                 {.func_name = "SigmaDelta_step4_SIMD", .vec_sd_func = SigmaDelta_step4_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                //  {              .func_name = "SigmaDelta_step4_ExLU_O3_NoIf", .sd_func = SigmaDelta_step4_ExLU_O3_NoIf, .n_coeff = N, .v_min = Vmin, .v_max =Vmax ,.instr_type = SCALAR},
+                                //  {.func_name = "SigmaDelta_step0_SIMD", .vec_sd_func = SigmaDelta_step0_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                //  {.func_name = "SigmaDelta_step1_SIMD", .vec_sd_func = SigmaDelta_step1_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                //  {.func_name = "SigmaDelta_step2_SIMD", .vec_sd_func = SigmaDelta_step2_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                //  {.func_name = "SigmaDelta_step3_SIMD", .vec_sd_func = SigmaDelta_step3_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                //  {.func_name = "SigmaDelta_step4_SIMD", .vec_sd_func = SigmaDelta_step4_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 };
     
     struct complete_sd_set completeSDs[] = {
@@ -328,23 +329,24 @@ int main(void)
     // display_vui8matrix(vM_t0, 0, 0, 0, 0, "%4u", "vM_t0");
     // display_vui8matrix(vI_t0, 0, 0, 0, 0, "%4u", "vI_t0");
     // display_vui8matrix(vM_t1, 0, 0, 0, 0, "%4u", "vM_t1");
-    // test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 3, false);
+    test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 3, false);
     // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 3, 1, 1, 200, 5000, 100);
-    // test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 4, false);
+    test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 4, false);
     // launch_SD_step_benchmark("output/benchmark_sdstep1.dat"             , SDs_step1, 4, 1, 1, 200, 5000, 100);
-    // test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 1, false);
-    // launch_SD_step_benchmark("output/benchmark_sdstep2.dat"             , SDs_step2, 3, 1, 1, 200, 5000, 100);
-    test_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step3, 1, false);
-    launch_SD_step_benchmark("output/benchmark_sdstep3.dat"             , SDs_step3, 1, 1, 1, 200, 10000, 10);
-    // test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 4, false);
+    test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 5, false);
+    // launch_SD_step_benchmark("output/benchmark_sdstep2.dat"             , SDs_step2, 5, 1, 1, 200, 5000, 50);
+    test_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step3, 4, false);
+    // launch_SD_step_benchmark("output/benchmark_sdstep3.dat"             , SDs_step3, 4, 1, 1, 200, 9000, 50);
+    test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 4, false);
     // launch_SD_step_benchmark("output/benchmark_sdstep4.dat"             , SDs_step4, 4, 1, 1, 200, 5000, 100);
     // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
-    // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       19, 1, 1, 200, 5000, 100);
-    // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
+    // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       5, 1, 1, 200, 5000, 100);
+    launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
     // test_erosions ("../car3/car_3000.pgm", erosions , nb_sets, false);
     // test_dilations("../car3/car_3000.pgm", dilations, nb_sets, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , nb_sets, 1, 1, 10, 2000, 1);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , nb_sets, 1, 1, 10, 2000, 1);
+    
 
     
     

@@ -436,16 +436,16 @@ double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls,
 	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
-		X = ui8matrix_checker(0, size, 0, size, 3, 1); 
-		Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
-		// vX = ui8matrix_to_vui8matrix(X, 0, size, 0, size, &i0, &i1, &v0, &v1);
-		// vY = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &i0, &i1, &v0, &v1);
-		
-		t0 = create_image_from_ui8matrix(X, 0, size, 0, size);
-		t1 = create_image_from_ui8matrix(Y, 0, size, 0, size);
-		vec_t0 = create_vimage_from_ui8matrix(X, 0, size, 0, size);
-		vec_t1 = create_vimage_from_ui8matrix(Y, 0, size, 0, size);
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
+
+			X = ui8matrix_checker(0, size, 0, size, 3, 1); 
+			Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
+			// vX = ui8matrix_to_vui8matrix(X, 0, size, 0, size, &i0, &i1, &v0, &v1);
+			// vY = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &i0, &i1, &v0, &v1);
+			
+			t0 = create_image_from_ui8matrix(X, 0, size, 0, size);
+			t1 = create_image_from_ui8matrix(Y, 0, size, 0, size);
+
 			n_coeff = csdsets[idx_set].n_coeff;
 			v_min   = csdsets[idx_set].v_min;
 			v_max   = csdsets[idx_set].v_max;
@@ -455,26 +455,28 @@ double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls,
 				min_cycles_sum = 0;
 				for (idx_test = 0; idx_test < nb_tests; idx_test++)
 					min_cycles_sum += get_min_cpu_cycles_of_sd(&csdsets[idx_set], packet_size, t0, t1, n_coeff, v_min, v_max);
-				results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 				end = __rdtsc();
 			}
 			else if (csdsets[idx_set].instr_type == SIMD) {
+				vec_t0 = create_vimage_from_ui8matrix(X, 0, size, 0, size);
+				vec_t1 = create_vimage_from_ui8matrix(Y, 0, size, 0, size);
 				begin = __rdtsc();			
 				min_cycles_sum = 0;
-				for (idx_test = 0; idx_test < nb_tests; idx_test++)
+				for (idx_test = 0; idx_test < nb_tests; idx_test++);
 					min_cycles_sum += get_min_cpu_cycles_of_vec_sd(&csdsets[idx_set], packet_size, vec_t0, vec_t1, n_coeff, v_min, v_max);
-				results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 				end = __rdtsc();
+				free_vimage(vec_t0);
+				free_vimage(vec_t1);
 			}
+			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
 				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  csdsets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
+
+			free_image(t0);
+			free_image(t1);
+			free_ui8matrix(X, 0, size, 0, size);
+			free_ui8matrix(Y, 0, size, 0, size);
 		}
-		free_image(t0);
-		free_image(t1);
-		free_vimage(vec_t0);
-		free_vimage(vec_t1);
-		free_ui8matrix(X, 0, size, 0, size);
-		free_ui8matrix(Y, 0, size, 0, size);
 		cnt++;
 	}
 	return results;

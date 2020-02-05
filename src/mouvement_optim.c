@@ -143,6 +143,7 @@ void SigmaDelta_step2_InLU_O3_bitop(uint8** M  , uint8** I, uint8** O, long nrl,
 		case 1:
 		
 		for (i = nrl; i <= nrh; i++) {
+			M_row0 = M[i + 0];I_row0 = I[i + 0]; O_row0 = O[i + 0];
 			x1 = M_row0[nch - 0] - I_row0[nch - 0];
 			y1 = x1 >> 8;
 			O_row0[nch - 0] = (y1 + x1) ^ y1;
@@ -375,6 +376,7 @@ void SigmaDelta_step4_ExLU_O3_NoIf(uint8** O, uint8** V, uint8** E, long nrl, lo
 
 void SigmaDelta_best(p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
 {
+	// SigmaDelta_step0_mem(t0->M, t0->I, t0->M, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 	SigmaDelta_step1_InLU_O3_NoIf (t0->M, t1->I, t1->M, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 	SigmaDelta_step2_InLU_O3_bitop(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);
 	SigmaDelta_step3_InLU_O3_NoIf (t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->ncl, t1->nch, n_coeff, v_min, v_max);

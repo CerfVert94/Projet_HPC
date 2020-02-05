@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "nrdef.h"
@@ -27,7 +28,8 @@
 void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	//copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
-	copy_vui8matrix_vui8matrix(I, nrl, nrh, v0, v1, M);
+	// copy_vui8matrix_vui8matrix(I, nrl, nrh, v0, v1, M);
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	long i, j;
 	vuint8 vec1 = init_vuint8(1);
 	for (i = nrl; i <= nrh; i++)
@@ -74,7 +76,7 @@ void SigmaDelta_step2_SIMD(vuint8** M, vuint8** I, vuint8** O, long nrl, long nr
 /*---------------------------------------------------------------------------------------------*/
 
 	vuint8 vI, vM, vO;
-
+	vuint8 vMI_sub, vShift;
 
 	for(long i = nrl; i <= nrh; i++) {
 		for(long j = v0; j <= v1; j++) {
@@ -88,6 +90,69 @@ void SigmaDelta_step2_SIMD(vuint8** M, vuint8** I, vuint8** O, long nrl, long nr
 	}
 	
 }
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step2_InLU_O3_SIMD(vuint8** M, vuint8** I, vuint8** O, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+
+	vuint8 vI, vM, vO;
+	vuint8  *vI_row, *vM_row, *vO_row;
+	vuint8 vMI_sub, vShift;
+	long order = 3;
+	long r = (v1 - v0 + 1) % order;
+	long i, j;
+
+	for(long i = nrl; i <= nrh; i++) {
+		vI_row = I[i];
+		vM_row = M[i];
+		vO_row = O[i];
+		for(long j = v0; j <= v1 - r; j+= order) {
+			vI = _mm_load_si128((vuint8*) &vI_row[j + 0]);
+			vM = _mm_load_si128((vuint8*) &vM_row[j + 0]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &vO_row[j+0], vO);
+
+			vI = _mm_load_si128((vuint8*) &vI_row[j + 1]);
+			vM = _mm_load_si128((vuint8*) &vM_row[j + 1]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &vO_row[j+1], vO);
+			
+			vI = _mm_load_si128((vuint8*) &vI_row[j + 2]);
+			vM = _mm_load_si128((vuint8*) &vM_row[j + 2]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &vO_row[j]+2, vO );
+		}
+	}
+	switch(r) {
+		case 2:
+
+		for(long i = nrl; i <= nrh; i++) {
+			
+			vI = _mm_load_si128((vuint8*) &I[i][v1 - 1]);
+			vM = _mm_load_si128((vuint8*) &M[i][v1 - 1]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &O[i][v1 -1], vO);
+
+			vI = _mm_load_si128((vuint8*) &I[i][v1 + 0]);
+			vM = _mm_load_si128((vuint8*) &M[i][v1 + 0]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &O[i][v1 - 0], vO);
+		}
+		break;
+		case 1:
+
+		for(long i = nrl; i <= nrh; i++) {
+			vI = _mm_load_si128((vuint8*) &I[i][v1 + 0]);
+			vM = _mm_load_si128((vuint8*) &M[i][v1 + 0]);
+			vO = vec_subabs(vI, vM);
+			_mm_store_si128((vuint8*) &O[i][v1 - 0], vO);
+		}
+		break;
+		case 0:
+		break;
+	}
+	
+}
+
 
 /*-----------------------------------------------------------------------------------------------*/
 void SigmaDelta_step3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
@@ -188,6 +253,7 @@ void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nr
 void SigmaDelta_SIMD(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
 {
 	SigmaDelta_step1_SIMD(t0->M, t1->I, t1->M, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
+	SigmaDelta_step2_InLU_O3_SIMD(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
 	SigmaDelta_step2_SIMD(t1->M, t1->I, t1->O, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
 	SigmaDelta_step3_SIMD(t0->V, t1->O, t1->V, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
 	SigmaDelta_step4_SIMD(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
