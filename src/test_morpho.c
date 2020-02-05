@@ -61,7 +61,7 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	vuint8 **vX, **vY, **vZ,**vTempBuffer;
 	vuint8 **vimage;
 	vuint8 _mm_equal_ = _mm_set_epi8(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);
-	uint8 **X, **tempBuffer, **Z;
+	uint8 **X, **tempBuffer, **Z, **FO_Z;
 	int card = card_vuint8();
 	int i0, i1, j0, j1;
 	assert((nrh - nrl + 1) > 20 && (nch - ncl + 1) > 1);
@@ -72,7 +72,8 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	// Test Input
 	X		   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
 	tempBuffer =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	Z		   =  ui8matrix(nrl    , nrh    , ncl    , nch    );
+	Z		   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	FO_Z	   =  ui8matrix(nrl    , nrh    , ncl    , nch    );
     vX 		   = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
     vY 		   = vui8matrix( i0    ,  i1    ,  j0    ,  j1    );
     // Full zero intialization & copy image 
@@ -91,6 +92,8 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	
 	
 			naive_morpho->morpho_func(X, nrl, i, ncl, j, tempBuffer, Z);
+			naive_morpho->morpho_func(Z, nrl, i, ncl, j, tempBuffer, FO_Z);
+			
 			s2v1D((int)ncl, (int)j, card, &v0, &v1);
 			for (int k = 0; k < nb_sets; k++) {
 				printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets[k].func_name, filename);
@@ -99,21 +102,28 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 				int l = 0;
 				uint8 **Y;
 				long nrl_, nrh_, ncl_, nch_;
-				morpho_sets->vec_morpho_func(vX, nrl, i, v0, v1 , vY);
+				morpho_sets[k].vec_morpho_func(vX, nrl, i, v0, v1 , vY);
 				Y = vui8matrix_to_ui8matrix(vY, nrl, i, v0, v1, &nrl_, &nrh_, &ncl_, &nch_);
 				
-				for (int l = nrl_; l < nrh_ + 1; l++)
-					assert(!memcmp_ui8matrix(Z, Y, l, l, ncl_, j));
+				if (morpho_sets[k].op_type == NORMAL) {
+					for (int l = nrl_; l < nrh_ + 1; l++)
+						assert(!memcmp_ui8matrix(Z, Y, l, l, ncl_, j));
+				}
+				else {
+					if (morpho_sets[k].op_type == FUSION)
+						assert(!memcmp_ui8matrix(FO_Z, Y, l, l, ncl_, j));
+				}
 
 				printf("Test passed\n");
-				free_ui8matrix(Y,nrl_, nrh_, ncl_, nch_);
+				free_ui8matrix(Y, nrl_, nrh_, ncl_, nch_);
 			}			
 
 		}
 	}	
 	free_ui8matrix(         X, ncl - 2, nch + 2, nrl - 2, nrh + 2);
 	free_ui8matrix(tempBuffer, ncl - 2, nch + 2, nrl - 2, nrh + 2);
-	free_ui8matrix(         Z, ncl    , nch    , nrl    , nrh    );
+	free_ui8matrix(         Z, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	free_ui8matrix(      FO_Z, ncl    , nch    , nrl    , nrh    );
     free_vui8matrix(vX, i0 - 2, i1 + 2, j0 - 1, j1 + 1);
     free_vui8matrix(vY, i0    ,  i1    ,  j0    ,  j1    );
 	free_vui8matrix(vimage, i0, i1, j0, j1);
@@ -132,7 +142,10 @@ void test_erosions(char *filename, struct morpho_set *erosion_sets , const int n
 	// vimage  = LoadPGM_vui8matrix(filename, &i0, &i1, &j0, &j1);
 		
 	for (int i = 0; i < nb_sets; i++) {
-        test_implementation_erosion3(&erosion_sets[i]);
+		if (erosion_sets[i].op_type == NORMAL)
+			test_implementation_erosion3(&erosion_sets[i]);
+		else if (erosion_sets[i].op_type == FUSION)
+			test_implementation_erosion5(&erosion_sets[i]);
 	}
 	test_intergration(    image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
 	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, erosion_sets, nb_sets, logging);
@@ -146,8 +159,12 @@ void test_dilations(char *filename, struct morpho_set *dilation_sets, const int 
 	uint8 **image;
 	long nrl, nrh, ncl, nch;
     image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-    for (int i = 0; i < nb_sets; i++) 
-		test_implementation_dilation3(&dilation_sets[i]);
+    for (int i = 0; i < nb_sets; i++)  {
+		if (dilation_sets[i].op_type == NORMAL)
+			test_implementation_dilation3(&dilation_sets[i]);
+		else if (dilation_sets[i].op_type == FUSION)
+			test_implementation_dilation5(&dilation_sets[i]);
+	}
 	test_intergration(    image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
 	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morpho_set, dilation_sets, nb_sets, logging);
 		
@@ -172,9 +189,10 @@ void test_implementation_erosion3(struct morpho_set *erosion_set)
 	uint32 perm, max, min = 0;
 	uint8 **X;
 	vuint8 **vX;
+	int snrl = -2, snrh = 2, sncl = -2, snch = 2 ;
 	
-	X = ui8matrix(-1, 1, -1, 1);
-	vX = vui8matrix(-1, 1, -1, 1);
+	X = ui8matrix(snrl, snrh, sncl, snch);
+	vX = vui8matrix(snrl, snrh, sncl, snch);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	printf("Implementation test : %s\n", erosion_set->func_name);
@@ -202,19 +220,20 @@ void test_implementation_erosion3(struct morpho_set *erosion_set)
 		}
 	}
 	puts("Passed all tests.\n");
-	free_ui8matrix(X, -1, 1, -1, 1);
-	free_vui8matrix(vX, -1, 1, -1, 1);
+	free_ui8matrix(X, snrl, snrh, sncl, snch);
+	free_vui8matrix(vX, snrl, snrh, sncl, snch);
 }
 void test_implementation_dilation3(struct morpho_set *dilation_set)
 {
-	// A binary square matrix has 2^(size*size)-1 combinations
+	/// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 3;
 	uint32 perm, max, min = 0;
 	uint8 **X;
 	vuint8 **vX;
+	int snrl = -2, snrh = 2, sncl = -2, snch = 2 ;
 	
-	X = ui8matrix(-1, 1, -1, 1);
-	vX = vui8matrix(-1, 1, -1, 1);
+	X = ui8matrix(snrl, snrh, sncl, snch);
+	vX = vui8matrix(snrl, snrh, sncl, snch);
 	max = (1 << (size * size)) - 1; // 2^25
 
 	printf("Implementation test : %s\n", dilation_set->func_name);
@@ -241,34 +260,48 @@ void test_implementation_dilation3(struct morpho_set *dilation_set)
 		}
 	}
 	puts("Passed all tests.\n");
-	free_ui8matrix(X, -1, 1, -1, 1);
-	free_vui8matrix(vX, -1, 1, -1, 1);
+	free_ui8matrix(X, snrl, snrh, sncl, snch);
+	free_vui8matrix(vX, snrl, snrh, sncl, snch);
 }
 
 void test_implementation_erosion5(struct morpho_set *erosion_set)
 {
-	// assert(check_for5_structuring_element(erosion_set->s) == true);
-	// A binary square matrix has 2^(size*size)-1 combinations
 	const int size = 5;
-	uint32 perm, max;
+	uint32 perm, max, min = 0;
 	uint8 **X;
+	vuint8 **vX;
+	int snrl = -2, snrh = 2, sncl = -2, snch = 2 ;
 	
 	X = ui8matrix(-2, 2, -2, 2);
+	vX = vui8matrix(-2, 2, -2, 2);
 	max = (1 << (size * size)) - 1; // 2^25
 
-	printf("Implementation test : %s\n", erosion_set->func_name);
 	// Loop 1: Get permutations :
-	for (perm = 0; perm < max + 1; perm++) {
-		ui8matrix_permutation(X, STRUCTURING_ELEMENT_DIM(erosion_set->s), perm);
+	printf("Implementation test : %s\n", erosion_set->func_name);
+	if (erosion_set->instr_type == SCALAR) {
+		for (perm = 0; perm < max + 1; perm++) {
+			ui8matrix_permutation(X, snrl, snrh, sncl, snch, perm);
+			
+			if (perm % (max / PROGRESS_FACTOR) == 0)
+				print_progress(perm, max);
 
-		if (perm % (max / PROGRESS_FACTOR) == 0)
-			print_progress(perm, max);
+			if (perm == max) assert(morpho_produces_one(erosion_set, X) == true);
+			else			 assert(morpho_produces_one(erosion_set, X) == false);
+		}
+	}
+	else if (erosion_set->instr_type == SIMD) {
+		for (perm = 0; perm < max + 1; perm++) {
+			vui8matrix_permutation(vX, snrl, snrh, sncl, snch, perm);
+			
+			if (perm % (max / PROGRESS_FACTOR) == 0)
+				print_progress(perm, max);
 
-		if (perm == max) assert(morpho_produces_one(erosion_set, X) == true);
-		else			 assert(morpho_produces_one(erosion_set, X) == false);
+			if (perm == max) {assert(vec_morpho_produces_one(erosion_set, vX) == true);/*printf("False\n");*/}
+			else			 {assert(vec_morpho_produces_one(erosion_set, vX) == false);/*printf("True\n");*/}
+		}
 	}
 	puts("Passed all tests.\n");
-	free_ui8matrix(X, STRUCTURING_ELEMENT_DIM(erosion_set->s));
+	free_ui8matrix(X, snrl, snrh, sncl, snch);
 
 }
 void test_implementation_dilation5(struct morpho_set *dilation_set)
@@ -278,23 +311,41 @@ void test_implementation_dilation5(struct morpho_set *dilation_set)
 	const int size = 5;
 	uint32 perm, max, min = 0;
 	uint8 **X;
+	vuint8 **vX;
+	int snrl = -2, snrh = 2, sncl = -2, snch = 2 ;
 	
-	X = ui8matrix(-2, 2, -2, 2);
-	max = (1 << (size * size)); // 2^25
+	X = ui8matrix(snrl, snrh, sncl, snch);
+	vX = vui8matrix(snrl, snrh, sncl, snch);
+	max = (1 << (size * size)) - 1; // 2^25
 
 	// Loop 1: Get permutations :
 	printf("Implementation test : %s\n", dilation_set->func_name);
-	for (perm = 0; perm < max; perm++) {
-		ui8matrix_permutation(X, STRUCTURING_ELEMENT_DIM(dilation_set->s), perm);
-		
-		if (perm % (max / PROGRESS_FACTOR) == 0)
-			print_progress(perm, max);
+	if (dilation_set->instr_type == SCALAR) {
+		for (perm = 0; perm < max + 1; perm++) {
+			ui8matrix_permutation(X, snrl, snrh, sncl, snch, perm);
+			
+			if (perm % (max / PROGRESS_FACTOR) == 0)
+				print_progress(perm, max);
 
-		if (perm == min) assert(morpho_produces_one(dilation_set, X) == false);
-		else			 assert(morpho_produces_one(dilation_set, X) == true);
+			if (perm == min) {assert(morpho_produces_one(dilation_set, X) == false); /*printf("False\n");*/}
+			else			 {assert(morpho_produces_one(dilation_set, X) == true); /*printf("True\n");*/}
+		}
+	}
+	else if (dilation_set->instr_type == SIMD) {
+		// max = 0x1F;
+		for (perm = 0; perm < max + 1; perm++) {
+			// perm &= 0x1fffff0 ; 
+			vui8matrix_permutation(vX, snrl, snrh, sncl, snch, perm);
+			if (perm % (max / PROGRESS_FACTOR) == 0)
+				print_progress(perm, max);
+
+			if (perm == min) {assert(vec_morpho_produces_one(dilation_set, vX) == false); /*printf("False\n");*/}
+			else			 {assert(vec_morpho_produces_one(dilation_set, vX) == true); /*printf("True\n");*/}
+			// getchar();
+		}
 	}
 	puts("Passed all tests.\n");
-	free_ui8matrix(X, STRUCTURING_ELEMENT_DIM(dilation_set->s));
+	free_ui8matrix(X, snrl, snrh, sncl, snch);
 }
 bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 {
@@ -328,65 +379,76 @@ bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
 	vuint8 **vZ = vY + 2;
 	vuint8 **vTempZ = vTempY + 2;
 	uint8 *z = (uint8*)&vZ[0][0];
-
+	int col_cnt = 0;
+	
 	mset->vec_morpho_func(vW, 0, 0, 0, 0 /*, vTempZ*/, vZ);
 	// int max = (1 << 9); // 2^9 
     
     // for (int i = 0; i < max; i++){
-        
-	// printf("vW:\n");
-	// for (int row = -1; row <= 1; row++)
-	// {
-	// 	uint8 *p;
-	// 	int i = 0;
-	// 	for (int v = -1; v <= 1; v++)  {
-	// 		p = (uint8*)&vW[row][v];
-	// 		for(i=0; i<16; i++)
-	// 			printf("%u", p[i]);
-	// 	}
-	// 	printf("\n");
-	// }
-	// printf("\n");
-	// printf("Z = %u\n", *z);
-	// printf("vZ:\n");
-	// for (int row = -1; row <= 1; row++)
-	// {
-	// 	uint8 *p;
-	// 	int i = 0;
-	// 	for (int v = -1; v <= 1; v++)  {
-	// 		p = (uint8*)&vZ[row][v];
-	// 		for(i=0; i<16; i++)
-	// 			printf("%u", p[i]);
-	// 	}
-	// 	printf("\n");
-	// }
-	// printf("\n");
+	// #define DEBUG_FUSION 0    
+	// #define DEBUG_NORMAL 
+    #ifdef DEBUG_FUSION    
+	if(*z == DEBUG_FUSION ){
+		printf("vW:\n");
+		for (int row = -2; row <= 2; row++)
+		{
+			uint8 *p;
+			int i = 0;
+			col_cnt = 0;
+			for (int v = -1; v <= 1; v++)  {
+				p = (uint8*)&vW[row][v];
+				for(i=0; i<16; i++){
+					if (14 <= col_cnt && col_cnt < 19)
+						printf("%u", p[i]);
+					col_cnt++;
+				}
+			}
+			printf("\n");
+		}
+
+		printf("vZ:\n");
+		for (int row = -2; row <= 2; row++)
+		{
+			uint8 *p;
+			int i = 0;
+			col_cnt = 0;
+			for (int v = -1; v <= 1; v++)  {
+				p = (uint8*)&vZ[row][v];
+				for(i=0; i<16; i++){
+					if (14 <= col_cnt && col_cnt < 19)
+						printf("%u", p[i]);
+					col_cnt++;
+				}
+			}
+			printf("\n");
+		}
+		printf("Z = %u\n\n", *z);
+
+	}
+	#endif
+	#ifdef DEBUG_NORMAL
+		for (int row = -1; row <= 1; row++)
+	{
+		uint8 *p;
+		int i = 0;
+		col_cnt = 0;
+		for (int v = -1; v <= 1; v++)  {
+			p = (uint8*)&vW[row][v];
+			for(i=0; i<16; i++){
+				if (15 <= col_cnt && col_cnt < 18)
+					printf("%u", p[i]);
+				col_cnt++;
+			}
+		}
+		printf("\n");
+	}
+	printf("Z = %u\n\n", *z);
+	#endif
 
     // printf("%s\n", z[0] == 1 ?"True" : "False");
 	return z[0] == 1;
 }
-	// uint8 *x;
-	// x = &X[1][1];
-	// x[0]= W[0][0];
-	// x[1]= W[0][1];
-	// x[2]= W[0][2];
-	// x[3]= W[0][3];
-	// x[4]= W[0][4];
-
-
-
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  0  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  10  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  210  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  3210  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  43210  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15   4321  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15    432  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15     43  */
-	// /*0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15      4  */
 	
-// }
-
 
 
 void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morpho_set, struct morpho_set *morpho_sets,int nb_sets, bool logging)

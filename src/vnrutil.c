@@ -1843,7 +1843,7 @@ void display_vui8vector(vuint8 *vX, int j0, int j1, char *format, char *name)
         x = _mm_load_si128(&vX[j]);
         display_vuint8(x, format, NULL);
     }
-    printf("\n");
+    // printf("\n");
 }
 /* ----------------------------------------------------------------------- */
 void display_vsi8vector(vsint8 *vX, int j0, int j1, char *format, char *name)

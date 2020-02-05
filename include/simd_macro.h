@@ -58,6 +58,7 @@
 #define vector_or3_row1shift(A, B, C)  (vector_or3(vec_right1(A, B), B, vec_left1(B, C)))
 #define vector_or3_row2shift(A, B, C)  (vector_or3(vec_right2(A, B), B, vec_left2(B, C)))
 #define vector_or5(A, B, C, D, E)      (vector_or3(vector_or3(A,B,C), D, E))
+//_mm_or_si128(_mm_or_si128(_mm_or_si128(A, B),_mm_or_si128(C,D)),E)
 
 // -------
 //   MIN

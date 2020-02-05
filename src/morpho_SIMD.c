@@ -247,7 +247,7 @@ void ui8matrix_dilation_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v
 }
 
 /*------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
 
 	long row, col, x, y, i;
@@ -342,17 +342,17 @@ void ui8matrix_erosion_erosion_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, 
 } 
 
 /*------------------------------------------------------------------------------------------*/
-void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
 
 	long row, col, x, y, i;
 	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
 
-	vuint8 v_2X_1, v_2X, v_2X1;
-	vuint8 v_1X_1, v_1X, v_1X1;
-	vuint8   vX_1,   vX,   vX1;
-	vuint8  v1X_1,  v1X,  v1X1;
-	vuint8  v2X_1,  v2X,  v2X1;
+	vuint8  v0_0, v0_1, v0_2;
+	vuint8  v1_0, v1_1, v1_2;
+	vuint8  v2_0, v2_1, v2_2;
+	vuint8  v3_0, v3_1, v3_2;
+	vuint8  v4_0, v4_1, v4_2;
 
 	vuint8 vY_1, vY, vY1;
 	vuint8 vSHIFT1, vSHIFT2;
@@ -362,34 +362,34 @@ void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, long nrl, long nrh, long v0
 	for (row = nrl; row <= nrh; row++) {
 		for (col = v0; col <= v1; col++) {
 
-			v_2X_1  = _mm_load_si128((vuint8*) &X[row-2][col-1]);
-			v_1X_1 	= _mm_load_si128((vuint8*) &X[row-1][col-1]);
-			vX_1	= _mm_load_si128((vuint8*) &X[row  ][col-1]);
-			v1X_1 	= _mm_load_si128((vuint8*) &X[row+1][col-1]);
-			v_2X_1	= _mm_load_si128((vuint8*) &X[row+2][col-1]);
-			v_2X    = _mm_load_si128((vuint8*) &X[row-2][col  ]);
-			v_1X   	= _mm_load_si128((vuint8*) &X[row-1][col  ]);
-			vX   	= _mm_load_si128((vuint8*) &X[row  ][col  ]);
-			v1X   	= _mm_load_si128((vuint8*) &X[row+1][col  ]);
-			v2X 	= _mm_load_si128((vuint8*) &X[row+2][col  ]);
-			v_2X1   = _mm_load_si128((vuint8*) &X[row-2][col+1]);
-			v_1X1  	= _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			vX1  	= _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v1X1  	= _mm_load_si128((vuint8*) &X[row+1][col+1]);
-			v2X1    = _mm_load_si128((vuint8*) &X[row+2][col+1]);
+			v0_0 = _mm_load_si128((vuint8*) &X[row-2][col-1]);
+			v1_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
+			v2_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
+			v3_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
+			v4_0 = _mm_load_si128((vuint8*) &X[row+2][col-1]);
 
+			v0_1 = _mm_load_si128((vuint8*) &X[row-2][col  ]);
+			v1_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
+			v2_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
+			v3_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
+			v4_1 = _mm_load_si128((vuint8*) &X[row+2][col  ]);
 
+			v0_2 = _mm_load_si128((vuint8*) &X[row-2][col+1]);
+			v1_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
+			v2_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
+			v3_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
+			v4_2 = _mm_load_si128((vuint8*) &X[row+2][col+1]);
 			//Column -1 "or" operator
-			vY_1 = vector_or5(v_2X_1, v_1X_1, vX_1, v1X_1, v2X_1);
+			vY_1 = vector_or5(v0_0, v1_0, v2_0, v3_0, v4_0);
 			//Column  0 "or" operator 
-			vY   = vector_or5(v_2X,   v_1X,   vX,   v1X,   v2X);
+			vY   = vector_or5(v0_1, v1_1, v2_1, v3_1, v4_1);
 			//Column  1 "or" operator
-			vY1  = vector_or5(v_2X1,  v_1X1,  vX1,  v1X1,  v2X1);
+			vY1  = vector_or5(v0_2, v1_2, v2_2, v3_2, v4_2);
 
 			//Row operator
 			vSHIFT1 = vector_or3_row1shift(vY_1, vY,   vY1);
 			vSHIFT2 = vector_or3_row2shift(vY_1, vY,   vY1);
-			vSHIFT1 = _mm_and_si128(vSHIFT1, vSHIFT2);
+			vSHIFT1 = _mm_or_si128(vSHIFT1, vSHIFT2);
 
 			_mm_store_si128((vuint8*) &Y[row][col], vSHIFT1);	
 		}
@@ -398,7 +398,7 @@ void ui8matrix_dilation_dilation_SIMD_FO(vuint8** X, long nrl, long nrh, long v0
 } 
 
 /*---------------------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*---------------------------------------------------------------------------------------------------------*/
 	
 	long row, col, x, y, i;
@@ -486,7 +486,7 @@ void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, l
 }
 
 /*-------------------------------------------------------------------------------------------------*/
-void ui8matrix_dilation_dilation_SIMD_FO_RR_row (vuint8** X, long nrl, long nrh, long v0, long v1, vuint8 **Y) {
+void ui8matrix_dilation_dilation_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **Y) {
 /*-------------------------------------------------------------------------------------------------*/
 	
 	long row, col, x, y, i;

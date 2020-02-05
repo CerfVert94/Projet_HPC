@@ -38,7 +38,7 @@ inline void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, lo
 void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row, col, x, y;
-	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
+	long snrl = -1, snrh = 1, sncl = -1, snch = 1;
 
 	// Erode
 	for (row = nrl; row < nrh + 1; row++){
@@ -56,7 +56,7 @@ void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, 
 void ui8matrix_dilation_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row, col, x, y;
-	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
+	long snrl = -1, snrh = 1, sncl = -1, snch = 1;
 	// dilate
 	for (row = nrl; row < nrh + 1; row++){
 		for (col = ncl; col < nch + 1; col++) {
@@ -71,6 +71,41 @@ void ui8matrix_dilation_naive(uint8** X, long nrl, long nrh, long ncl, long nch,
 	}
 }
 
+void ui8matrix_erosion5_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+{
+	long row, col, x, y;
+	long snrl = -2, snrh = 2, sncl = -2, snch = 2;
+
+	// Erode
+	for (row = nrl; row < nrh + 1; row++){
+		for (col = ncl; col < nch + 1; col++) {
+			// Copy the input to the output
+			Y[row][col] = X[row][col];
+
+			// Apply morpho to the output
+			for (y = snrl; y < snrh + 1; y++ ) 
+				for (x = sncl; x < snch + 1; x++ )  
+					Y[row][col] &= X[row + y][col + x];
+		}
+	}
+}
+void ui8matrix_dilation5_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+{
+	long row, col, x, y;
+	long snrl = -2, snrh = 2, sncl = -2, snch = 2;
+	// dilate
+	for (row = nrl; row < nrh + 1; row++){
+		for (col = ncl; col < nch + 1; col++) {
+			// Copy the input to the output
+			Y[row][col] = X[row][col];
+			
+			// Apply morpho to the output
+			for (y = snrl; y < snrh + 1; y++ )
+				for (x = sncl; x < snch + 1; x++ ) 
+					Y[row][col] |= X[row + y][col + x];
+		}
+	}
+}
 
 
 #define _IMG_DIMENSION(img, s) img->nrl - SE_NRL, img->nrh - SE_NRH, img->ncl - SE_NCL, img->nch - SE_NCH

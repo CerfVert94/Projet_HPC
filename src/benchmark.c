@@ -317,6 +317,9 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 	long size, idx_set, idx_test, nrl, nrh, ncl, nch, cnt = 0;
 	double **results;
 	uint8 **X, **Y, **temp_buffer;
+	vuint8 **vX, **vY, **vTempBuffer;
+	int i0, i1, j0, j1;
+	int k0, k1, l0, l1;
 	
 	// Initialize to save the benchmark result.
 	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
@@ -325,20 +328,34 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 	for (size = ls - 1; size < hs; size += step) {
 		X            = ui8matrix_checker(-2, size + 2, -2, size + 2, 3, 1); 
 		Y            = ui8matrix(0, size, 0, size);
-		temp_buffer  = ui8matrix(-2, size + 2, -2, size + 2); 
-		
+		temp_buffer  = ui8matrix(-2, size + 2, -2, size + 2);
+		vX			 = ui8matrix_to_vui8matrix(X,-2, size + 2, -2, size + 2, &i0, &i1, &j0, &j1);
+		vY			 = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &k0, &k1, &l0, &l1);
+		vTempBuffer  = vui8matrix(i0, i1, j0, j1); 
+
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
-			begin = __rdtsc();			
-			min_cycles_sum = 0;
-			for (idx_test = 0; idx_test < nb_tests; idx_test++)
-				min_cycles_sum += get_min_cpu_cycles_of_morpho(&morphos[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
-			
+			if (morphos[idx_set].instr_type == SCALAR) {
+				begin = __rdtsc();			
+				min_cycles_sum = 0;
+				for (idx_test = 0; idx_test < nb_tests; idx_test++)
+					min_cycles_sum += get_min_cpu_cycles_of_morpho(&morphos[idx_set], packet_size, X, 0, size, 0, size, temp_buffer, Y);
+				end = __rdtsc();			
+			}
+			else if (morphos[idx_set].instr_type == SIMD) {
+				begin = __rdtsc();			
+				min_cycles_sum = 0;
+				for (idx_test = 0; idx_test < nb_tests; idx_test++)
+					min_cycles_sum += get_min_cpu_cycles_of_vec_morpho(&morphos[idx_set], packet_size, vX, k0, k1, l0, l1, vTempBuffer, vY);
+				end = __rdtsc();	
+			}
+
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
-			end = __rdtsc();
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
 				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
-		}
-	
+		} 
+		free_vui8matrix(vTempBuffer, i0, i1, j0, j1);
+		free_vui8matrix(vX, i0, i1, j0, j1);
+		free_vui8matrix(vY, k0, k1, l0, l1);
 		free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
 		free_ui8matrix(X, -2, size + 2, -2, size + 2);
 		free_ui8matrix(Y, 0, size, 0, size);
@@ -347,6 +364,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 	}
 	return results;
 }
+
 
 double **benchmark_of_packed_morpho(struct morpho_set *morphos, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
 {
