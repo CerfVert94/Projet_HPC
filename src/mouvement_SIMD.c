@@ -105,24 +105,22 @@ void SigmaDelta_step3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nrl, long 
 	vuint8 vVmax = init_vuint8(v_max);
 	vuint8 vVmin = init_vuint8(v_min);
 	// vuint8 vVmin = init_vuint8(v_min);
-	printf("vmin:%u\n",v_min);
-	printf("vmax:%u\n",v_max);
+	// printf("vmin:%u\n",v_min);
+	// printf("vmax:%u\n",v_max);
 
 	for(long i = nrl; i <= nrh; i++) {
 		for(long j = v0; j <= v1; j++) {
 			vV_1 = _mm_load_si128((vuint8*) &V_1[i][j]); 
-			printf("\n");
 			vO 	 = _mm_load_si128((vuint8*) &O[i][j]);   
-			printf("\n");
 
-			display_vuint8(vV_1, " %03u", "vV_1");
 			vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
 			vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
-			display_vuint8(vV_1, " %03u", "vV_1");
-			display_vuint8(vV_1sub, " %03u", "vV_1sub");
-			display_vuint8(vV_1add, " %03u", "vV_1add");
+			// display_vuint8(vV_1, " %03u", "vV_1\t\t"); 			printf("\n");
+			// display_vuint8(vV_1sub, " %03u", "vV_1sub\t\t");	printf("\n");
+			// display_vuint8(vV_1add, " %03u", "vV_1add\t\t");	printf("\n");
 			NvO = vO;
-			for (int k = 0; k < N; k++) _mm_adds_epu8(NvO, vO);
+			for (int k = 1; k < n_coeff; k++) NvO =_mm_adds_epu8(NvO, vO);
+			// display_vuint8(NvO, " %03u", "NvO\t\t");	printf("\n");
 
 			// V_t0 < n * O_t1
 			vec_cmplt(vV_1, NvO, C1, CMP);
@@ -132,7 +130,9 @@ void SigmaDelta_step3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nrl, long 
 
 			// V_t0 > n * O_t1 <=> !(V_t0 == n * O_t1) && !(V_t0 < n * O_t1) && _mm_set_epi8(0xFF, ..., 0xFF)
 			C3 = _mm_andnot_si128(C1, _mm_andnot_si128(C2, vuint8_max));
-
+			// display_vuint8(C1, "%4u", "less than\t");	printf("\n");
+			// display_vuint8(C2, "%4u", "equal to\t");	printf("\n");
+			// display_vuint8(C3, "%4u", "greater than\t");printf("\n");
 			// NvO = _mm_sub_epi8(NvO, CMP);
 			// vM_1 = _mm_sub_epi8(vM_1, CMP);
 			// C1  = _mm_cmplt_epi8(vM_1, NvO);
@@ -143,13 +143,13 @@ void SigmaDelta_step3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nrl, long 
 			// If V_t0 < n * O_t1 then vV := vV_1add 
 			// OR
 			// If V_t0 > n * O_t1 then vV := vV_1sub
-			//    equivalent to  
-			//    If !(V_t0 < n * O_t1) and !(V_t0 < n * O_t1) then vV := vV_1sub
-		    TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_andnot_si128(C3, vV_1sub));
-		    TMP = _mm_or_si128(TMP, _mm_andnot_si128(C2, vV_1));
-		    // vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
+		    TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_and_si128(C3, vV_1sub));
+			// display_vuint8(TMP, "%4u", "TMP\t\t");printf("\n");
+		    TMP = _mm_or_si128(TMP, _mm_and_si128(C2, vV_1));
+			// display_vuint8(TMP, "%4u", "TMP\t\t");printf("\n");
+		    vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
 
-		    _mm_store_si128((vuint8*) &V[i][j], TMP);
+		    _mm_store_si128((vuint8*) &V[i][j], vV);
 
 		}
 	}
