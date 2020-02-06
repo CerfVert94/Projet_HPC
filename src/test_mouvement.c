@@ -265,6 +265,10 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 		free_vui8matrix(vX, i0, i1, v0, v1);
 		free_vui8matrix(vY, i0, i1, v0, v1);
 		free_vui8matrix(vZ, i0, i1, v0, v1);
+		nrl0 = nrl1;
+		nrh0 = nrh1;
+		ncl0 = ncl1;
+		nch0 = nch1;
 	}
 	for (long row = nrl1; row < nrh1 + 1; row++) 
 		for (long col = ncl1; col < nch1 + 1; col++){

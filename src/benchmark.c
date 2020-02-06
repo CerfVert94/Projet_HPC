@@ -266,15 +266,15 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
-		X = ui8matrix_checker(0, size, 0, size, 3, 1); 
-		Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
-		Z = ui8matrix        (0, size, 0, size); 
-		
-		vX = ui8matrix_to_vui8matrix(X, 0, size, 0, size, &i0, &i1, &v0, &v1);
-		vY = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &i0, &i1, &v0, &v1);
-		vZ =              vui8matrix(   0, size, 0, size);
 		
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
+			X = ui8matrix_checker(0, size, 0, size, 3, 1); 
+			Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
+			Z = ui8matrix        (0, size, 0, size); 
+			
+			vX = ui8matrix_to_vui8matrix(X, 0, size, 0, size, &i0, &i1, &v0, &v1);
+			vY = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &i0, &i1, &v0, &v1);
+			vZ =              vui8matrix(   0, size, 0, size);
 			n_coeff = sdsets[idx_set].n_coeff;
 			v_min   = sdsets[idx_set].v_min;
 			v_max   = sdsets[idx_set].v_max;
@@ -298,14 +298,15 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 			
 			if ((size + 1) % 500 == 0 || size >= hs - 1) 
 				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles.\n",  sdsets[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+
+			free_ui8matrix(  X, 0, size, 0, size);
+			free_ui8matrix(  Y, 0, size, 0, size);
+			free_ui8matrix(  Z, 0, size, 0, size);
+			free_vui8matrix(vX, 0, size, 0, size);
+			free_vui8matrix(vY, 0, size, 0, size);
+			free_vui8matrix(vZ, 0, size, 0, size);
 		}
 		
-		free_ui8matrix(  X, 0, size, 0, size);
-		free_ui8matrix(  Y, 0, size, 0, size);
-		free_ui8matrix(  Z, 0, size, 0, size);
-		free_vui8matrix(vX, 0, size, 0, size);
-		free_vui8matrix(vY, 0, size, 0, size);
-		free_vui8matrix(vZ, 0, size, 0, size);
 		cnt++;
 	}
 	return results;
@@ -327,10 +328,10 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
 		X            = ui8matrix_checker(-2, size + 2, -2, size + 2, 3, 1); 
-		Y            = ui8matrix(0, size, 0, size);
-		temp_buffer  = ui8matrix(-2, size + 2, -2, size + 2);
-		vX			 = ui8matrix_to_vui8matrix(X,-2, size + 2, -2, size + 2, &i0, &i1, &j0, &j1);
-		vY			 = ui8matrix_to_vui8matrix(Y, 0, size, 0, size, &k0, &k1, &l0, &l1);
+		Y            = ui8matrix(		 -2, size + 2, -2, size + 2);
+		temp_buffer  = ui8matrix(		 -2, size + 2, -2, size + 2);
+		vX			 = ui8matrix_to_vui8matrix(X, -2, size + 2, -2, size + 2, &i0, &i1, &j0, &j1);
+		vY			 = ui8matrix_to_vui8matrix(Y, -2, size + 2, -2, size + 2, &k0, &k1, &l0, &l1);
 		vTempBuffer  = vui8matrix(i0, i1, j0, j1); 
 
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
@@ -358,7 +359,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 		free_vui8matrix(vY, k0, k1, l0, l1);
 		free_ui8matrix(temp_buffer, -2, size + 2, -2, size + 2);
 		free_ui8matrix(X, -2, size + 2, -2, size + 2);
-		free_ui8matrix(Y, 0, size, 0, size);
+		free_ui8matrix(Y, -2, size + 2, -2, size + 2);
 
 		cnt++;
 	}
