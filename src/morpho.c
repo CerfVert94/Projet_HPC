@@ -1,5 +1,6 @@
 #include "nrdef.h"
 #include "nrutil.h"
+#include "mynrutil.h"
 #include <img.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,18 +23,20 @@ extern const char * nom_func;
 
 inline void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
-	// uint8 **ppPreOutput0, **ppPreOutput1;
-	// ppPreOutput0 = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ppPreOutput1 = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// memset_ui8matrix(ppPreOutput0, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_erosion_naive (X     , nrl, nrh, ncl, nch, ppPreOutput0);
-	// memset_ui8matrix(ppPreOutput1, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_dilation_naive(ppPreOutput0, nrl, nrh, ncl, nch, ppPreOutput1);
-	// memset_ui8matrix(ppPreOutput0, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_dilation_naive(ppPreOutput1, nrl, nrh, ncl, nch, ppPreOutput0);
-	// ui8matrix_erosion_naive (ppPreOutput0, nrl, nrh, ncl, nch, Y);
-	// free_ui8matrix(ppPreOutput0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// free_ui8matrix(ppPreOutput1, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	memset_ui8matrix(temp_buffer, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	
+	
+	ui8matrix_erosion_naive  (X, nrl, nrh, ncl, nch, NULL, temp_buffer); memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_dilation_naive (temp_buffer, nrl, nrh, ncl, nch, NULL, Y); memset_ui8matrix(temp_buffer, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_dilation_naive (Y, nrl, nrh, ncl, nch, NULL, temp_buffer); memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_erosion_naive  (temp_buffer, nrl, nrh, ncl, nch, NULL, Y);
+	// memcpy_ui8matrix(temp_buffer, nrl - 2, nrh + 2, ncl - 2, nrh + 2, Y);
+	
+	// display_ui8matrix(Y, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "Sequence");
+	
+	
+	
+	// display_ui8matrix(Y          , nrl-2, nrh+2, ncl-2, nch+2, "%4u", "3rd Erosion (Naive)");
 }
 void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {

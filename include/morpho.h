@@ -194,6 +194,8 @@ void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP     (uint8** X, long nrl, l
 
 
 void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 

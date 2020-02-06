@@ -37,6 +37,7 @@
 
 #include "nrdef.h"
 #include "nrutil.h"
+#include "mynrutil.h"
 #include <img.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -70,12 +71,183 @@
                                   scalar_or5((input)[ 1], col) |\
                                   scalar_or5((input)[ 2], col)
 
-#define SE_NRL -1
-#define SE_NRH  1
-#define SE_NCL -1
-#define SE_NCH  1
 
 
+void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
+{
+	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4, *out_row, *in_row;
+	uint8 **in, **mid, **out;
+	long row, col, nrow, r;
+
+	nrow = nrh - nrl + 1;
+	row = 0;
+	
+	in = X; mid = Z; out = Y;
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+
+	in = Y; mid = Z; out = X;
+	// memset_ui8matrix(mid, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_or5(in_row, col);
+		}
+	}
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 2];
+		temp_row1 = mid[row - 1];
+		temp_row2 = mid[row + 0];
+		temp_row3 = mid[row + 1];
+		temp_row4 = mid[row + 2];
+
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]|
+						   temp_row1[col]|
+						   temp_row2[col]|
+						   temp_row3[col]|
+						   temp_row4[col];
+		}
+	}
+	in = X; mid = Y; out = Z;
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+
+	// display_ui8matrix(Z, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "Z");
+
+}
+
+
+
+void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
+{
+	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4, *out_row, *in_row;
+	uint8 **in, **mid, **out;
+	long row, col, nrow, r;
+
+	nrow = nrh - nrl + 1;
+	row = 0;
+	
+	in = X; mid = Z; out = Y;
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+
+	in = Y; mid = Z; out = X;
+	// memset_ui8matrix(mid, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_or5(in_row, col);
+		}
+	}
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 2];
+		temp_row1 = mid[row - 1];
+		temp_row2 = mid[row + 0];
+		temp_row3 = mid[row + 1];
+		temp_row4 = mid[row + 2];
+
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]|
+						   temp_row1[col]|
+						   temp_row2[col]|
+						   temp_row3[col]|
+						   temp_row4[col];
+		}
+	}
+	in = X; mid = Y; out = Z;
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl; col < nch + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl; row < nrh + 1; row ++)
+	{
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+
+	// display_ui8matrix(Z, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "Z");
+
+}
 /*******************************************/
 /******* Optimisation : Loop Unroll ********/
 /*******************************************/
@@ -858,7 +1030,7 @@ void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR(uint8** X, long nrl, long nrh, lon
 void ui8matrix_dilation_row_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *temp_row0, *temp_row1, *temp_row2, *out_row0;
 	// Prologue	
 	temp_row0 = temp_buffer[nrl - 1];
@@ -890,13 +1062,13 @@ void ui8matrix_dilation_row_pipeline(uint8** X, long nrl, long nrh, long ncl, lo
 				  	    temp_row1[ col] |
 		     scalar_or3(temp_row2, col);
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 
 void ui8matrix_dilation_col_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
 	uint8 x0, x1, x2;
 	// Prologue	
@@ -932,13 +1104,13 @@ void ui8matrix_dilation_col_pipeline(uint8** X, long nrl, long nrh, long ncl, lo
 			temp_row[col + 1] = x2;		  
 		}
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 
 void ui8matrix_dilation_col_pipeline_RR(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
 	uint8 x0, x1, x2;
 	// Prologue	
@@ -982,7 +1154,7 @@ void ui8matrix_dilation_col_pipeline_RR(uint8** X, long nrl, long nrh, long ncl,
 	// 				 X[row + 0][nch + 1] |
 	// 				 X[row + 1][nch + 1];
 	// }
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 /*************************************************/
 /******* End of optimisation : Pipelining ********/
@@ -1097,16 +1269,16 @@ void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, l
 		break;
 
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh , ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch, "%u ", "Out");
-	// free_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// display_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch, "%u ", "Out");
+	// free_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_dilation_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -1196,12 +1368,12 @@ void ui8matrix_dilation_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, l
 		default:
 		break;
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh, ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u ", "Temp");
+	// display_ui8matrix(temp,nrl, nrh, ncl + (-1), nch + 1, "%u ", "Temp");
 
 	// ui8matrix_dilation_LU3x3_O1xO1(X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 	
 }
 
@@ -1328,13 +1500,13 @@ void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh
 		break;
 
 	}
-	// free_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -1437,12 +1609,12 @@ void ui8matrix_dilation_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh
 		default:
 		break;
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh, ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u ", "Temp");
+	// display_ui8matrix(temp,nrl, nrh, ncl + (-1), nch + 1, "%u ", "Temp");
 
 	// ui8matrix_dilation_LU3x3_O1xO1(X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 	
 }
 void ui8matrix_dilation_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
@@ -1456,7 +1628,7 @@ void ui8matrix_dilation_divide_row_and_conquer (uint8** X, long nrl, long nrh, l
 	nrow = nrh - nrl + 1;
 	row = 0;
 	
-	for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 	{
 		temp_row =    temp_buffer[row];
 		in_row   = X[row];
@@ -1600,7 +1772,7 @@ void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, lon
 		}
 		break;
 	}
-	// display_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch, "%u", "Temp");
+	// display_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch, "%u", "Temp");
 	for (row = nrl; row < nrh + 1; row ++)
 	{
 		temp_row0 =     temp_buffer[row - 1];
@@ -1615,7 +1787,7 @@ void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, lon
 	}
 
 	
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
@@ -1628,7 +1800,7 @@ void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 	nrow = nrh - nrl + 1;
 	row = 0;
 	r = (nch + 1) % order;
-	for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 	{
 		temp_row =    temp_buffer[row];
 		in_row   = X[row];
@@ -1641,7 +1813,7 @@ void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 	}
 	switch(r) {
 		case 2:
-		for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+		for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 		{
 			temp_row =    temp_buffer[row];
 			in_row   = X[row];
@@ -1650,7 +1822,7 @@ void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 		}
 		break;
 		case 1:
-		for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+		for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 		{
 			temp_row =    temp_buffer[row];
 			in_row   = X[row];
@@ -1680,12 +1852,12 @@ void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 	}
 	
 		
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_dilation_divide_col_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *out_row, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -1699,7 +1871,7 @@ void ui8matrix_dilation_divide_col_and_conquer (uint8** X, long nrl, long nrh, l
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] | in_row1[col] | in_row2[col];
 	}
 	
@@ -1710,12 +1882,12 @@ void ui8matrix_dilation_divide_col_and_conquer (uint8** X, long nrl, long nrh, l
 		for(col = ncl; col < nch + 1; col++) 
 			out_row[col] = scalar_or3(temp_row, col);
 	}
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *out_row0,*out_row1,*out_row2, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -1728,7 +1900,7 @@ void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, lon
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] | in_row1[col] | in_row2[col];
 	}
 	
@@ -1773,12 +1945,12 @@ void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, lon
 		case 0:
 		break;
 	}
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *out_row, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -1792,7 +1964,7 @@ void ui8matrix_dilation_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] | in_row1[col] | in_row2[col];
 	}
 	r = (nch + 1) % order;
@@ -1825,14 +1997,14 @@ void ui8matrix_dilation_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, lon
 		case 0:
 		break;
 	}
-	// display_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u", "temp");
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// display_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1, "%u", "temp");
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -1913,13 +2085,13 @@ void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, 
 		default:
 			break;
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -2028,7 +2200,7 @@ void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, 
 			break;
 	}
 	// display_ui8matrix(Y, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	
 }
 
@@ -2037,7 +2209,7 @@ void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nr
 {
 	const long order = 3;
 	long row = nrl, col = ncl, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3;
 	uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
@@ -2162,13 +2334,13 @@ void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nr
 		default:
 			break;
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -2248,7 +2420,7 @@ void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nr
 			break;
 	}
 	// display_ui8matrix(Y, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	
 }
 /***********************************************************************************/
@@ -3361,7 +3533,7 @@ void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR(uint8** X, long nrl, long nrh, long
 void ui8matrix_erosion_row_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *temp_row0, *temp_row1, *temp_row2, *out_row0;
 	// Prologue	
 	temp_row0 = temp_buffer[nrl - 1];
@@ -3393,13 +3565,13 @@ void ui8matrix_erosion_row_pipeline(uint8** X, long nrl, long nrh, long ncl, lon
 				  	    temp_row1[ col] &
 		     scalar_and3(temp_row2, col);
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 
 void ui8matrix_erosion_col_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
 	uint8 x0, x1, x2;
 	// Prologue	
@@ -3435,13 +3607,13 @@ void ui8matrix_erosion_col_pipeline(uint8** X, long nrl, long nrh, long ncl, lon
 			temp_row[col + 1] = x2;		  
 		}
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 
 void ui8matrix_erosion_col_pipeline_RR(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	long row = nrl, col = ncl, x, y;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
 	uint8 x0, x1, x2;
 	// Prologue	
@@ -3485,7 +3657,7 @@ void ui8matrix_erosion_col_pipeline_RR(uint8** X, long nrl, long nrh, long ncl, 
 	// 				 X[row + 0][nch + 1] &
 	// 				 X[row + 1][nch + 1];
 	// }
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 /*************************************************/
 /******* End of optimisation : Pipelining ********/
@@ -3600,16 +3772,16 @@ void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, lo
 		break;
 
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh , ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch, "%u ", "Out");
-	// free_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// display_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch, "%u ", "Out");
+	// free_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_erosion_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -3699,12 +3871,12 @@ void ui8matrix_erosion_pipeline_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, lo
 		default:
 		break;
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh, ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u ", "Temp");
+	// display_ui8matrix(temp,nrl, nrh, ncl + (-1), nch + 1, "%u ", "Temp");
 
 	// ui8matrix_erosion_LU3x3_O1xO1(X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 	
 }
 
@@ -3831,13 +4003,13 @@ void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh,
 		break;
 
 	}
-	// free_ui8matrix(temp,nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp,nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -3940,12 +4112,12 @@ void ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh,
 		default:
 		break;
 	}
-	// display_ui8matrix(X,nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH, "%u", "In");
+	// display_ui8matrix(X,nrl + (-1), nrh + 1, ncl + (-1), nch + 1, "%u", "In");
 	// display_ui8matrix(Y,nrl, nrh, ncl, nch , "%03u ", "Out");
-	// display_ui8matrix(temp,nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u ", "Temp");
+	// display_ui8matrix(temp,nrl, nrh, ncl + (-1), nch + 1, "%u ", "Temp");
 
 	// ui8matrix_erosion_LU3x3_O1xO1(X, nrl, nrh, ncl, nch, temp_buffer, Y);
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 	
 }
 void ui8matrix_erosion_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
@@ -3954,12 +4126,11 @@ void ui8matrix_erosion_divide_row_and_conquer (uint8** X, long nrl, long nrh, lo
 	
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *out_row, *in_row;
 	long row, col, nrow, r;
-	int nb_threads;
 
 	nrow = nrh - nrl + 1;
 	row = 0;
 	
-	for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 	{
 		temp_row =    temp_buffer[row];
 		in_row   = X[row];
@@ -3980,7 +4151,7 @@ void ui8matrix_erosion_divide_row_and_conquer (uint8** X, long nrl, long nrh, lo
 						   temp_row2[col];
 		}
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 /** Deprcated **/
 void ui8matrix_erosion_unrolled_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
@@ -4038,7 +4209,7 @@ void ui8matrix_erosion_unrolled_divide_row_and_conquer (uint8** X, long nrl, lon
 						   temp_row2[col];
 		}
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
@@ -4105,7 +4276,7 @@ void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long
 		}
 		break;
 	}
-	// display_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch, "%u", "Temp");
+	// display_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch, "%u", "Temp");
 	for (row = nrl; row < nrh + 1; row ++)
 	{
 		temp_row0 =     temp_buffer[row - 1];
@@ -4120,7 +4291,7 @@ void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long
 	}
 
 	
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
@@ -4133,7 +4304,7 @@ void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long
 	nrow = nrh - nrl + 1;
 	row = 0;
 	r = (nch + 1) % order;
-	for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 	{
 		temp_row =    temp_buffer[row];
 		in_row   = X[row];
@@ -4146,7 +4317,7 @@ void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long
 	}
 	switch(r) {
 		case 2:
-		for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+		for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 		{
 			temp_row =    temp_buffer[row];
 			in_row   = X[row];
@@ -4155,7 +4326,7 @@ void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long
 		}
 		break;
 		case 1:
-		for (row = nrl - 1; row < (nrh + 1) + SE_NRH; row ++)
+		for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 		{
 			temp_row =    temp_buffer[row];
 			in_row   = X[row];
@@ -4185,12 +4356,12 @@ void ui8matrix_erosion_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long
 	}
 	
 		
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl, nch);
 }
 void ui8matrix_erosion_divide_col_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *out_row, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -4204,7 +4375,7 @@ void ui8matrix_erosion_divide_col_and_conquer (uint8** X, long nrl, long nrh, lo
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] & in_row1[col] & in_row2[col];
 	}
 	
@@ -4215,12 +4386,12 @@ void ui8matrix_erosion_divide_col_and_conquer (uint8** X, long nrl, long nrh, lo
 		for(col = ncl; col < nch + 1; col++) 
 			out_row[col] = scalar_and3(temp_row, col);
 	}
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_erosion_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *out_row0,*out_row1,*out_row2, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -4233,7 +4404,7 @@ void ui8matrix_erosion_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] & in_row1[col] & in_row2[col];
 	}
 	
@@ -4278,12 +4449,12 @@ void ui8matrix_erosion_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long
 		case 0:
 		break;
 	}
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_erosion_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
-	// uint8 **temp = ui8matrix(nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl, nrh, ncl + (-1), nch + 1);
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *out_row, *in_row0, *in_row1, *in_row2;
 	long row, col, nrow, r;
 	int nb_threads;
@@ -4297,7 +4468,7 @@ void ui8matrix_erosion_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long
 		in_row0   = X[row - 1];
 		in_row1   = X[row + 0];
 		in_row2   = X[row + 1];
-		for(col = ncl + SE_NCL; col < nch + 1 + SE_NCH; col++) 
+		for(col = ncl + (-1); col < nch + 1 + 1; col++) 
 			temp_row[col] = in_row0[col] & in_row1[col] & in_row2[col];
 	}
 	r = (nch + 1) % order;
@@ -4330,14 +4501,14 @@ void ui8matrix_erosion_divide_col_and_conquer_InLU_O3 (uint8** X, long nrl, long
 		case 0:
 		break;
 	}
-	// display_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH, "%u", "temp");
-	// free_ui8matrix(temp, nrl, nrh, ncl + SE_NCL, nch + SE_NCH);
+	// display_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1, "%u", "temp");
+	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -4418,13 +4589,13 @@ void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3 (uint8** X, long nrl, long nrh, l
 		default:
 			break;
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -4533,7 +4704,7 @@ void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3 (uint8** X, long nrl, long nrh, l
 			break;
 	}
 	// display_ui8matrix(Y, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	
 }
 
@@ -4542,7 +4713,7 @@ void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh
 {
 	const long order = 3;
 	long row = nrl, col = ncl, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3;
 	uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
@@ -4667,13 +4838,13 @@ void ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nrh
 		default:
 			break;
 	}
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 }
 void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
-	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
@@ -4753,7 +4924,7 @@ void ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nrh
 			break;
 	}
 	// display_ui8matrix(Y, nrl - 1, nrh + 1, ncl - 1, nch + 1, "%u", "TEst");
-	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	// free_ui8matrix(temp, nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
 	
 }
 /***********************************************************************************/
