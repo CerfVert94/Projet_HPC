@@ -40,7 +40,7 @@ CC = gcc
 AR = ar -rc
 
 # -- Flags ----------
-C_DEBUG_FLAGS = -O3 -g
+C_DEBUG_FLAGS = -O3 #-g
 C_CC_FLAGS = -std=c99
 C_OPTIMISATION_FLAGS = -O3 -fstrict-aliasing
 C_ARCH_FLAGS = -mssse3 
