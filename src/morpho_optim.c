@@ -81,28 +81,15 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 
 	nrow = nrh - nrl + 1;
 	row = 0;
-	
+	memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	in = X; mid = Z; out = Y;
-	for (row = nrl - 2; row < (nrh + 1) + 2; row ++)
-	{
-		temp_row = mid[row];
-		in_row   = in[row];
-		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
-			temp_row[col] = scalar_and3(in_row, col);
-		}
+	for (long row = nrl; row < nrh + 1; row++){
+		in[row][ncl - 1] = in[row][ncl];
+		in[row][nch + 1] = in[row][nch];
 	}
-	for (row = nrl - 1; row < (nrh + 1) + 1; row ++) {
-		temp_row0 = mid[row - 1];
-		temp_row1 = mid[row + 0];
-		temp_row2 = mid[row + 1];
-		out_row   = out[row + 0];
-		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
-			out_row[col] = temp_row0[col]&
-						   temp_row1[col]&
-						   temp_row2[col];
-		}
-	}
-
+	
+	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
+	memcpy_ui8matrix(out, nrl - 2, nrh + 2, ncl - 2, nch + 2, Z);
 	in = Y; mid = Z; out = X;
 	for (row = nrl - 2; row < (nrh + 1) + 2; row ++) {
 		temp_row = mid[row];
@@ -127,27 +114,11 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 						   temp_row4[col];
 		}
 	}
-	in = X; mid = Y; out = Z;
-	memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	for (row = nrl - 2; row < (nrh + 1) + 2; row ++) {
-		temp_row = mid[row];
-		in_row   = in[row];
-		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
-			temp_row[col] = scalar_and3(in_row, col);
-		}
+	for (long row = nrl; row < nrh + 1; row++){
+		out[row][ncl - 1] = out[row][ncl];
+		out[row][nch + 1] = out[row][nch];
 	}
-	
-	for (row = nrl - 1; row < (nrh + 1) + 1; row ++) {
-		temp_row0 = mid[row - 1];
-		temp_row1 = mid[row + 0];
-		temp_row2 = mid[row + 1];
-		out_row   = out[row + 0];
-		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
-			out_row[col] = temp_row0[col]&
-						   temp_row1[col]&
-						   temp_row2[col];
-		}
-	}
+	ui8matrix_erosion_divide_row_and_conquer(X, nrl, nrh, ncl, nch, Y, Z);
 }
 void ui8matrix_sequence_LE_FO_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
 {

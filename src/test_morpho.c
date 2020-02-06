@@ -103,6 +103,7 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 							assert(!memcmp_ui8matrix(Z, Y, l, l, ncl_, j));
 					}
 					else if (morpho_sets[k].op_type == FUSION) {
+						for (int l = nrl_; l < nrh_ + 1; l++)
 							assert(!memcmp_ui8matrix(FO_Z, Y, l, l, ncl_, j));
 					}
 
@@ -353,9 +354,9 @@ bool morpho_produces_one(struct morpho_set *mset, uint8** W)
 	uint8 **Z = Y + 2;
 	uint8 **tempZ = tempY + 2;
 
-	display_ui8matrix(W, -1, 1, -1, 1, "%u", "W");
+	// display_ui8matrix(W, -1, 1, -1, 1, "%u", "W");
 	mset->morpho_func(W, 0, 0, 0, 0, tempZ, Z);
-	display_ui8matrix(Z, -1, 1, -1, 1, "%u", "Z");
+	// display_ui8matrix(Z, -1, 1, -1, 1, "%u", "Z");
 	return Z[0][0] == 1;
 }
 bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
@@ -457,8 +458,8 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 
 	assert((nrh - nrl + 1) > 20 && (nch - ncl + 1) > 20);
 	
-    for(temp_nrh = nrh - 20; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = nch - 20; temp_nch < nch + 1; temp_nch++){
+    for(temp_nrh = nrl + 10; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = ncl + 10; temp_nch < nch + 1; temp_nch++){
 			// Test Input
 			X 			= ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 			// Middle Buffer
@@ -469,9 +470,7 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 			Z 			= ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 
 			// Full zero intialization & copy image 
-			memset_ui8matrix(X          , 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
-			copy_ui8matrix_ui8matrix(image, nrl, temp_nrh, ncl, temp_nch, X);
-
+			
 			for (int i = 0; i < nb_sets; i++) {
 				memset_ui8matrix(temp_buffer, 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 				memset_ui8matrix(Y			, 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
@@ -480,8 +479,13 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 					printf("Integration test : "LALIGNED_STR" (%-30s)\n", morpho_sets[i].func_name, filename);
 					printf("\tTesting for %ld x %ld\n", temp_nch + 1, temp_nrh + 1);
 
+					memset_ui8matrix(X            , 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD   );
+					copy_ui8matrix_ui8matrix(image   , nrl       , temp_nrh       , ncl       , temp_nch       , X);
 					naive_morpho_set->morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
+					memset_ui8matrix(X            , 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD   );
+					copy_ui8matrix_ui8matrix(image   , nrl       , temp_nrh       , ncl       , temp_nch       , X);
 					morpho_sets[i].morpho_func(   X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Y);	
+				
 
 					if (logging) {
 						printf("%ld %ld %ld %ld\n", nrl, temp_nrh, ncl, temp_nch);
@@ -489,7 +493,11 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 						display_ui8matrix(Y, nrl, temp_nrh, ncl, temp_nch, "%03u ", morpho_sets[i].func_name);
 						display_ui8matrix(Z, nrl, temp_nrh, ncl, temp_nch, "%03u ", naive_morpho_set->func_name);
 					}
-					assert(!memcmp_ui8matrix(Y, Z, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD));
+					for (long row = nrl; row < temp_nrh + 1; row++){
+						assert(!memcmp_ui8matrix(&Y[row], &Z[row], 0, 0, ncl, temp_nch));
+					}
+						
+						
 					printf("\tTest passed\n");
 				}
 			}
@@ -586,7 +594,7 @@ void  ui8matrix_permutation (uint8** m, long nrl, long nrh, long ncl, long nch, 
 		for(long j = ncl; j < nch + 1; j++)
 			m[i][j] = (perm >> k++) & 0x1;
 
-	display_ui8matrix(m, -1, 1, -1, 1, "%u", "x");
+	// display_ui8matrix(m, -1, 1, -1, 1, "%u", "x");
 }
 
 void  vui8matrix_permutation (vuint8** vM, long nrl, long nrh, long ncl, long nch, uint32 perm)
