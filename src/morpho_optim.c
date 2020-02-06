@@ -83,6 +83,88 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 	row = 0;
 	
 	in = X; mid = Z; out = Y;
+	// memset_ui8matrix(mid, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row ++)
+	{
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++) {
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+
+	in = Y; mid = Z; out = X;
+	// memset_ui8matrix(mid, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	// memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row ++) {
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
+			temp_row[col] = scalar_or5(in_row, col);
+		}
+	}
+	for (row = nrl; row < nrh + 1; row ++)	{
+		temp_row0 = mid[row - 2];
+		temp_row1 = mid[row - 1];
+		temp_row2 = mid[row + 0];
+		temp_row3 = mid[row + 1];
+		temp_row4 = mid[row + 2];
+
+		out_row   = out[row + 0];
+		for(col = ncl; col < nch + 1; col++) {
+			out_row[col] = temp_row0[col]|
+						   temp_row1[col]|
+						   temp_row2[col]|
+						   temp_row3[col]|
+						   temp_row4[col];
+		}
+	}
+	in = X; mid = Y; out = Z;
+	memset_ui8matrix(out, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row ++) {
+		temp_row = mid[row];
+		in_row   = in[row];
+		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
+			temp_row[col] = scalar_and3(in_row, col);
+		}
+	}
+	
+	for (row = nrl - 1; row < (nrh + 1) + 1; row ++) {
+		temp_row0 = mid[row - 1];
+		temp_row1 = mid[row + 0];
+		temp_row2 = mid[row + 1];
+		out_row   = out[row + 0];
+		for(col = ncl - 1; col < (nch + 1) + 1; col++) {
+			out_row[col] = temp_row0[col]&
+						   temp_row1[col]&
+						   temp_row2[col];
+		}
+	}
+}
+
+
+void ui8matrix_sequence_drnc_fo_1(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
+{
+	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4, *out_row, *in_row;
+	uint8 **in, **mid, **out;
+	long row, col, nrow, r;
+
+	nrow = nrh - nrl + 1;
+	row = 0;
+	
+	in = X; mid = Z; out = Y;
 	for (row = nrl - 1; row < (nrh + 1) + 1; row ++)
 	{
 		temp_row = mid[row];
@@ -159,7 +241,6 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 	// display_ui8matrix(Z, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "Z");
 
 }
-
 
 
 void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)

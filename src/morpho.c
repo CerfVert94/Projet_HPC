@@ -21,18 +21,18 @@
 
 extern const char * nom_func;
 
-inline void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+inline void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
 {
-	memset_ui8matrix(temp_buffer, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	long row, col, x, y;
+	long snrl = -1, snrh = 1, sncl = -1, snch = 1;
+	memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_erosion_naive  (X, nrl, nrh, ncl, nch, NULL, Y); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_dilation_naive (Y, nrl, nrh, ncl, nch, NULL, Z); memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_dilation_naive (Z, nrl, nrh, ncl, nch, NULL, Y); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
+	ui8matrix_erosion_naive  (Y, nrl, nrh, ncl, nch, NULL, Z);
+	// memcpy_ui8matrix(Y, nrl - 2, nrh + 2, ncl - 2, nrh + 2, Z);
 	
-	
-	ui8matrix_erosion_naive  (X, nrl, nrh, ncl, nch, NULL, temp_buffer); memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
-	ui8matrix_dilation_naive (temp_buffer, nrl, nrh, ncl, nch, NULL, Y); memset_ui8matrix(temp_buffer, 0, nrl-2, nrh+2, ncl-2, nch+2);
-	ui8matrix_dilation_naive (Y, nrl, nrh, ncl, nch, NULL, temp_buffer); memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
-	ui8matrix_erosion_naive  (temp_buffer, nrl, nrh, ncl, nch, NULL, Y);
-	// memcpy_ui8matrix(temp_buffer, nrl - 2, nrh + 2, ncl - 2, nrh + 2, Y);
-	
-	// display_ui8matrix(Y, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "Sequence");
+	// display_ui8matrix(Z, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "Sequence");
 	
 	
 	
