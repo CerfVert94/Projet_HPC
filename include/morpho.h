@@ -21,7 +21,7 @@ struct morpho_set{
 // typedef void (*morpho_func_t)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 
 void ui8matrix_dilation_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
-
+void ui8matrix_dilation5_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 /****************************/
 /******* Loop Unroll ********/
 /****************************/
@@ -54,7 +54,7 @@ void ui8matrix_dilation_pipeline2_LU3x3_ExLU_O3_RR (uint8** X, long nrl, long nr
 /************************************/
 /******** Alternate Versions ********/
 /************************************/
-
+void ui8matrix_dilation5_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z);
 void ui8matrix_dilation_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 void ui8matrix_dilation_divide_row_and_conquer_InLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
@@ -105,7 +105,7 @@ void ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP (uint8** X, long nrl, long
 
 
 void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
-
+void ui8matrix_erosion5_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 /****************************/
 /******* Loop Unroll ********/
 /****************************/
@@ -194,7 +194,12 @@ void ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP     (uint8** X, long nrl, l
 
 
 void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_crnc(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z);
+void ui8matrix_sequence_drnc(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z);
 void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_LE_FO_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z);
+void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
+void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 void ui8matrix_sequence_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y);
 

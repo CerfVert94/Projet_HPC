@@ -14,7 +14,7 @@
 
 #pragma message("  include  mouvement_SIMD.h")
 
-void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y);
+// void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y);
 
 
 /* Init image*/
