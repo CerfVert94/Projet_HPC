@@ -122,6 +122,7 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 }
 void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
 {
+	
 	long row = nrl, col = ncl, x, y;
 	uint8 **in, **mid_e3, **mid_d5, **out;
 	uint8 *mid_e3_row, *mid_e3_row0, *mid_e3_row1, *mid_e3_row2;
@@ -237,7 +238,9 @@ void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl
 					 	   mid_e3_row2[col] ;
 		}
 	}
-	display_ui8matrix(X, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3-D5-E3");
+	
+	display_ui8matrix(Z, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3-D5-E3");
+	memcpy_ui8matrix(X, nrl - 2, nrh + 2, ncl - 2, nch + 2, Z);
 	free_ui8matrix(mid_e3, nrl - 2, nrh + 2, ncl - 2, nch + 2);
 	getchar();
 }
