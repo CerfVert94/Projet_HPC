@@ -120,13 +120,15 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 	}
 	ui8matrix_erosion_divide_row_and_conquer(X, nrl, nrh, ncl, nch, Y, Z);
 }
-void ui8matrix_sequence_LE_FO_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
+void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
 {
 	long row = nrl, col = ncl, x, y;
 	uint8 **in, **mid_e3, **mid_d5, **out;
+	uint8 *mid_e3_row, *mid_e3_row0, *mid_e3_row1, *mid_e3_row2;
+	uint8 *mid_d5_row, *mid_d5_row0, *mid_d5_row1, *mid_d5_row2, *mid_d5_row3, *mid_d5_row4;
+	uint8 *in_row, *mid_row, *out_row;
 	const long PRE_D5_NROW = 5;
 	const long PRE_E3_NROW = 3;
-	
 	
 	
 	in     = X; 
@@ -134,25 +136,110 @@ void ui8matrix_sequence_LE_FO_pipeline(uint8** X, long nrl, long nrh, long ncl, 
 	mid_d5 = Y;
 	out    = Z;
 
-	// Prologue
-	for (row = nrl - 1; row < (nrl - 1) + (PRE_D5_NROW * PRE_E3_NROW); row++) {
-		for (col = ncl - 1; col < (nch + 1) + 1; col++) {
-            mid_e3[row][col] = scalar_and3x3(&in[row], col);
-		}
-	}
-	for (row = nrl; row < nrl + (PRE_E3_NROW); row++) {
-		for (col = ncl; col < (nch + 1); col++) {
-            mid_d5[row][col] = scalar_and5x5(&mid_e3[row], col);
+	for (row = nrl - 2; row < (nrh + 1) + 2; row++) {	
+		mid_e3_row 		= mid_e3[row]; 
+		in_row     		=      X[row];
+		in_row[ncl - 1] = in_row[ncl];
+		in_row[nch + 1] = in_row[nch];
+		for (col = ncl; col < nch + 1; col++) {
+			mid_e3_row[col] = scalar_and3(in_row, col);
 		}
 	}
 
+	// Pre E3
+	mid_e3_row0 = mid_e3[nrl - 1];
+	mid_e3_row1 = mid_e3[nrl + 0];
+	mid_e3_row2 = mid_e3[nrl + 1];
+	out_row		= 	 out[nrl + 0];
+	for (col = ncl; col < nch + 1; col++) {
+		out_row[col] = mid_e3_row0[col] &
+					   mid_e3_row1[col] &
+					   mid_e3_row2[col];
+	}
+	// E3 & Pre D5 
+	for (row = nrl + 1; row < nrh + 1; row++) {
+		mid_e3_row0 = mid_e3[row - 1];
+		mid_e3_row1 = mid_e3[row + 0];
+		mid_e3_row2 = mid_e3[row + 1];
+		out_row		= 	 out[row + 0];
+
+		mid_d5_row = mid_d5[row - 1]; 
+		mid_row    =    out[row - 1]; 
+		for (col = ncl; col < nch + 1; col++) {
+			out_row[col] = mid_e3_row0[col] &
+					 	   mid_e3_row1[col] &
+					 	   mid_e3_row2[col] ;
+			mid_d5_row[col] = scalar_or5(mid_row, col);
+		}
+	}
+	// E3 Done 
+	display_ui8matrix(out, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3");
+	// Pre D5 Epilogue & D5 Prologue
+	mid_d5_row0 = mid_d5[nrl - 2];
+	mid_d5_row1 = mid_d5[nrl - 1];
+	mid_d5_row2 = mid_d5[nrl + 0];
+	mid_d5_row3 = mid_d5[nrl + 1];
+	mid_d5_row4 = mid_d5[nrl + 2];
+	out_row		= 	 out[nrl + 0];
+	mid_d5_row  = mid_d5[nrh    ]; 
+	mid_row     =    out[nrh    ]; 
+	for (col = ncl; col < nch + 1; col++) {
+		out_row[col] = mid_d5_row0[col] |
+					   mid_d5_row1[col] |			
+					   mid_d5_row2[col] |
+					   mid_d5_row3[col] |
+					   mid_d5_row4[col];
+		mid_d5_row[col] = scalar_or5(mid_row, col);
+	}
+	// D5 & Pre E3
+	for (row = nrl + 1; row < nrh + 1; row++) {
+		mid_d5_row0 = mid_d5[row - 2];
+		mid_d5_row1 = mid_d5[row - 1];
+		mid_d5_row2 = mid_d5[row + 0];
+		mid_d5_row3 = mid_d5[row + 1];
+		mid_d5_row4 = mid_d5[row + 2];
+		out_row		= 	 out[row + 0];
+
+		mid_e3_row  = mid_e3[row - 1]; 
+		mid_row     =    out[row - 1]; 
+		mid_row[ncl - 1] = mid_row[ncl];
+		mid_row[nch + 1] = mid_row[nch];
+		for (col = ncl; col < nch + 1; col++) {
+			out_row[col] = mid_d5_row0[col] |
+						   mid_d5_row1[col] |			
+						   mid_d5_row2[col] |
+						   mid_d5_row3[col] |
+						   mid_d5_row4[col];
+			mid_e3_row[col] = scalar_and3(mid_row, col);
+		}
+	}
+	mid_e3_row  = mid_e3[nrh]; 
+	mid_row     =    out[nrh]; 
+	mid_row[ncl - 1] = mid_row[ncl];
+	mid_row[nch + 1] = mid_row[nch];
+	display_ui8matrix(out, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3-D5");
+	// Pre E3 Epilogue
+	mid_e3_row  = mid_e3[nrh    ]; // Epilogue
+	mid_row     =    out[nrh    ]; // Epilogue
+	for (col = ncl; col < nch + 1; col++) {
+		mid_e3_row[col] = scalar_and3(mid_row, col);
+	}
 	
-	for (row = nrl; row < nrl + 1; row++) {
-		for (col = ncl - 1; col < (nch + 1) + 1; col++) {
-            mid_e3[row][col] = scalar_and3x3(&in[row], col);
+	memset_ui8matrix(X, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	for (row = nrl; row < nrh + 1; row++) {
+		mid_e3_row0 = mid_e3[row - 1];
+		mid_e3_row1 = mid_e3[row + 0];
+		mid_e3_row2 = mid_e3[row + 1];
+		out_row		= 	   X[row + 0];
+		for (col = ncl; col < nch + 1; col++) {
+			out_row[col] = mid_e3_row0[col] &
+					 	   mid_e3_row1[col] &
+					 	   mid_e3_row2[col] ;
 		}
 	}
-
+	display_ui8matrix(X, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3-D5-E3");
+	free_ui8matrix(mid_e3, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	getchar();
 }
 /*******************************************/
 /******* Optimisation : Loop Unroll ********/
