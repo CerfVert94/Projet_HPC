@@ -34,7 +34,7 @@ void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nr
 	vuint8 vec1 = init_vuint8(1);
 	for (i = nrl; i <= nrh; i++)
 		for (j = v0; j <= v1; j++)
-			_mm_store_si128((vuint8**) &V[i][j], vec1);
+			_mm_store_si128((vuint8*) &V[i][j], vec1);
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -378,52 +378,53 @@ void SigmaDelta_step3_InLU_O3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nr
 	}
 
 	switch(r){
-		for(long i = nrl; i <= nrh; i++) {
-			vV_1 = _mm_load_si128((vuint8*) &V_1[i][v1 - 1]); 
-			vO 	 = _mm_load_si128((vuint8*) &O[i][v1 - 1]);   
+		case 2: 
+			for(long i = nrl; i <= nrh; i++) {
+				vV_1 = _mm_load_si128((vuint8*) &V_1[i][v1 - 1]); 
+				vO 	 = _mm_load_si128((vuint8*) &O[i][v1 - 1]);   
 
-			vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
-			vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
-			
-			NvO = vO;
-			for (int k = 1; k < n_coeff; k++) NvO =_mm_adds_epu8(NvO, vO);
-			
-			// V_t0 < n * O_t1
-			vec_cmplt(vV_1, NvO, C1, CMP);
-			// V_t0 == n * O_t1
-			C2  = _mm_cmpeq_epi8(NvO, vV_1);
-			// V_t0 > n * O_t1 <=> !(V_t0 == n * O_t1) && !(V_t0 < n * O_t1) && _mm_set_epi8(0xFF, ..., 0xFF)
-			C3 = _mm_andnot_si128(C1, _mm_andnot_si128(C2, vuint8_max));
-			
-			// If V_t0 > n * O_t1 then vV := vV_1sub
-			TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_and_si128(C3, vV_1sub));
-			TMP = _mm_or_si128(TMP, _mm_and_si128(C2, vV_1));
-			vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
-			_mm_store_si128((vuint8*) &V[i][v1 - 1], vV);
+				vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
+				vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
+				
+				NvO = vO;
+				for (int k = 1; k < n_coeff; k++) NvO =_mm_adds_epu8(NvO, vO);
+				
+				// V_t0 < n * O_t1
+				vec_cmplt(vV_1, NvO, C1, CMP);
+				// V_t0 == n * O_t1
+				C2  = _mm_cmpeq_epi8(NvO, vV_1);
+				// V_t0 > n * O_t1 <=> !(V_t0 == n * O_t1) && !(V_t0 < n * O_t1) && _mm_set_epi8(0xFF, ..., 0xFF)
+				C3 = _mm_andnot_si128(C1, _mm_andnot_si128(C2, vuint8_max));
+				
+				// If V_t0 > n * O_t1 then vV := vV_1sub
+				TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_and_si128(C3, vV_1sub));
+				TMP = _mm_or_si128(TMP, _mm_and_si128(C2, vV_1));
+				vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
+				_mm_store_si128((vuint8*) &V[i][v1 - 1], vV);
 
-			vV_1 = _mm_load_si128((vuint8*) &V_1[i][v1]); 
-			vO 	 = _mm_load_si128((vuint8*) &O[i][v1]);   
+				vV_1 = _mm_load_si128((vuint8*) &V_1[i][v1]); 
+				vO 	 = _mm_load_si128((vuint8*) &O[i][v1]);   
 
-			vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
-			vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
-			
-			NvO = vO;
-			for (int k = 1; k < n_coeff; k++) NvO =_mm_adds_epu8(NvO, vO);
-			
-			// V_t0 < n * O_t1
-			vec_cmplt(vV_1, NvO, C1, CMP);
-			// V_t0 == n * O_t1
-			C2  = _mm_cmpeq_epi8(NvO, vV_1);
-			// V_t0 > n * O_t1 <=> !(V_t0 == n * O_t1) && !(V_t0 < n * O_t1) && _mm_set_epi8(0xFF, ..., 0xFF)
-			C3 = _mm_andnot_si128(C1, _mm_andnot_si128(C2, vuint8_max));
-			
-			// If V_t0 > n * O_t1 then vV := vV_1sub
-			TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_and_si128(C3, vV_1sub));
-			TMP = _mm_or_si128(TMP, _mm_and_si128(C2, vV_1));
-			vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
+				vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
+				vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
+				
+				NvO = vO;
+				for (int k = 1; k < n_coeff; k++) NvO =_mm_adds_epu8(NvO, vO);
+				
+				// V_t0 < n * O_t1
+				vec_cmplt(vV_1, NvO, C1, CMP);
+				// V_t0 == n * O_t1
+				C2  = _mm_cmpeq_epi8(NvO, vV_1);
+				// V_t0 > n * O_t1 <=> !(V_t0 == n * O_t1) && !(V_t0 < n * O_t1) && _mm_set_epi8(0xFF, ..., 0xFF)
+				C3 = _mm_andnot_si128(C1, _mm_andnot_si128(C2, vuint8_max));
+				
+				// If V_t0 > n * O_t1 then vV := vV_1sub
+				TMP = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_and_si128(C3, vV_1sub));
+				TMP = _mm_or_si128(TMP, _mm_and_si128(C2, vV_1));
+				vV  = _mm_max_epu8(_mm_min_epu8(TMP, vVmax), vVmin);
 
-			_mm_store_si128((vuint8*) &V[i][v1], vV);
-		}
+				_mm_store_si128((vuint8*) &V[i][v1], vV);
+			}
 		case 1: 
 			for(long i = nrl; i <= nrh; i++) {
 
