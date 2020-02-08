@@ -887,7 +887,6 @@ void display_ui8matrix(uint8 **m,long nrl,long nrh,long ncl, long nch, char *for
 /* ------------------------------------------------------------------------------------------ */
 {
   long i,j;
-
   if(name != NULL) puts(name);
 
   for(i=nrl; i<=nrh; i++) {

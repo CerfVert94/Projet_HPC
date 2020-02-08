@@ -19,7 +19,7 @@
 
 
 /*---------------------------------------------------------------------------------------------*/
-void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long vmax, vuint8** Y) {
+void copy_vui8matrix_vui8matrix(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8** Y) {
 /*---------------------------------------------------------------------------------------------*/
 	long i;
 	int j;
@@ -27,7 +27,7 @@ void copy_vui8matrix_vui8matrix(vuint8** X, long nrl, long nrh, long vmin, long 
 	vuint8 vX;
 
 	for (i = nrl; i <= nrh; i++)
-		for (j = vmin; j <= vmax; j++ ) {
+		for (j = v0; j <= v1; j++ ) {
 			vX = _mm_load_si128(&X[i][j]);
 			_mm_store_si128((vuint8*)&Y[i][j], vX);
 		}
@@ -73,23 +73,27 @@ uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, l
 /*--------------------------------------------------------------------------------*/
 {
     int i, j, card;
+    int ncl_, nch_;
     vuint8 x;
 
     card = card_vuint8();
     *nrl = i0;        *nrh = i1;
-    *ncl = j0 * card; *nch = (j0 + (j1 - j0 + 1)) * card - 1;
-    // v2m1D(i0, i1, card, ncl, nch);
-    // printf("%d %d %d %d\n", *nrl,*nrh,*ncl,*nch);
-    uint8 **Y = filled_ui8matrix(i0, i1, *ncl, *nch, 0);
+    // *ncl = j0 * card; *nch = (j0 + (j1 - j0 + 1)) * card - 1;
+    // printf("%s : %ld %ld %ld %ld\n", __func__, i0, i1, j0, i1);
+    v2m1D(j0, j1, card, (int*)ncl, (int*)nch);
+    ncl_ = (int)*ncl;
+    nch_ = (int)*nch;
+    // printf("%s : %ld %ld %d %d\n", __func__, i0, i1, ncl_, nch_);
+    
+    uint8 **Y = filled_ui8matrix(i0, i1, ncl_, nch_, 0);
 
     
     for(i=i0; i<=i1; i++) {
         for(j=j0; j<=j1; j++) {
-            vuint8 T[1];
-            uint8 *U;
+            vuint8 T;
             x = _mm_load_si128(&vX[i][j]);
-            _mm_store_si128(T, x);                  
-            memmove(&Y[i][j * card], (uint8*)T, sizeof(uint8) * card);
+            _mm_store_si128((vuint*)&T, x);                  
+            memcpy(&Y[i][j * card], (uint8*)&T, sizeof(uint8) * card);
 
         }
     }
