@@ -71,29 +71,30 @@
                                   scalar_or5((input)[ 1], col) |\
                                   scalar_or5((input)[ 2], col)
 
-
+#define HANDLE_EDGE_OF_ROW(x) 	x[ncl - 1] = x[ncl];\
+							  	x[nch + 1] = x[nch];
+#define HANDLE_EDGE(x, row)		x[row][ncl - 1] = x[row][ncl];\
+							  	x[row][nch + 1] = x[row][nch];
+#define ZERO_EDGE_OF_ROW(x) 	x[ncl - 1] = 0;\
+							  	x[nch + 1] = 0;
+#define ZERO_EDGE(x, row)		x[row][ncl - 1] = 0;\
+							  	x[row][nch + 1] = 0;
 
 void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
 {
-	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4, *out_row, *in_row;
+	uint8  *in_row, *out_row;
 	uint8 **in, **mid, **out;
 	long row, col, nrow, r;
 	
 	in = X; mid = Z; out = Y;
-	for (long row = nrl; row < nrh + 1; row++){
-		in[row][ncl - 1] = in[row][ncl]; out[row][ncl - 1] = 0;
-		in[row][nch + 1] = in[row][nch]; out[row][nch + 1] = 0;
-	}
-	
+	for (long row = nrl; row < nrh + 1; row++){HANDLE_EDGE_OF_ROW(in[row]);	ZERO_EDGE_OF_ROW(out[row]);}
 	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
+
 	in = Y; mid = Z; out = X;
 	ui8matrix_dilation5_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
 
-	for (long row = nrl; row < nrh + 1; row++){
-		out[row][ncl - 1] = out[row][ncl];
-		out[row][nch + 1] = out[row][nch];
-	}
 	in = X; mid = Y; out = Z;
+	for (long row = nrl; row < nrh + 1; row++) {HANDLE_EDGE_OF_ROW(in[row]);}
 	ui8matrix_erosion_divide_row_and_conquer(X, nrl, nrh, ncl, nch, Y, Z);
 }
 
@@ -102,7 +103,7 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 	uint8 *temp_row, *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4, *out_row, *in_row;
 	uint8 **in, **mid, **out;
 	long row, col, nrow, r;
-	long d5_nrl, prologue_nrh;
+	long d5_row, e3_row, nrl_prime, nrh_prime;
 	const long PRE_D5_NROW = 5;
 	const long PRE_E3_NROW = 3;
 	
@@ -111,28 +112,61 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 		in[row][ncl - 1] = in[row][ncl]; out[row][ncl - 1] = 0;
 		in[row][nch + 1] = in[row][nch]; out[row][nch + 1] = 0;
 	}
-	ui8matrix_erosion_divide_row_and_conquer(in, nrl, (nrl - 2) + PRE_D5_NROW, ncl, nch, mid, out);
+
+
+
+	nrl_prime = (nrl - 2) + PRE_D5_NROW ;
+	nrh_prime = (nrl - 2) + PRE_D5_NROW + PRE_E3_NROW ;
+	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrl_prime, ncl, nch, mid, out);
 	
-	d5_nrl = nrl;
-	
-	for (row = (nrl - 2) + PRE_D5_NROW + 1; row < nrh + 1; row ++) {
+	d5_row = nrl;
+	e3_row = nrl;
+	for (row = nrl_prime + 1; row < nrh_prime + 1; row ++) {
 		in = X; mid = Z; out = Y;
 		ui8matrix_erosion_divide_row_and_conquer(in, row, row, ncl, nch, mid, out);
-		// display_ui8matrix(out, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "E3(Pipeline)");
 		in = Y; mid = Z; out = X;
-		ui8matrix_dilation5_divide_row_and_conquer(in, d5_nrl, d5_nrl, ncl, nch, mid, out);
-		out[d5_nrl][ncl - 1] = out[d5_nrl][ncl];
-		out[d5_nrl][nch + 1] = out[d5_nrl][nch];
-		d5_nrl++;
+		ui8matrix_dilation5_divide_row_and_conquer(in, d5_row, d5_row, ncl, nch, mid, out);
+		out_row = out[d5_row];
+		out_row[ncl - 1] = out_row[ncl];
+		out_row[nch + 1] = out_row[nch];
+		d5_row++;
 	}
-	ui8matrix_dilation5_divide_row_and_conquer(in, d5_nrl - 1, nrh, ncl, nch, mid, out);
-	for (row = d5_nrl - 1; row < nrh + 1; row ++) {
+	
+	for (row = nrh_prime + 1; row < nrh + 1; row ++) {
+		in = X; mid = Z; out = Y;
+		ui8matrix_erosion_divide_row_and_conquer(in, row, row, ncl, nch, mid, out);
+		in = Y; mid = Z; out = X;
+		ui8matrix_dilation5_divide_row_and_conquer(in, d5_row, d5_row, ncl, nch, mid, out);
+		out_row = out[d5_row];
+		out_row[ncl - 1] = out_row[ncl];
+		out_row[nch + 1] = out_row[nch];
+
+		in = X; mid = Y; out = Z;
+		memset_ui8matrix(&Z[e3_row], 0, 0, 0, ncl - 2, nch + 2);
+		ui8matrix_erosion_divide_row_and_conquer(in, e3_row, e3_row, ncl, nch, mid, out);
+		d5_row++;
+		e3_row++;
+	}
+	
+	// d5_row--;
+	e3_row--;
+	for (row = d5_row; row < nrh + 1; row ++) {
+		in = Y; mid = Z; out = X;
+		ui8matrix_dilation5_divide_row_and_conquer(in, row, nrh, ncl, nch, mid, out);
+		// display_ui8matrix(out, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "E3-D5-E3(Pipeline)");
 		out[row][ncl - 1] = out[row][ncl];
 		out[row][nch + 1] = out[row][nch];
+		in = X; mid = Y; out = Z;
+		// memset_ui8matrix(&Z[e3_row], 0, 0, 0, ncl - 2, nch + 2);
+		ui8matrix_erosion_divide_row_and_conquer(in, e3_row, e3_row, ncl, nch, mid, out);
+		e3_row++;
 	}
 	in = X; mid = Y; out = Z;
-	ui8matrix_erosion_divide_row_and_conquer(X, nrl, nrh, ncl, nch, Y, Z);
-	// display_ui8matrix(out, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "E3 - E5(Pipeline)");
+	for (row = e3_row; row < nrh + 1; row ++) {
+		// memset_ui8matrix(&Z[row], 0, 0, 0, ncl - 2, nch + 2);
+		ui8matrix_erosion_divide_row_and_conquer(in, row, row, ncl, nch, mid, out);
+	}
+	// display_ui8matrix(out, nrl-2, nrh+2, ncl-2, nch+2, "%4u", "E3-D5-E3(Pipeline)");
 
 	
 }
