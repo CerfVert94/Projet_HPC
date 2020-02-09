@@ -9,42 +9,7 @@
 #include "util.h"
 #include <img.h>
 #include <morpho.h>
-
-#define scalar_and3(input, col)                  (input[col - 1] & input[col + 0] & input[col + 1])
-#define scalar_and5(input, col) (input[col - 2] & input[col - 1] & input[col + 0] & input[col + 1] & input[col + 2])
-#define scalar_or3(input, col)                   (input[col - 1] | input[col + 0] | input[col + 1])
-#define scalar_or5(input, col)  (input[col - 2] | input[col - 1] | input[col + 0] | input[col + 1] | input[col + 2])
-
-#define scalar_and3x3(input, col) scalar_and3((input)[-1], col) &\
-                                  scalar_and3((input)[ 0], col) &\
-                                  scalar_and3((input)[ 1], col) 
-
-#define scalar_and5x5(input, col) scalar_and5((input)[-2], col) &\
-                                  scalar_and5((input)[-1], col) &\
-                                  scalar_and5((input)[ 0], col) &\
-                                  scalar_and5((input)[ 1], col) &\
-                                  scalar_and5((input)[ 2], col)
-
-#define scalar_or3x3(input, col)  scalar_or3((input)[-1], col) |\
-                                  scalar_or3((input)[ 0], col) |\
-                                  scalar_or3((input)[ 1], col)
-
-#define scalar_or5x5(input, col)  scalar_or5((input)[-2], col) |\
-                                  scalar_or5((input)[-1], col) |\
-                                  scalar_or5((input)[ 0], col) |\
-                                  scalar_or5((input)[ 1], col) |\
-                                  scalar_or5((input)[ 2], col)
-
-#include "nrdef.h"
-#include "nrutil.h"
 #include "mynrutil.h"
-#include <img.h>
-#include <stdlib.h>
-#include <stdio.h>
-//#include <malloc.h>
-#include <morpho.h>
-// #include <test_morpho.h>
-#include <util.h>
 
 #define scalar_and3(input, col)                  (input[col - 1] & input[col + 0] & input[col + 1])
 #define scalar_and5(input, col) (input[col - 2] & input[col - 1] & input[col + 0] & input[col + 1] & input[col + 2])
@@ -1739,6 +1704,8 @@ void ui8matrix_dilation5_divide_row_and_conquer (uint8** X, long nrl, long nrh, 
 		}
 	}
 }
+
+
 void ui8matrix_dilation_divide_row_and_conquer (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
@@ -1997,14 +1964,12 @@ void ui8matrix_dilation_divide_col_and_conquer (uint8** X, long nrl, long nrh, l
 			temp_row[col] = in_row0[col] | in_row1[col] | in_row2[col];
 	}
 	
-	for (row = nrl; row < nrh + 1; row ++)
-	{
+	for (row = nrl; row < nrh + 1; row ++) {
 		temp_row = temp_buffer[row];
 		out_row  = Y[row];
 		for(col = ncl; col < nch + 1; col++) 
 			out_row[col] = scalar_or3(temp_row, col);
 	}
-	// free_ui8matrix(temp, nrl, nrh, ncl + (-1), nch + 1);
 }
 void ui8matrix_dilation_divide_col_and_conquer_ExLU_O3 (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
@@ -2463,19 +2428,12 @@ void ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR (uint8** X, long nrl, long nr
 	const long order = 3;
 	long row = nrl, col = ncl, x, y, r = 0;
 	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, ncl + (-1), nch + 1);
-	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5, y0, y1, y2;
+	uint8 *row0, *row1, *row2, *row3, x0, x1, x2, x3, x4, x5;
 	uint8 *temp_row0, *temp_row1, *temp_row2, *temp_row3, *temp_row4;
 	uint8 *out_row0, *out_row1, *out_row2, *out_row3;
 	
 	r = (nch + 1) % order;
 	// Prologue	
-	row0 = X[row - 1];
-	row1 = X[row + 0];
-	row2 = X[row + 1];
-	
-	// temp_row1 = temp_buffer[row - 1];
-	// temp_row2 = temp_buffer[row + 0];
-	// temp_row3 = temp_buffer[row + 1];
 	for (row = nrl; row < nrh + 1; row++) {
 		row0 = X[row - 1];
 		row1 = X[row + 0];
