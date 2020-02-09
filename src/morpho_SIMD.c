@@ -152,8 +152,8 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 		row2 = X[row + 1];
 		temp_row1 = vTempBuffer[row + 0];
 
-		_mm_store_si128(&temp_row1[v0 - 1], vector_and3(row0[v0 - 1],  row1[v0 - 1], row2[v0 - 1]));
-		_mm_store_si128(&temp_row1[v0 + 0], vector_and3(row0[v0 - 0],  row1[v0 - 0], row2[v0 - 0]));
+		temp_row1[v0 - 1] = vector_and3(row0[v0 - 1],  row1[v0 - 1], row2[v0 - 1]);
+		temp_row1[v0 + 0] = vector_and3(row0[v0 - 0],  row1[v0 - 0], row2[v0 - 0]);
 	}
 
 	for (row = nrl; row < nrh + 1; row ++){
@@ -164,19 +164,19 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 
 		out_row1 = Y[row]; 
 		
-		_mm_store_si128(&x0, temp_row1[v0 - 1]);		// LOAD => A
-		_mm_store_si128(&x1, temp_row1[v0 - 0]);		// LOAD => B
+		x0 = temp_row1[v0 - 1];		// LOAD => A
+		x1 = temp_row1[v0 - 0];		// LOAD => B
 		for (col = v0; col < v1 + 1 - r; col += order) {
-			_mm_store_si128(&x2, vector_and3(row0[col + 1], row1[col + 1], row2[col + 1]));
-			_mm_store_si128(&x3, vector_and3(row0[col + 2], row1[col + 2], row2[col + 2]));
-			_mm_store_si128(&x4, vector_and3(row0[col + 3], row1[col + 3], row2[col + 3]));
+			x2 = vector_and3(row0[col + 1], row1[col + 1], row2[col + 1]);
+			x3 = vector_and3(row0[col + 2], row1[col + 2], row2[col + 2]);
+			x4 = vector_and3(row0[col + 3], row1[col + 3], row2[col + 3]);
 			
-			_mm_store_si128(&out_row1[col + 0], vector_and3_row1shift(x0, x1, x2)); // A | B | C
-			_mm_store_si128(&out_row1[col + 1], vector_and3_row1shift(x1, x2, x3)); // B | C | D
-			_mm_store_si128(&out_row1[col + 2], vector_and3_row1shift(x2, x3, x4)); // C | D | E
+			out_row1[col + 0] = vector_and3_row1shift(x0, x1, x2); // A | B | C
+			out_row1[col + 1] = vector_and3_row1shift(x1, x2, x3); // B | C | D
+			out_row1[col + 2] = vector_and3_row1shift(x2, x3, x4); // C | D | E
 
-			_mm_store_si128(&x0, x3);
-			_mm_store_si128(&x1, x4);
+			x0 = x3;
+			x1 = x4;
 		}
 	}
 	
@@ -188,12 +188,12 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 				row2 = X[row + 1];
 				out_row1 = Y[row]; 
 
-				_mm_store_si128(&x0, vector_and3(row0[v1 - 2], row1[v1 - 2], row2[v1 - 2]));
-				_mm_store_si128(&x1, vector_and3(row0[v1 - 1], row1[v1 - 1], row2[v1 - 1]));
-				_mm_store_si128(&x2, vector_and3(row0[v1 + 0], row1[v1 + 0], row2[v1 + 0]));
-				_mm_store_si128(&x3, vector_and3(row0[v1 + 1], row1[v1 + 1], row2[v1 + 2]));
-				_mm_store_si128(&out_row1[v1 - 1], vector_and3_row1shift(x0, x1, x2));
-				_mm_store_si128(&out_row1[v1 + 0], vector_and3_row1shift(x1, x2, x3));
+				x0 = vector_and3(row0[v1 - 2], row1[v1 - 2], row2[v1 - 2]);
+				x1 = vector_and3(row0[v1 - 1], row1[v1 - 1], row2[v1 - 1]);
+				x2 = vector_and3(row0[v1 + 0], row1[v1 + 0], row2[v1 + 0]);
+				x3 = vector_and3(row0[v1 + 1], row1[v1 + 1], row2[v1 + 2]);
+				out_row1[v1 - 1] = vector_and3_row1shift(x0, x1, x2);
+				out_row1[v1 + 0] = vector_and3_row1shift(x1, x2, x3);
 				row0 = row1;
 				row1 = row2;
 			}
@@ -204,10 +204,10 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 			for (row = nrl; row < nrh + 1; row++) {
 				row2 = X[row + 1];
 
-				_mm_store_si128(&x0, vector_and3(row0[v1 - 1], row1[v1 - 1], row2[v1 - 1]));
-				_mm_store_si128(&x1, vector_and3(row0[v1 - 0], row1[v1 + 0], row2[v1 - 0]));
-				_mm_store_si128(&x2, vector_and3(row0[v1 + 1], row1[v1 + 1], row2[v1 + 1]));
-				_mm_store_si128(&Y[row][v1], vector_and3_row1shift(x0, x1, x2));
+				x0 = vector_and3(row0[v1 - 1], row1[v1 - 1], row2[v1 - 1]);
+				x1 = vector_and3(row0[v1 - 0], row1[v1 + 0], row2[v1 - 0]);
+				x2 = vector_and3(row0[v1 + 1], row1[v1 + 1], row2[v1 + 1]);
+				Y[row][v1] = vector_and3_row1shift(x0, x1, x2);
 				row0 = row1;
 				row1 = row2;
 			}
@@ -217,6 +217,7 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 	}
 
 }
+
 /*------------------------------------------------------------------------------------------*/
 void ui8matrix_erosion_SIMD_divide_col_and_conquer(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
@@ -357,57 +358,366 @@ void ui8matrix_erosion_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1
 	}
 }
 
-/*---------------------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_SIMD_InLU_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
-/*---------------------------------------------------------------------------------------------------------*/
+void ui8matrix_erosion_SIMD_InLU_O3_AddrRR (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	const long order = 3;
+	long row = nrl, col = v0, r;
+	vuint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, y0, y1, y2, y3, y4;
+	vuint8 *row0, *row1, *row2, *row3, *row4;
+	vuint8 *out_row0;
+
+	r = (v1 + 1) % order;
+	row0 = X[nrl - 1];
+	row1 = X[nrl + 0];
+	for (row = nrl; row < nrh + 1; row++) {
+		row2 = X[row + 1];
+
+		out_row0 = Y[row + 0];
+		for (col = v0; col < v1 + 1 - r; col += order) {
+			x0 = _mm_load_si128(&row0[col - 1]); x5  = _mm_load_si128(&row1[col - 1]); x10 = _mm_load_si128(&row2[col - 1]); 
+			x1 = _mm_load_si128(&row0[col + 0]); x6  = _mm_load_si128(&row1[col + 0]); x11 = _mm_load_si128(&row2[col + 0]); 
+			x2 = _mm_load_si128(&row0[col + 1]); x7  = _mm_load_si128(&row1[col + 1]); x12 = _mm_load_si128(&row2[col + 1]); 
+			x3 = _mm_load_si128(&row0[col + 2]); x8  = _mm_load_si128(&row1[col + 2]); x13 = _mm_load_si128(&row2[col + 2]);
+			x4 = _mm_load_si128(&row0[col + 3]); x9  = _mm_load_si128(&row1[col + 3]); x14 = _mm_load_si128(&row2[col + 3]);
+			y0 = vector_and3(x0, x5, x10);
+			y1 = vector_and3(x1, x6, x11);
+			y2 = vector_and3(x2, x7, x12);
+			y3 = vector_and3(x3, x8, x13);
+			y4 = vector_and3(x4, x9, x14);
+
+			out_row0[col + 0] = vector_and3_row1shift(y0, y1, y2);
+			out_row0[col + 1] = vector_and3_row1shift(y1, y2, y3);
+			out_row0[col + 2] = vector_and3_row1shift(y2, y3, y4);
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+	switch(r) {
+		case 2:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+		
+			x0 = _mm_load_si128(&row0[v1 - 2]); x5  = _mm_load_si128(&row1[v1 - 2]); x10 = _mm_load_si128(&row2[v1 - 2]); 
+			x1 = _mm_load_si128(&row0[v1 - 1]); x6  = _mm_load_si128(&row1[v1 - 1]); x11 = _mm_load_si128(&row2[v1 - 1]); 
+			x2 = _mm_load_si128(&row0[v1 + 0]); x7  = _mm_load_si128(&row1[v1 + 0]); x12 = _mm_load_si128(&row2[v1 + 0]); 
+			x3 = _mm_load_si128(&row0[v1 + 1]); x8  = _mm_load_si128(&row1[v1 + 1]); x13 = _mm_load_si128(&row2[v1 + 1]);
+			y0 = vector_and3(x0, x5, x10);
+			y1 = vector_and3(x1, x6, x11);
+			y2 = vector_and3(x2, x7, x12);
+			y3 = vector_and3(x3, x8, x13);
+			out_row0[v1 - 1] = vector_and3_row1shift(y0, y1, y2);
+			out_row0[v1 + 0] = vector_and3_row1shift(y1, y2, y3);
+			
+		}
+		break;
+	case 1:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+			x0 = _mm_load_si128(&row0[v1 - 1]); x5  = _mm_load_si128(&row1[v1 - 1]); x10 = _mm_load_si128(&row2[v1 - 1]); 
+			x1 = _mm_load_si128(&row0[v1 + 0]); x6  = _mm_load_si128(&row1[v1 + 0]); x11 = _mm_load_si128(&row2[v1 + 0]); 
+			x2 = _mm_load_si128(&row0[v1 + 1]); x7  = _mm_load_si128(&row1[v1 + 1]); x12 = _mm_load_si128(&row2[v1 + 1]); 
+			y0 = vector_and3(x0, x5, x10);
+			y1 = vector_and3(x1, x6, x11);
+			y2 = vector_and3(x2, x7, x12);
+			out_row0[v1 + 0] = vector_and3_row1shift(y0, y1, y2);;
+			
+		}
+		break;
+	default:
+		break;
+	}
+}
+void ui8matrix_dilation_SIMD_InLU_O3_AddrRR (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	const long order = 3;
+	long row = nrl, col = v0, r;
+	vuint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, y0, y1, y2, y3, y4;
+	vuint8 *row0, *row1, *row2, *row3, *row4;
+	vuint8 *out_row0;
+
+	r = (v1 + 1) % order;
+	row0 = X[nrl - 1];
+	row1 = X[nrl + 0];
+	for (row = nrl; row < nrh + 1; row++) {
+		row2 = X[row + 1];
+
+		out_row0 = Y[row + 0];
+		for (col = v0; col < v1 + 1 - r; col += order) {
+			x0 = _mm_load_si128(&row0[col - 1]); x5  = _mm_load_si128(&row1[col - 1]); x10 = _mm_load_si128(&row2[col - 1]); 
+			x1 = _mm_load_si128(&row0[col + 0]); x6  = _mm_load_si128(&row1[col + 0]); x11 = _mm_load_si128(&row2[col + 0]); 
+			x2 = _mm_load_si128(&row0[col + 1]); x7  = _mm_load_si128(&row1[col + 1]); x12 = _mm_load_si128(&row2[col + 1]); 
+			x3 = _mm_load_si128(&row0[col + 2]); x8  = _mm_load_si128(&row1[col + 2]); x13 = _mm_load_si128(&row2[col + 2]);
+			x4 = _mm_load_si128(&row0[col + 3]); x9  = _mm_load_si128(&row1[col + 3]); x14 = _mm_load_si128(&row2[col + 3]);
+			y0 = vector_or3(x0, x5, x10);
+			y1 = vector_or3(x1, x6, x11);
+			y2 = vector_or3(x2, x7, x12);
+			y3 = vector_or3(x3, x8, x13);
+			y4 = vector_or3(x4, x9, x14);
+
+			out_row0[col + 0] = vector_or3_row1shift(y0, y1, y2);
+			out_row0[col + 1] = vector_or3_row1shift(y1, y2, y3);
+			out_row0[col + 2] = vector_or3_row1shift(y2, y3, y4);
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+	switch(r) {
+		case 2:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+		
+			x0 = _mm_load_si128(&row0[v1 - 2]); x5  = _mm_load_si128(&row1[v1 - 2]); x10 = _mm_load_si128(&row2[v1 - 2]); 
+			x1 = _mm_load_si128(&row0[v1 - 1]); x6  = _mm_load_si128(&row1[v1 - 1]); x11 = _mm_load_si128(&row2[v1 - 1]); 
+			x2 = _mm_load_si128(&row0[v1 + 0]); x7  = _mm_load_si128(&row1[v1 + 0]); x12 = _mm_load_si128(&row2[v1 + 0]); 
+			x3 = _mm_load_si128(&row0[v1 + 1]); x8  = _mm_load_si128(&row1[v1 + 1]); x13 = _mm_load_si128(&row2[v1 + 1]);
+			y0 = vector_or3(x0, x5, x10);
+			y1 = vector_or3(x1, x6, x11);
+			y2 = vector_or3(x2, x7, x12);
+			y3 = vector_or3(x3, x8, x13);
+			out_row0[v1 - 1] = vector_or3_row1shift(y0, y1, y2);
+			out_row0[v1 + 0] = vector_or3_row1shift(y1, y2, y3);
+			
+		}
+		break;
+	case 1:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+			x0 = _mm_load_si128(&row0[v1 - 1]); x5  = _mm_load_si128(&row1[v1 - 1]); x10 = _mm_load_si128(&row2[v1 - 1]); 
+			x1 = _mm_load_si128(&row0[v1 + 0]); x6  = _mm_load_si128(&row1[v1 + 0]); x11 = _mm_load_si128(&row2[v1 + 0]); 
+			x2 = _mm_load_si128(&row0[v1 + 1]); x7  = _mm_load_si128(&row1[v1 + 1]); x12 = _mm_load_si128(&row2[v1 + 1]); 
+			y0 = vector_or3(x0, x5, x10);
+			y1 = vector_or3(x1, x6, x11);
+			y2 = vector_or3(x2, x7, x12);
+			out_row0[v1 + 0] = vector_or3_row1shift(y0, y1, y2);;
+			
+		}
+		break;
+	default:
+		break;
+	}
+}
+void ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	const long order = 3;
+	long row = nrl, col = v0, r;
+	vuint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24;
+	vuint8 y0, y1, y2, y3, y4;
+	vuint8 *row0, *row1, *row2, *row3, *row4;
+	vuint8 *out_row0;
+
+	r = (v1 + 1) % order;
+	row0 = X[nrl - 2];
+	row1 = X[nrl - 1];
+	for (row = nrl; row < nrh + 1; row++) {
+		col = v0;
+		row2 = X[row + 0];
+		row3 = X[row + 1];
+		row4 = X[row + 2];
+		out_row0 = Y[row + 0];
+		
+		x0 = _mm_load_si128(&row0[col - 1]); x5  = _mm_load_si128(&row1[col - 1]); x10 = _mm_load_si128(&row2[col - 1]); x15 = _mm_load_si128(&row3[col - 1]); x20 = _mm_load_si128(&row4[col - 1]);
+		x1 = _mm_load_si128(&row0[col + 0]); x6  = _mm_load_si128(&row1[col + 0]); x11 = _mm_load_si128(&row2[col + 0]); x16 = _mm_load_si128(&row3[col + 0]); x21 = _mm_load_si128(&row4[col + 0]);
+		y0 = vector_or5(x0, x5, x10, x15, x20);
+		y1 = vector_or5(x1, x6, x11, x16, x21);
+		for (col = v0; col < v1 + 1 - r; col += order) { 
+			x2 = _mm_load_si128(&row0[col + 1]); x7  = _mm_load_si128(&row1[col + 1]); x12 = _mm_load_si128(&row2[col + 1]); x17 = _mm_load_si128(&row3[col + 1]); x22 = _mm_load_si128(&row4[col + 1]); 
+			x3 = _mm_load_si128(&row0[col + 2]); x8  = _mm_load_si128(&row1[col + 2]); x13 = _mm_load_si128(&row2[col + 2]); x18 = _mm_load_si128(&row3[col + 2]); x23 = _mm_load_si128(&row4[col + 2]);
+			x4 = _mm_load_si128(&row0[col + 3]); x9  = _mm_load_si128(&row1[col + 3]); x14 = _mm_load_si128(&row2[col + 3]); x19 = _mm_load_si128(&row3[col + 3]); x24 = _mm_load_si128(&row4[col + 3]);
+			
+			y2 = vector_or5(x2, x7, x12, x17, x22);
+			y3 = vector_or5(x3, x8, x13, x18, x23);
+			y4 = vector_or5(x4, x9, x14, x19, x24);
+
+			out_row0[col + 0] = _mm_or_si128(vector_or3_row1shift(y0, y1, y2), vector_or3_row2shift(y0, y1, y2));
+			out_row0[col + 1] = _mm_or_si128(vector_or3_row1shift(y1, y2, y3), vector_or3_row2shift(y1, y2, y3));
+			out_row0[col + 2] = _mm_or_si128(vector_or3_row1shift(y2, y3, y4), vector_or3_row2shift(y2, y3, y4));
+			y0 = y3; y1 = y4;
+
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+	switch(r) {
+		case 2:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 2];
+			row1 = X[row - 1];
+			row2 = X[row + 0];
+			row3 = X[row + 1];
+			row4 = X[row + 2];
+
+			out_row0 = Y[row + 0];
+		
+			x0 = _mm_load_si128(&row0[v1 - 2]); x5  = _mm_load_si128(&row1[v1 - 2]); x10 = _mm_load_si128(&row2[v1 - 2]); x15 = _mm_load_si128(&row3[v1 - 2]); x20 = _mm_load_si128(&row4[v1 - 2]);
+			x1 = _mm_load_si128(&row0[v1 - 1]); x6  = _mm_load_si128(&row1[v1 - 1]); x11 = _mm_load_si128(&row2[v1 - 1]); x16 = _mm_load_si128(&row3[v1 - 1]); x21 = _mm_load_si128(&row4[v1 - 1]);
+			x2 = _mm_load_si128(&row0[v1 + 0]); x7  = _mm_load_si128(&row1[v1 + 0]); x12 = _mm_load_si128(&row2[v1 + 0]); x17 = _mm_load_si128(&row3[v1 + 0]); x22 = _mm_load_si128(&row4[v1 + 0]);
+			x3 = _mm_load_si128(&row0[v1 + 1]); x8  = _mm_load_si128(&row1[v1 + 1]); x13 = _mm_load_si128(&row2[v1 + 1]); x18 = _mm_load_si128(&row3[v1 + 1]); x23 = _mm_load_si128(&row4[v1 + 1]);
+			y0 = vector_or5(x0, x5, x10, x15, x20);
+			y1 = vector_or5(x1, x6, x11, x16, x21);
+			y2 = vector_or5(x2, x7, x12, x17, x22);
+			y3 = vector_or5(x3, x8, x13, x18, x23);
+			out_row0[v1 - 1] = _mm_or_si128(vector_or3_row1shift(y0, y1, y2), vector_or3_row2shift(y0, y1, y2));
+			out_row0[v1 + 0] = _mm_or_si128(vector_or3_row1shift(y1, y2, y3), vector_or3_row2shift(y1, y2, y3));
+			
+		}
+		break;
+	case 1:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 2];
+			row1 = X[row - 1];
+			row2 = X[row + 0];
+			row3 = X[row + 1];
+			row4 = X[row + 2];
+
+			out_row0 = Y[row + 0];
+			x0 = _mm_load_si128(&row0[v1 - 1]); x5  = _mm_load_si128(&row1[v1 - 1]); x10 = _mm_load_si128(&row2[v1 - 1]); x15 = _mm_load_si128(&row3[v1 - 1]); x20 = _mm_load_si128(&row4[v1 - 1]);
+			x1 = _mm_load_si128(&row0[v1 + 0]); x6  = _mm_load_si128(&row1[v1 + 0]); x11 = _mm_load_si128(&row2[v1 + 0]); x16 = _mm_load_si128(&row3[v1 + 0]); x21 = _mm_load_si128(&row4[v1 + 0]);
+			x2 = _mm_load_si128(&row0[v1 + 1]); x7  = _mm_load_si128(&row1[v1 + 1]); x12 = _mm_load_si128(&row2[v1 + 1]); x17 = _mm_load_si128(&row3[v1 + 1]); x22 = _mm_load_si128(&row4[v1 + 1]);
+			y0 = vector_or5(x0, x5, x10, x15, x20);
+			y1 = vector_or5(x1, x6, x11, x16, x21);
+			y2 = vector_or5(x2, x7, x12, x17, x22);
+			out_row0[v1 + 0] = _mm_or_si128(vector_or3_row1shift(y0, y1, y2), vector_or3_row2shift(y0, y1, y2));
+			
+		}
+		break;
+	default:
+		break;
+	}
+}
+void ui8matrix_dilation_SIMD_InLU_O3_ValAddrRR (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	const long order = 3;
+	long row = nrl, col = v0, r;
+	vuint8 x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, y0, y1, y2, y3, y4;
+	vuint8 *row0, *row1, *row2, *row3, *row4;
+	vuint8 *out_row0;
+
+	r = (v1 + 1) % order;
+	row0 = X[nrl - 1];
+	row1 = X[nrl + 0];
+	for (row = nrl; row < nrh + 1; row++) {
+		col = v0;
+		row2 = X[row + 1];
+		out_row0 = Y[row + 0];
+
+		x0 = _mm_load_si128(&row0[col - 1]); x5  = _mm_load_si128(&row1[col - 1]); x10 = _mm_load_si128(&row2[col - 1]);
+		x1 = _mm_load_si128(&row0[col + 0]); x6  = _mm_load_si128(&row1[col + 0]); x11 = _mm_load_si128(&row2[col + 0]); 
+		y0 = vector_or3(x0, x5, x10);
+		y1 = vector_or3(x1, x6, x11);
+		for (col = v0; col < v1 + 1 - r; col += order) { 
+			x2 = _mm_load_si128(&row0[col + 1]); x7  = _mm_load_si128(&row1[col + 1]); x12 = _mm_load_si128(&row2[col + 1]); 
+			x3 = _mm_load_si128(&row0[col + 2]); x8  = _mm_load_si128(&row1[col + 2]); x13 = _mm_load_si128(&row2[col + 2]);
+			x4 = _mm_load_si128(&row0[col + 3]); x9  = _mm_load_si128(&row1[col + 3]); x14 = _mm_load_si128(&row2[col + 3]);
+			
+			y2 = vector_or3(x2, x7, x12);
+			y3 = vector_or3(x3, x8, x13);
+			y4 = vector_or3(x4, x9, x14);
+
+			out_row0[col + 0] = vector_or3_row1shift(y0, y1, y2);
+			out_row0[col + 1] = vector_or3_row1shift(y1, y2, y3);
+			out_row0[col + 2] = vector_or3_row1shift(y2, y3, y4);
+			y0 = y3; y1 = y4;
+
+		}
+		row0 = row1;
+		row1 = row2;
+	}
+	switch(r) {
+		case 2:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+		
+			x0 = _mm_load_si128(&row0[v1 - 2]); x5  = _mm_load_si128(&row1[v1 - 2]); x10 = _mm_load_si128(&row2[v1 - 2]); 
+			x1 = _mm_load_si128(&row0[v1 - 1]); x6  = _mm_load_si128(&row1[v1 - 1]); x11 = _mm_load_si128(&row2[v1 - 1]); 
+			x2 = _mm_load_si128(&row0[v1 + 0]); x7  = _mm_load_si128(&row1[v1 + 0]); x12 = _mm_load_si128(&row2[v1 + 0]); 
+			x3 = _mm_load_si128(&row0[v1 + 1]); x8  = _mm_load_si128(&row1[v1 + 1]); x13 = _mm_load_si128(&row2[v1 + 1]);
+			y0 = vector_or3(x0, x5, x10);
+			y1 = vector_or3(x1, x6, x11);
+			y2 = vector_or3(x2, x7, x12);
+			y3 = vector_or3(x3, x8, x13);
+			out_row0[v1 - 1] = vector_or3_row1shift(y0, y1, y2);
+			out_row0[v1 + 0] = vector_or3_row1shift(y1, y2, y3);
+			
+		}
+		break;
+	case 1:
+		for (row = nrl; row < nrh + 1; row++) {
+			row0 = X[row - 1];
+			row1 = X[row + 0];
+			row2 = X[row + 1];
+
+			out_row0 = Y[row + 0];
+			x0 = _mm_load_si128(&row0[v1 - 1]); x5  = _mm_load_si128(&row1[v1 - 1]); x10 = _mm_load_si128(&row2[v1 - 1]); 
+			x1 = _mm_load_si128(&row0[v1 + 0]); x6  = _mm_load_si128(&row1[v1 + 0]); x11 = _mm_load_si128(&row2[v1 + 0]); 
+			x2 = _mm_load_si128(&row0[v1 + 1]); x7  = _mm_load_si128(&row1[v1 + 1]); x12 = _mm_load_si128(&row2[v1 + 1]); 
+			y0 = vector_or3(x0, x5, x10);
+			y1 = vector_or3(x1, x6, x11);
+			y2 = vector_or3(x2, x7, x12);
+			out_row0[v1 + 0] = vector_or3_row1shift(y0, y1, y2);;
+			
+		}
+		break;
+	default:
+		break;
+	}
+}
+void ui8matrix_erosion_SIMD_col_pipeline(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	long row = nrl, col = v0, x, y;
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, v0 + (-1), v1 + 1);
+	vuint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
+	vuint8 x0, x1, x2;
+	// Prologue	
+	for (row = nrl; row < nrh + 1; row++) {
+		in_row0 = X[row - 1];
+		in_row1 = X[row + 0];
+		in_row2 = X[row + 1];
+		temp_row = vTempBuffer[row];
+    	temp_row[v0 - 1] = vector_and3(in_row0[v0 - 1], in_row1[v0 - 1], in_row2[v0 - 1]);
+    	temp_row[v0 + 0] = vector_and3(in_row0[v0 + 0], in_row1[v0 + 0], in_row2[v0 + 0]);
+	}	
 	
-	long row, col, x, y, i;
-	long snrl = SE_NRL, snrh = SE_NRH, sncl = SE_NCL, snch = SE_NCH;
-	
-	vuint8 v0_0, v0_1, v0_2; //X[row-1][col-1], X[row-1][col  ], X[row-1][col+1]
-	vuint8 v1_0, v1_1, v1_2; //X[row  ][col-1], X[row  ][col  ], X[row  ][col+1]
-	vuint8 v2_0, v2_1, v2_2; //X[row+1][col-1], X[row+1][col  ], X[row+1][col+1]
 
-	vuint8 vY0, vY1, vY2;
-	vuint8 vTMP;
+	for (row = nrl; row < nrh + 1; row++){
+		temp_row = vTempBuffer[row];
+		
+		in_row0 = X[row - 1];
+		in_row1 = X[row + 0];
+		in_row2 = X[row + 1];
 
-	// Erosion
-	for (row = nrl; row <= nrh; row++) {
-
-		col = 0;
-		v0_0 = _mm_load_si128((vuint8*) &X[row-1][col-1]);
-		v1_0 = _mm_load_si128((vuint8*) &X[row  ][col-1]);
-		v2_0 = _mm_load_si128((vuint8*) &X[row+1][col-1]);
-
-		v0_1 = _mm_load_si128((vuint8*) &X[row-1][col  ]);
-		v1_1 = _mm_load_si128((vuint8*) &X[row  ][col  ]);
-		v2_1 = _mm_load_si128((vuint8*) &X[row+1][col  ]);
-
-		//Column -1 "and" operator
-		vY0 = vector_and3(v0_0, v1_0, v2_0);
-		//Column  0 "and" operator 
-		vY1  = vector_and3(v0_1, v1_1, v2_1);
-
-		for (col = v0; col <= v1; col++) {	
-
-			v0_2 = _mm_load_si128((vuint8*) &X[row-1][col+1]);
-			v1_2 = _mm_load_si128((vuint8*) &X[row  ][col+1]);
-			v2_2 = _mm_load_si128((vuint8*) &X[row+1][col+1]);
-
-			//Column  1 "and" operator
-			vY2  = vector_and3(v0_2, v1_2, v2_2);
-
-			//Row operator
-			vTMP = vector_and3_row1shift(vY0, vY1, vY2);
-
-			_mm_store_si128((vuint8*) &Y[row][col], vTMP);
-
-			vY0 = vY1;
-			vY1 = vY2;
-
+		out_row0 = Y[row]; 
+		
+		for (col = v0; col < v1 + 1; col ++) {
+			x0 = temp_row[col - 1];		// LOAD => A
+			x1 = temp_row[col - 0];		// LOAD => B
+			x2 = vector_and3(in_row0[col + 1], in_row1[col + 1], in_row2[col + 1]);
+			
+			out_row0[col + 0] = vector_and3_row1shift( x0, x1, x2); // A | B | C
+			temp_row[col + 1] = x2;		  
 		}
 	}
 }
+
 
 /*-------------------------------------------------------------------------------------------------*/
 void ui8matrix_dilation_SIMD_RR_row (vuint8** X, int nrl, int nrh, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
