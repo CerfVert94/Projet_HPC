@@ -82,12 +82,13 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	
 	vimage = ui8matrix_to_vui8matrix(image, nrl, nrh, ncl, nch, &i0, &i1, &j0, &j1);
 	// Test Input
-	X		   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	tempBuffer =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	Z		   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	FO_Z	   =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
-    vX 		   = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
-    vY 		   = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+	X		    =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	tempBuffer  =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	Z		    =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	FO_Z	    =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
+    vX 		    = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+    vTempBuffer = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+    vY 		    = vui8matrix( i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
     // Full zero intialization & copy image 
 	
 	int error = 0;
@@ -114,7 +115,7 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 			
 
 					zero_vui8matrix(vY            ,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
-					morpho_sets[k].vec_morpho_func(vX, (int)i0, (int)i, (int)j0, (int)v1 + 1, /*vTempBuffer,*/ vY);
+					morpho_sets[k].vec_morpho_func(vX, (int)i0, (int)i, (int)j0, (int)v1 + 1, vTempBuffer, vY);
 					
 					// printf("%ld %ld %ld %ld\n",  i0, i, j0, v1);
 					Y = vui8matrix_to_ui8matrix(vY, i0, i, j0, v1 + 1, &a0, &a1, &b0, &b1);
@@ -155,12 +156,13 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 			
 		}
 	}	
-	free_ui8matrix(         X, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	free_ui8matrix(tempBuffer, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	free_ui8matrix(         Z, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-	free_ui8matrix(      FO_Z, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-    free_vui8matrix(       vX,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
-    free_vui8matrix(       vY,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+	free_ui8matrix(           X, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	free_ui8matrix(  tempBuffer, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	free_ui8matrix(           Z, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+	free_ui8matrix(        FO_Z, nrl - 2, nrh + 2, ncl - 2, nch + 2);
+    free_vui8matrix(         vX,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+    free_vui8matrix(vTempBuffer,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+    free_vui8matrix(         vY,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
 	free_vui8matrix(vimage, i0, i1, j0, j1);
 }
 
@@ -436,7 +438,7 @@ bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
 	uint8 *z = (uint8*)&vZ[0][0];
 	int col_cnt = 0;
 	
-	mset->vec_morpho_func(vW, 0, 0, 0, 0 /*, vTempZ*/, vZ);
+	mset->vec_morpho_func(vW, 0, 0, 0, 0 , vTempZ, vZ);
 	// int max = (1 << 9); // 2^9 
     
     // for (int i = 0; i < max; i++){

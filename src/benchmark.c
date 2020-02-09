@@ -164,16 +164,16 @@ unsigned long long get_min_cpu_cycles_of_sd_step(struct sd_set *sdset, long pack
 
 
 
-unsigned long long get_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY)
+unsigned long long get_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
 	begin = __rdtsc();
-	ptr_mset->vec_morpho_func(vX, i0, i1, j0, j1, /*temp_vBuffer,*/ vY);
+	ptr_mset->vec_morpho_func(vX, i0, i1, j0, j1, vTempBuffer, vY);
 	end = __rdtsc();
 	return end - begin;
 }
 
-unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY)
+unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
 {
 	unsigned long long min_cycles, *cycles;
 	int i;
@@ -181,10 +181,9 @@ unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset,
 		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
 		exit(EXIT_FAILURE);
 	}
-
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
 	for (int i = 0; i < packet_size; i++) {
-		cycles[i] = get_cpu_cycles_of_vec_morpho(ptr_mset, vX, i0, i1, j0, j1, temp_vBuffer, vY);
+		cycles[i] = get_cpu_cycles_of_vec_morpho(ptr_mset, vX, i0, i1, j0, j1, vTempBuffer, vY);
 	}
 	min_cycles = get_min_cycles(cycles, packet_size);
 	free(cycles);
@@ -333,7 +332,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 		vX			 = ui8matrix_to_vui8matrix(X, -2, size + 2, -2, size + 2, &i0, &i1, &j0, &j1);
 		vY			 = ui8matrix_to_vui8matrix(Y, -2, size + 2, -2, size + 2, &k0, &k1, &l0, &l1);
 		vTempBuffer  = vui8matrix(i0, i1, j0, j1); 
-
+		
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
 			if (morphos[idx_set].instr_type == SCALAR) {
 				begin = __rdtsc();			
@@ -346,7 +345,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 				begin = __rdtsc();			
 				min_cycles_sum = 0;
 				for (idx_test = 0; idx_test < nb_tests; idx_test++)
-					min_cycles_sum += get_min_cpu_cycles_of_vec_morpho(&morphos[idx_set], packet_size, vX, k0, k1, l0, l1, vTempBuffer, vY);
+					min_cycles_sum += get_min_cpu_cycles_of_vec_morpho(&morphos[idx_set], packet_size, vX, 0, size, j0 + 1, j1, vTempBuffer, vY);
 				end = __rdtsc();	
 			}
 
