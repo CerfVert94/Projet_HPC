@@ -12,6 +12,7 @@
 
 #include "vnrdef.h"
 #include "vnrutil.h"
+#include "myvnrutil.h"
 
 #include "mutil.h"
 
