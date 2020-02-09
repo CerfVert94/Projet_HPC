@@ -66,6 +66,7 @@ uint8 ui8matrix_dilation5_1pt(uint8**X, long i, long j){
 		   X[i + 1][j - 2] | X[i + 1][j - 1] | X[i + 1][j + 0] | X[i + 1][j + 1] | X[i + 1][j + 1] | X[i + 1][j + 2] |
 		   X[i + 2][j - 2] | X[i + 2][j - 1] | X[i + 2][j + 0] | X[i + 2][j + 1] | X[i + 2][j + 1] | X[i + 2][j + 2];
 }
+
 void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morphos, struct morpho_set *morpho_sets,int nb_sets, bool logging);
 void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, const char *filename, struct morpho_set *naive_morphos, struct morpho_set *morpho_sets,int nb_sets, bool logging)
 {
@@ -81,6 +82,7 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	
 	
 	vimage = ui8matrix_to_vui8matrix(image, nrl, nrh, ncl, nch, &i0, &i1, &j0, &j1);
+	
 	// Test Input
 	X		    =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
 	tempBuffer  =  ui8matrix(nrl - 2, nrh + 2, ncl - 2, nch + 2);
@@ -115,19 +117,22 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 			
 
 					zero_vui8matrix(vY            ,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
-					morpho_sets[k].vec_morpho_func(vX, (int)i0, (int)i, (int)j0, (int)v1 + 1, vTempBuffer, vY);
+					morpho_sets[k].vec_morpho_func(vX, (int)i0, (int)i, ncl, nch, (int)j0, (int)v1 + 1, vTempBuffer, vY);
 					
 					// printf("%ld %ld %ld %ld\n",  i0, i, j0, v1);
 					Y = vui8matrix_to_ui8matrix(vY, i0, i, j0, v1 + 1, &a0, &a1, &b0, &b1);
 
 					
-					if (logging) 
+					
+					if (logging) {
+						printf("%ld %ld %ld %ld\n",  i0, i, j0, v1 + 1);
 						display_ui8matrix(X, i0 - 2,  i + 2, ncl - 2,   j + 2, "%4u", "Input");
+					}
 						
 
 					if (morpho_sets[k].op_type == NORMAL){
 						memset_ui8matrix(Z, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
-						// printf("%ld %ld %ld %ld\n",  i0, i, j0, v1 + 1);
+						
 						naive_morphos[0].morpho_func(X, nrl, i, ncl, nch, tempBuffer, Z);
 						if (logging){
 							display_ui8matrix(Z, i0, i, ncl, j, "%4u", naive_morphos[0].func_name);
@@ -211,12 +216,13 @@ void test_dilations(char *filename, struct morpho_set *dilation_sets, const int 
 }
 void test_sequences(char *filename, struct morpho_set *sequence_sets, const int nb_sets, bool logging)
 {
-    struct morpho_set naive_morphos = {.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive};
+    struct morpho_set naive_morphos[2] = {{.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive},
+										  {.func_name = "ui8matrix_sequence_naive", ui8matrix_sequence_naive}};
 	uint8 **image;
 	long nrl, nrh, ncl, nch;
     image = LoadPGM_ui8matrix(filename, &nrl, &nrh, &ncl, &nch);
-	test_intergration(    image, nrl, nrh, ncl, nch, filename, &naive_morphos, sequence_sets, nb_sets, logging);
-	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, &naive_morphos, sequence_sets, nb_sets, logging);
+	test_intergration(    image, nrl, nrh, ncl, nch, filename, naive_morphos, sequence_sets, nb_sets, logging);
+	test_vec_intergration(image, nrl, nrh, ncl, nch, filename, naive_morphos, sequence_sets, nb_sets, logging);
 }
 
 void print_progress(uint32 current, uint32 max)
@@ -438,7 +444,7 @@ bool vec_morpho_produces_one(struct morpho_set *mset, vuint8** vW)
 	uint8 *z = (uint8*)&vZ[0][0];
 	int col_cnt = 0;
 	
-	mset->vec_morpho_func(vW, 0, 0, 0, 0 , vTempZ, vZ);
+	mset->vec_morpho_func(vW, 0, 0, 0, 0 , 0, 0 , vTempZ, vZ);
 	// int max = (1 << 9); // 2^9 
     
     // for (int i = 0; i < max; i++){
@@ -501,8 +507,8 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 
 	assert((nrh - nrl + 1) > 20 && (nch - ncl + 1) > 20);
 	
-    for(temp_nrh = nrh - 30; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = nch - 30; temp_nch < nch + 1; temp_nch++){
+    for(temp_nrh = nrl + 10; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = ncl + 10; temp_nch < nch + 1; temp_nch++){
 			// Test Input
 			X 			= ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 			// Middle Buffer

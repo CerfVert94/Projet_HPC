@@ -164,16 +164,16 @@ unsigned long long get_min_cpu_cycles_of_sd_step(struct sd_set *sdset, long pack
 
 
 
-unsigned long long get_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
+unsigned long long get_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, vuint8 **vX, int i0, int i1, long ncl, long nch, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
 {
     unsigned long long begin = 0, end = 0, cycles = 0;
 	begin = __rdtsc();
-	ptr_mset->vec_morpho_func(vX, i0, i1, j0, j1, vTempBuffer, vY);
+	ptr_mset->vec_morpho_func(vX, i0, i1, ncl, nch, j0, j1, vTempBuffer, vY);
 	end = __rdtsc();
 	return end - begin;
 }
 
-unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
+unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, long ncl, long nch, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY)
 {
 	unsigned long long min_cycles, *cycles;
 	int i;
@@ -183,7 +183,7 @@ unsigned long long get_min_cpu_cycles_of_vec_morpho(struct morpho_set *ptr_mset,
 	}
 	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
 	for (int i = 0; i < packet_size; i++) {
-		cycles[i] = get_cpu_cycles_of_vec_morpho(ptr_mset, vX, i0, i1, j0, j1, vTempBuffer, vY);
+		cycles[i] = get_cpu_cycles_of_vec_morpho(ptr_mset, vX, i0, i1, ncl, nch, j0, j1, vTempBuffer, vY);
 	}
 	min_cycles = get_min_cycles(cycles, packet_size);
 	free(cycles);
@@ -345,7 +345,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 				begin = __rdtsc();			
 				min_cycles_sum = 0;
 				for (idx_test = 0; idx_test < nb_tests; idx_test++)
-					min_cycles_sum += get_min_cpu_cycles_of_vec_morpho(&morphos[idx_set], packet_size, vX, 0, size, j0 + 1, j1, vTempBuffer, vY);
+					min_cycles_sum += get_min_cpu_cycles_of_vec_morpho(&morphos[idx_set], packet_size, vX, 0, size, 0, size, j0 + 1, j1, vTempBuffer, vY);
 				end = __rdtsc();	
 			}
 

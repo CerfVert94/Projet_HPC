@@ -22,8 +22,8 @@ unsigned long long get_cpu_cycles_of_sd               (struct complete_sd_set *s
 unsigned long long get_min_cpu_cycles_of_sd           (struct complete_sd_set *sdset, long packet_size, p_image t0, p_image t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
 
 
-unsigned long long get_cpu_cycles_of_vec_morpho           (struct morpho_set *ptr_mset                  , vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
-unsigned long long get_min_cpu_cycles_of_vec_morpho       (struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+unsigned long long get_cpu_cycles_of_vec_morpho           (struct morpho_set *ptr_mset                  , vuint8 **vX, int i0, int i1, long ncl, long nch, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
+unsigned long long get_min_cpu_cycles_of_vec_morpho       (struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, long ncl, long nch, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
 
 unsigned long long get_cpu_cycles_of_vec_packed_morpho    (struct morpho_set *ptr_mset                  , vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);
 unsigned long long get_min_cpu_cycles_of_vec_packed_morpho(struct morpho_set *ptr_mset, long packet_size, vuint8 **vX, int i0, int i1, int j0, int j1, vuint8 **temp_vBuffer, vuint8 **vY);

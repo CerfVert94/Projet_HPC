@@ -10,7 +10,7 @@
 struct morpho_set{
     char func_name[128];
     void (*morpho_func)(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **tempBuffer, uint8 **Y);
-    void (*vec_morpho_func)(vuint8** vX, int i0, int i1, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY);
+    void (*vec_morpho_func)(vuint8** vX, int i0, int i1, long ncl, long nch, int j0, int j1, vuint8 **vTempBuffer, vuint8 **vY);
     enum {NO_PACK, HPACK, VPACK}pack_type;
     enum {NORMAL, FUSION}op_type;
     instruction_type instr_type;

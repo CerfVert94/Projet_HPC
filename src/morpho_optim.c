@@ -36,10 +36,10 @@
                                   scalar_or5((input)[ 1], col) |\
                                   scalar_or5((input)[ 2], col)
 
-#define HANDLE_EDGE_OF_ROW(x) 	x[ncl - 1] = x[ncl];\
-							  	x[nch + 1] = x[nch];
-#define HANDLE_EDGE(x, row)		x[row][ncl - 1] = x[row][ncl];\
-							  	x[row][nch + 1] = x[row][nch];
+#define HANDLE_EDGE_OF_ROW(x) 	/*x[ncl - 1] = x[ncl];\
+							  	x[nch + 1] = x[nch];*/
+#define HANDLE_EDGE(x, row)		/*x[row][ncl - 1] = x[row][ncl];\
+							  	x[row][nch + 1] = x[row][nch];*/
 #define ZERO_EDGE_OF_ROW(x) 	x[ncl - 1] = 0;\
 							  	x[nch + 1] = 0;
 #define ZERO_EDGE(x, row)		x[row][ncl - 1] = 0;\
@@ -52,9 +52,7 @@ void ui8matrix_sequence_drnc(uint8** X, long nrl, long nrh, long ncl, long nch, 
 	
 	memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
-	for (long row = nrl; row < nrh + 1; row++){
-		HANDLE_EDGE_OF_ROW(X[row]);
-	}
+	// for (long row = nrl; row < nrh + 1; row++){HANDLE_EDGE_OF_ROW(X[row]);}
 	in = X; mid = Z; out = Y;
 	ui8matrix_erosion_divide_row_and_conquer  (in, nrl, nrh, ncl, nch, mid, out); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	
@@ -66,9 +64,7 @@ void ui8matrix_sequence_drnc(uint8** X, long nrl, long nrh, long ncl, long nch, 
 	ui8matrix_dilation_divide_row_and_conquer (in, nrl, nrh, ncl, nch, mid, out); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	
 	in = Y; mid = X; out = Z;
-	for (long row = nrl; row < nrh + 1; row++){
-		HANDLE_EDGE_OF_ROW(in[row]);
-	}
+	// for (long row = nrl; row < nrh + 1; row++){ HANDLE_EDGE_OF_ROW(in[row]);}
 	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
 }
 void ui8matrix_sequence_crnc(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **Y, uint8 **Z)
@@ -79,9 +75,9 @@ void ui8matrix_sequence_crnc(uint8** X, long nrl, long nrh, long ncl, long nch, 
 	
 	memset_ui8matrix(Y, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
-	for (long row = nrl; row < nrh + 1; row++){
-		HANDLE_EDGE_OF_ROW(X[row]);
-	}
+	// for (long row = nrl; row < nrh + 1; row++){
+	// 	HANDLE_EDGE_OF_ROW(X[row]);
+	// }
 	in = X; mid = Z; out = Y;
 	ui8matrix_erosion_divide_col_and_conquer  (in, nrl, nrh, ncl, nch, mid, out); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	
@@ -93,9 +89,9 @@ void ui8matrix_sequence_crnc(uint8** X, long nrl, long nrh, long ncl, long nch, 
 	ui8matrix_dilation_divide_col_and_conquer (in, nrl, nrh, ncl, nch, mid, out); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	
 	in = Y; mid = X; out = Z;
-	for (long row = nrl; row < nrh + 1; row++){
-		HANDLE_EDGE_OF_ROW(in[row]);
-	}
+	// for (long row = nrl; row < nrh + 1; row++){
+	// 	HANDLE_EDGE_OF_ROW(in[row]);
+	// }
 	ui8matrix_erosion_divide_col_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
 }
 
@@ -106,14 +102,14 @@ void ui8matrix_sequence_drnc_fo(uint8** X, long nrl, long nrh, long ncl, long nc
 	long row, col, nrow, r;
 	
 	in = X; mid = Z; out = Y;
-	for (long row = nrl; row < nrh + 1; row++){HANDLE_EDGE_OF_ROW(in[row]);	ZERO_EDGE_OF_ROW(out[row]);}
+	// for (long row = nrl; row < nrh + 1; row++){HANDLE_EDGE_OF_ROW(in[row]);	ZERO_EDGE_OF_ROW(out[row]);}
 	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
 
 	in = Y; mid = Z; out = X;
 	ui8matrix_dilation5_divide_row_and_conquer(in, nrl, nrh, ncl, nch, mid, out);
 
 	in = X; mid = Y; out = Z;
-	for (long row = nrl; row < nrh + 1; row++) {HANDLE_EDGE_OF_ROW(in[row]);}
+	// for (long row = nrl; row < nrh + 1; row++) {HANDLE_EDGE_OF_ROW(in[row]);}
 	ui8matrix_erosion_divide_row_and_conquer(X, nrl, nrh, ncl, nch, Y, Z);
 }
 
@@ -131,11 +127,8 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 
 	in = X; mid = Z; out = Y;
 
-	// First prologue for D5 & Edge handling for E3 (First morpho)
-	for (long row = nrl; row < nrh + 1; row++) { 
-		HANDLE_EDGE_OF_ROW(in[row]); 
-		ZERO_EDGE_OF_ROW( out[row]);
-	}
+	// First prologue for D5 (Deprecated / Omitted: Edge handling for E3 (First morpho))
+
 	ui8matrix_erosion_divide_row_and_conquer(in, nrl, nrl_prime, ncl, nch, mid, out);
 
 	// Second prologue for E3 (Last morpho) 
@@ -145,9 +138,9 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 		in = Y; mid = Z; out = X;
 		ui8matrix_dilation5_divide_row_and_conquer(in, d5_row, d5_row, ncl, nch, mid, out);
 		out_row = out[d5_row];
-		HANDLE_EDGE_OF_ROW(out_row);
+		// HANDLE_EDGE_OF_ROW(out_row);
 	}
-	for (e3_row = nrl, row = nrh_prime + 1; row < nrh + 1; d5_row++, e3_row++, row ++) {
+	for (e3_row = nrl, row = nrh_prime + 1; row < nrh + 1; d5_row++, e3_row++, row++) {
 		in = X; mid = Z; out = Y;
 		ui8matrix_erosion_divide_row_and_conquer(in, row, row, ncl, nch, mid, out);
 		
@@ -155,7 +148,7 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 		ui8matrix_dilation5_divide_row_and_conquer(in, d5_row, d5_row, ncl, nch, mid, out);		
 		out_row = out[d5_row];
 
-		HANDLE_EDGE_OF_ROW(out_row);
+		// HANDLE_EDGE_OF_ROW(out_row);
 		in = X; mid = Y; out = Z;
 		memset_ui8matrix(&Z[e3_row], 0, 0, 0, ncl - 2, nch + 2);
 		ui8matrix_erosion_divide_row_and_conquer(in, e3_row, e3_row, ncl, nch, mid, out);
@@ -166,14 +159,13 @@ void ui8matrix_sequence_drnc_fo_pipeline2(uint8** X, long nrl, long nrh, long nc
 		in = Y; mid = Z; out = X;
 		ui8matrix_dilation5_divide_row_and_conquer(in, row, nrh, ncl, nch, mid, out);
 		in = X; mid = Y; out = Z;
-		HANDLE_EDGE_OF_ROW(in[row]);
+		// HANDLE_EDGE_OF_ROW(in[row]);
 		ui8matrix_erosion_divide_row_and_conquer(in, e3_row, e3_row, ncl, nch, mid, out);
 	}
-
 	// Epilogue for E3 (Last morpho) & Edge handling for E3 (Last morpho)
 	in = X; mid = Y; out = Z;
 	for (row = e3_row; row < nrh + 1; row ++) {
-		HANDLE_EDGE_OF_ROW(in[row]);
+		// HANDLE_EDGE_OF_ROW(in[row]);
 		ui8matrix_erosion_divide_row_and_conquer(in, row, row, ncl, nch, mid, out);	
 	}
 }
@@ -200,8 +192,8 @@ void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl
 		mid_e3_row[ncl - 1] = 0; // Empty buffer, just in case
 		mid_e3_row[nch + 1] = 0; // Empty buffer, just in case
 		in_row     		=      X[row];
-		in_row[ncl - 1] = in_row[ncl];
-		in_row[nch + 1] = in_row[nch];
+		// in_row[ncl - 1] = in_row[ncl];
+		// in_row[nch + 1] = in_row[nch];
 		for (col = ncl; col < nch + 1; col++) {
 			mid_e3_row[col] = scalar_and3(in_row, col);
 		}
@@ -264,8 +256,8 @@ void ui8matrix_sequence_drnc_fo_pipeline(uint8** X, long nrl, long nrh, long ncl
 
 		mid_e3_row  = mid_e3[row - 1]; 
 		mid_row     =    out[row - 1]; 
-		mid_row[ncl - 1] = mid_row[ncl];
-		mid_row[nch + 1] = mid_row[nch];
+		// mid_row[ncl - 1] = mid_row[ncl];
+		// mid_row[nch + 1] = mid_row[nch];
 		for (col = ncl; col < nch + 1; col++) {
 			out_row[col] = mid_d5_row0[col] |
 						   mid_d5_row1[col] |			
