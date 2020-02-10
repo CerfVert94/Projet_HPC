@@ -17,7 +17,42 @@
 #include "util.h"
 
 
+void print_vui8vector(vuint8 *vV, int ncl, int nch, char* format, char *name) {
+	int col_cnt;
 
+	if (name != NULL) printf("%s",name);
+	
+	uint8 *p;
+	int i = 0;
+	col_cnt = 0;
+	for (int v = -1; v <= 1; v++)  {
+		p = (uint8*)&vV[v];
+		for(i=0; i<16; i++){
+			if (16 + ncl <= col_cnt && col_cnt <= 16 + nch)
+				printf(format, p[i]);
+			col_cnt++;
+		}
+	}
+
+}
+
+void print_vui8matrix(vuint8 **vM, int i0, int i1, int ncl, int nch, char* format, char *name) {
+	int col_cnt;
+	uint8 *p;
+
+	if (name != NULL) printf("%s",name);
+	
+	for (int i = i0; i < i1 + 1; i++) {
+        for (int j = ncl; j < nch + 1; j++) {
+            p = (uint8 *)&vM[i][j];
+            for(int k = 0; k < 16; k++) {
+				printf(format, p[k]);
+                
+            }
+        }
+        printf("\n");
+    }
+}
 /*---------------------------------------------------------------------------------------------*/
 void copy_vui8matrix_vui8matrix(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8** Y) {
 /*---------------------------------------------------------------------------------------------*/

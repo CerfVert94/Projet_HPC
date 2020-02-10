@@ -696,10 +696,11 @@ void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, ui
 
 	vuint8 **M_1 = t0->M, **I_1 = t0->I, **O_1 = t0->O, **V_1 = t0->V, **E_1 = t0->E;
 	vuint8 **M   = t1->M, **I   = t1->I, **O   = t1->O, **V   = t1->V, **E   = t1->E;
-
-	nrl = t1->nrl; v0 = t1->v0;
-	nrh = t1->nrh; v1 = t1->v1;	
-
+	
+	nrl = (int)t1->nrl; v0 = t1->v0;
+	nrh = (int)t1->nrh; v1 = t1->v1;	
+	// printf("%d %d %d %d\n", nrl, nrh, v0, v1);getchar();
+	
 	for(long i = nrl; i <= nrh; i++) {
 		for(long j = v0; j <= v1; j++) {
 			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);

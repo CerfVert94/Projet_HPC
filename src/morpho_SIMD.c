@@ -25,34 +25,89 @@
 #include "img_SIMD.h"
 #include "morpho.h"
 #include "morpho_SIMD.h"
-
+#include <omp.h>
 #define SE_NRL -1
 #define SE_NRH  1
 #define SE_NCL -1
 #define SE_NCH  1
-void print_vui8vector(vuint8 *vV, int nrl, int nrh, int ncl, int nch, char* format, char *name) {
-	int col_cnt;
 
-	if (name != NULL) printf("%s",name);
+#define get_vec_edge(vX, i, v1, mask) _mm_and_si128(vec_right1(vX[i][v1], vX[i][v1]), mask);
+
+void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **Y , vuint8 **Z) {
 	
-	uint8 *p;
-	int i = 0;
-	col_cnt = 0;
-	for (int v = -1; v <= 1; v++)  {
-		p = (uint8*)&vV[v];
-		for(i=0; i<16; i++){
-			if (16 + ncl <= col_cnt && col_cnt <= 16 + nch)
-				printf(format, p[i]);
-			col_cnt++;
-		}
+	vuint8  *in_row, *out_row;
+	vuint8 **in, **mid, **out;
+	int row, col;
+	int d5_row, e3_row, nrl_prime, nrh_prime;
+	const int PRE_D5_NROW = 5;
+	const int PRE_E3_NROW = 3;
+	int card = card_vuint8(); 
+	int last_v    = (nch) / card,  last_vcol = (nch) % card; 
+	// Mask for edge
+	vuint8 vMask = _mm_setzero_si128(); 
+	uint8 *mask= (uint8*)&vMask;
+	for (col = 0; col < last_vcol + 1; col++) mask[col] = 0xFF;
+
+
+	nrl_prime = (nrl - 2) + PRE_D5_NROW ;
+	nrh_prime = (nrl - 2) + PRE_D5_NROW + PRE_E3_NROW ;
+
+	in = X; out = Y;
+
+	omp_set_num_threads(omp_get_max_threads());
+
+	// First prologue for D5 (Deprecated / Omitted: Edge handling for E3 (First morpho))
+	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrl_prime, ncl, nch, v0, v1, mid, out);
+	// Second prologue for E3 (Last morpho) 
+	
+	// #pragma omp SIMD parallel for default(none) private(out_row, row, col, d5_row) firstprivate(nrh_prime) shared(X, Y, Z, in, mid, out, v0, v1, nrl, nrl_prime, last_v, vMask)
+	for (d5_row = nrl, row = nrl_prime + 1; row < nrh_prime + 1; row ++, d5_row++) {
+		in = X; out = Y;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
+		in = Y; out = X;
+		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);
+
+		// Handle edge
+		out_row = out[d5_row];
+		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
+		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
+	}
+	// #pragma omp SIMD parallel for default(none) private(out_row, row, col, d5_row, e3_row) firstprivate(nrh_prime) shared(X, Y, Z,in, mid, out, v0, v1, nrl, nrl_prime, last_v, vMask)
+	for (e3_row = nrl, row = nrh_prime + 1; row < nrh + 1; d5_row++, e3_row++, row++) {
+		in = X; out = Y;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
+		
+		in = Y; out = X;
+		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);		
+	
+		// Handle edge
+		out_row = out[d5_row];
+		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
+		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
+
+		in = X; out = Z;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
 	}
 	
+	// Epilogue for D5 and E3 (Last morpoh) & Edge handling for E3 (Last morpho)
+	for (e3_row = e3_row - 1, row = d5_row; row < nrh + 1; e3_row++, row ++) {
+		in = Y; out = X;
+		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, row, nrh, ncl, nch, v0, v1, mid, out);
+		// Handle edge
+		out_row = out[row];
+		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
+		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
 
+		in = X; out = Z;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
+	}
+	// Epilogue for E3 (Last morpho) & Edge handling for E3 (Last morpho)
+	in = X; out = Z;
+	for (row = e3_row; row < nrh + 1; row ++) {
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);	
+	}
 }
-#define get_vec_edge(vX, i, v1, mask) _mm_and_si128(vec_right1(vX[i][v1], vX[i][v1]), mask);
-	// print_vui8vector(&in[row][v1 + 1], 0, 0, 0, 15, "%4u", NULL); printf(" ");
-	// 	print_vui8vector(&in[row][v1 + 2], 0, 0, 0, 15, "%4u", NULL); 
-	// 	printf("\n");
+
 void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **Y , vuint8 **Z) {
 	vuint8  *in_row, *out_row;
 	vuint8 **in, **mid, **out;
@@ -106,7 +161,7 @@ void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl, 
 	nrl_prime = (nrl - 2) + PRE_D5_NROW ;
 	nrh_prime = (nrl - 2) + PRE_D5_NROW + PRE_E3_NROW ;
 
-	in = X; mid = Z; out = Y;
+	in = X; out = Y;
 
 	// First prologue for D5 (Deprecated / Omitted: Edge handling for E3 (First morpho))
 

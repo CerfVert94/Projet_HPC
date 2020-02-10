@@ -15,4 +15,7 @@ uint8  **vui8matrix_to_ui8matrix(vuint8 **vX, long i0, long i1, int j0, int j1, 
 vuint8 **ui8matrix_to_vui8matrix(uint8  **X , long  nrl, long  nrh, long ncl, long nch, int *i0, int *i1, int *j0, int *j1);
 void copy_vui8matrix_vui8matrix(vuint8** X, int nrl, int nrh, int v0, int v1, vuint8** Y);
 vuint8 **LoadPGM_vui8matrix(char *filename, int *nrl, int *nrh, int *v0, int *v1);
+
+void print_vui8vector(vuint8 *vV, int ncl, int nch, char* format, char *name);
+void print_vui8matrix(vuint8 **vM, int i0, int i1, int ncl, int nch, char* format, char *name);
 #endif // __NRUTL_H__

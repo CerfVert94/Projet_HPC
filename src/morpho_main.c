@@ -317,9 +317,11 @@ struct morpho_set dilations[] = {
                                     {.func_name = "SigmaDelta_naive", .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SCALAR},                                  
                                     {.func_name = "SigmaDelta_best", .sd_step0 = SigmaDelta_step0_mem, .sd_func = SigmaDelta_best, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SCALAR},
                                     {.func_name = "SigmaDelta_SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD, .vec_sd_func = SigmaDelta_SIMD, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SIMD},
+                                    {.func_name = "SigmaDelta_SIMD_FL", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func = SigmaDelta_SIMD_FL, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SIMD},
                                   };
     struct morpho_set sequences[] = {
-                                        // {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
                                         {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR"   , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
                                         {.func_name = "ui8matrix_sequence_drnc_fo"                     , .morpho_func = ui8matrix_sequence_drnc_fo, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
                                         {.func_name = "ui8matrix_sequence_naive"                       , .morpho_func = ui8matrix_sequence_naive     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
@@ -330,76 +332,106 @@ struct morpho_set dilations[] = {
                                         // {.func_name = "ui8matrix_sequence_drnc_fo_pipeline"            , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
                                         // {.func_name = "ui8matrix_sequence_divide_row_and_conquer_OMP"  , .morpho_func = ui8matrix_sequence_divide_row_and_conquer_OMP   , .instr_type = SCALAR},
                                        };
+    struct complete_process_set cps[] = {
+                                        {.func_name = "SD_Naive/Sequential_Morpho_Naive"                 , .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .morpho_func = ui8matrix_sequence_naive, .instr_type= SCALAR},
+                                        {.func_name = "SD_FO+SIMD/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
+                                        };
+void launch_movement_detection(char *filename_format, int start, int end, char *res_filename_format)
+{
+    vuint8 **vTempBuffer;
+    uint8 **ui8image;
+    p_vimage t0, t1;
+    char filename[128], res_filename[128];
+    long nrl, nrh, ncl, nch;
+    int cnt = 0, error_no = 0;
 
+
+    sprintf(filename, filename_format, start);
+    t0 = create_vimage(filename);
+    
+    SigmaDelta_step0_SIMD_memset_load(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->v0, t0->v1, N, Vmin, Vmax);
+    vTempBuffer = vui8matrix(t0->nrl, t0->nrh, t0->v0, t0->v1);
+    
+    for (int i = start + 1; i < end + 1; i++, cnt++) {
+        sprintf(filename, filename_format, i);
+        sprintf(res_filename, res_filename_format, cnt);
+        t1 = create_vimage(filename);
+        SigmaDelta_SIMD_FL(t0, t1, N, Vmin, Vmax);
+        ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(t1->E, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch - BORD, t1->v0 + vBORD, t1->v1 -vBORD, vTempBuffer, t1->Omega);
+        ui8image = vui8matrix_to_ui8matrix(t1->Omega, t1->nrl + BORD, t1->nrh - BORD, t1->v0 + vBORD, t1->v1 - vBORD, &nrl, &nrh, &ncl, &nch);
+        binary_to_octal_ui8matrix(ui8image, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch + BORD);
+        SavePGM_ui8matrix(ui8image, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch + BORD,  res_filename);
+        free_vimage(t0);
+        free_ui8matrix(ui8image, nrl, nrh, ncl, nch);
+        t0 = t1;
+    }
+    free_vui8matrix(vTempBuffer, t0->nrl, t0->nrh, t0->v0, t0->v1);
+}
+
+void launch_naive_movement_detection(char *filename_format, int start, int end, char *res_filename_format)
+{
+    uint8 **tempBuffer;
+    p_image t0, t1;
+    char filename[128], res_filename[128];
+    long nrl, nrh, ncl, nch;
+    int cnt = 0, error_no = 0;
+
+
+    sprintf(filename, filename_format, start);
+    t0 = create_image(filename);
+    
+    SigmaDelta_step0_naive(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, N, Vmin, Vmax);
+   
+    tempBuffer = ui8matrix(t0->nrl, t0->nrh, t0->ncl, t0->nch);
+    for (int i = start + 1; i < end + 1; i++, cnt++) {
+        sprintf(filename, filename_format, i);
+        sprintf(res_filename, res_filename_format, cnt);
+        t1 = create_image(filename);
+        SigmaDelta_naive(t0, t1, N, Vmin, Vmax);
+        ui8matrix_sequence_naive(t1->E, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch - BORD, tempBuffer, t1->Omega);
+        binary_to_octal_ui8matrix(t1->Omega, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch + BORD);
+        SavePGM_ui8matrix(t1->Omega, t1->nrl, t1->nrh, t1->ncl, t1->nch,  res_filename);
+        free_image(t0);
+        t0 = t1;
+    }
+    free_ui8matrix(tempBuffer, t0->nrl, t0->nrh, t0->ncl, t0->nch);
+    free_image(t1);
+}
 // -----------
 int main(void)
 // -----------
 {
-    long nrl, nrh, ncl, nch;
-    long m0, m1, v0, v1;
     
     long nb_sets;
-    nb_sets = 45; 
-    vuint8 w0, w1, w2;
-    // w0 = _mm_set_epi8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
-    // w1 = _mm_set_epi8(31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16);
 
-    // w2 = vec_left2(w0, w1);
-    // display_vui8vector(&w2, 0,0, "%3u", "VEC_LEFT1");
-	// uint8 **img = LoadPGM_ui8matrix("../car3/car_3000.pgm", &nrl, &nrh, &ncl, &nch);
-    // vuint8 **vimg = ui8matrix_to_vui8matrix(img, nrl, nrh, ncl, nch - 20, &m0, &m1, &v0, &v1);
-    // // printf("%ld %ld %ld %ld\n", nrl, nrh, ncl, nch);
-    // display_ui8matrix(img, 0, 0, ncl, nch - 20, "%4u", "image");
-    // display_ui8matrix(img, 0, 0, 288, 303, "%4u", "image");
-    // display_vui8matrix(vimg, 0, 0, v0, v1, "%4u", "vimage");
     
-    // vuint8 **vI_t0 = LoadPGM_vui8matrix("../car3/car_3000.pgm", &nrl, &nrh, &v0, &v1);
-    // vuint8 **vM_t0 = vui8matrix(0,0,0,0);
-    // vuint8 **vM_t1 = vui8matrix(0,0,0,0);
-    // display_vui8matrix(vI_t0, 0, 0, 0, 0, "%4u", "vimage");
-    // SigmaDelta_step0_SIMD(vM_t0, vI_t0, vM_t1, 0,0,0,0, N, Vmin, Vmax);
-    // display_vui8matrix(vM_t0, 0, 0, 0, 0, "%4u", "vM_t0");
-    // display_vui8matrix(vI_t0, 0, 0, 0, 0, "%4u", "vI_t0");
-    // display_vui8matrix(vM_t1, 0, 0, 0, 0, "%4u", "vM_t1");
+    // launch_movement_detection("../car3/car_%d.pgm", 3000, 3199, "../res/res%04d_a.pgm");
+    // launch_naive_movement_detection("../car3/car_%d.pgm", 3000, 3199, "../res/res%04d_b.pgm");
     // test_SigmaDelta_step0("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step0, 8, false);
-    // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 8, 1, 1, 200, 10000, 100);
     // test_SigmaDelta_step1("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step1, 4, false);
-    // // launch_SD_step_benchmark("output/benchmark_sdstep1.dat"             , SDs_step1, 4, 1, 1, 200, 5000, 100);
     // test_SigmaDelta_step2("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step2, 6, false);
-    // launch_SD_step_benchmark("output/benchmark_sdstep2.dat"             , SDs_step2, 6, 1, 1, 200, 5000, 50);
-
     // test_SigmaDelta_step3("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step3, 6, false);
-    // launch_SD_step_benchmark("output/benchmark_sdstep3.dat"             , SDs_step3, 5, 1, 1, 200, 5000, 50);
     // test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 4, false);
+    // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 4, false);
+    
+    // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 8, 1, 1, 200, 10000, 100);
+    // launch_SD_step_benchmark("output/benchmark_sdstep1.dat"             , SDs_step1, 4, 1, 1, 200, 5000, 100);
+    // launch_SD_step_benchmark("output/benchmark_sdstep2.dat"             , SDs_step2, 6, 1, 1, 200, 5000, 50);
+    // launch_SD_step_benchmark("output/benchmark_sdstep3.dat"             , SDs_step3, 5, 1, 1, 200, 5000, 50);
     // launch_SD_step_benchmark("output/benchmark_sdstep4.dat"             , SDs_step4, 4, 1, 1, 200, 5000, 100);
-    // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
     // launch_SD_step_benchmark("output/benchmark_SD_step.dat"       , SD_steps   ,       5, 1, 1, 200, 10000, 100);
-    // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 3, 1, 1, 100, 10000, 100);
+    // launch_SD_benchmark(     "output/benchmark_SD.dat"            , completeSDs, 4, 1, 1, 100, 10000, 100);
+    
+
+
     // test_erosions ("../car3/car_3000.pgm", erosions , 3, false);
     // test_dilations("../car3/car_3000.pgm", dilations, 3, false);
-    // test_sequences ("../car3/car_3001.pgm", sequences , 2, false);
+    // test_sequences ("../car3/car_3001.pgm", sequences , 3, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , 1, 1, 1, 10, 2000, 1);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , 7, 1, 1, 10, 5000, 10);
-    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 1, 1, 1, 100, 10000, 50);
-    // int n = 0;
-    // vuint8 a = _mm_set_epi8(16 + n, 15 + n, 14 + n, 13 + n, 12 + n, 11 + n, 10 + n, 9 + n, 8 + n, 7 + n, 6 + n, 5 + n, 4 + n, 3 + n, 2 + n, 1 + n); n += 16;
-    // vuint8 a = _mm_set_epi8(     0,      0,      0,      0,      0,      0,      0,     0,     0,     0,     0,     0,     0,     0,     0,     0); n += 16;
-    // vuint8 b = _mm_set_epi8(16 + n, 15 + n, 14 + n, 13 + n, 12 + n, 11 + n, 10 + n, 9 + n, 8 + n, 7 + n, 6 + n, 5 + n, 4 + n, 3 + n, 2 + n, 1 + n); n += 16;
-    // vuint8 c = _mm_set_epi8(16 + n, 15 + n, 14 + n, 13 + n, 12 + n, 11 + n, 10 + n, 9 + n, 8 + n, 7 + n, 6 + n, 5 + n, 4 + n, 3 + n, 2 + n, 1 + n); n += 16;
-    // vuint8 d = _mm_set_epi8(16 + n, 15 + n, 14 + n, 13 + n, 12 + n, 11 + n, 10 + n, 9 + n, 8 + n, 7 + n, 6 + n, 5 + n, 4 + n, 3 + n, 2 + n, 1 + n); n += 16;
-    // vuint8 e = _mm_set_epi8(16 + n, 15 + n, 14 + n, 13 + n, 12 + n, 11 + n, 10 + n, 9 + n, 8 + n, 7 + n, 6 + n, 5 + n, 4 + n, 3 + n, 2 + n, 1 + n); n += 16;
-
-    // display_vuint8(              a , "%3u", "center : ");
-    // display_vuint8(              b , "%3u", "center : ");
-    // display_vuint8(              c , "%3u", "center : ");
-    // // display_vuint8(              d , "%3u", "center : ");
-    // // display_vuint8(              e , "%3u", "center : ");
-    // display_vuint8(vec_right2(a, b), "%3u", "right2 : ");
-    // display_vuint8(vec_right1(b, a), "%3u", "right1 : ");
-    // display_vuint8(              b , "%3u", "center : ");
-    // display_vuint8( vec_left1(a, b), "%3u", " left1 : ");
-    // display_vuint8( vec_left2(b, c), "%3u", " left2 : ");
-    //16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 3, 1, 1, 100, 10000, 50);
+    launch_complete_process_benchmark("output/full_benchmark.dat", cps, 2, 1, 1, 100, 2500, 50);
+    
 
 
     

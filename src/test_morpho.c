@@ -22,26 +22,26 @@
 
 #define PROGRESS_FACTOR 		   10
 
-void print_vui8matrix(vuint8 **vM, int nrl, int nrh, int ncl, int nch, int v0, int v1, char* format, char *name) {
-	int row, col, col_cnt;
+// void print_vui8matrix(vuint8 **vM, int nrl, int nrh, int ncl, int nch, int v0, int v1, char* format, char *name) {
+// 	int row, col, col_cnt;
 
-	if (name != NULL) printf("%s\n",name);
-	for (int row = nrl; row <= nrh; row++)
-	{
-		uint8 *p;
-		int i = 0;
-		col_cnt = 0;
-		for (int v = -1; v <= 1; v++)  {
-			p = (uint8*)&vM[row][v];
-			for(i=0; i<16; i++){
-				if (abs(v0) * card_vuint8() + ncl <= col_cnt && col_cnt <= v1 * card_vuint8() + nch)
-					printf(format, p[i]);
-				col_cnt++;
-			}
-		}
-		printf("\n");
-	}
-}
+// 	if (name != NULL) printf("%s\n",name);
+// 	for (int row = nrl; row <= nrh; row++)
+// 	{
+// 		uint8 *p;
+// 		int i = 0;
+// 		col_cnt = 0;
+// 		for (int v = -1; v <= 1; v++)  {
+// 			p = (uint8*)&vM[row][v];
+// 			for(i=0; i<16; i++){
+// 				if (abs(v0) * card_vuint8() + ncl <= col_cnt && col_cnt <= v1 * card_vuint8() + nch)
+// 					printf(format, p[i]);
+// 				col_cnt++;
+// 			}
+// 		}
+// 		printf("\n");
+// 	}
+// }
 uint8 ui8matrix_erosion3_1pt(uint8**X, long i, long j){
 	return X[i - 1][j - 1] & X[i - 1][j + 0] & X[i - 1][j + 1] &
 		   X[i + 0][j - 1] & X[i + 0][j + 0] & X[i + 0][j + 1] &
@@ -266,7 +266,7 @@ void test_implementation_erosion3(struct morpho_set *erosion_set, bool logging)
 			if (perm % (max / PROGRESS_FACTOR) == 0)
 				print_progress(perm, max);
 			if(logging){
-				print_vui8matrix(vX, -1, 1, -1, 1, -1, 1, "%u", "Test matrix 3x3");
+				print_vui8matrix(vX, -1, 1, -1, 1, "%u", "Test matrix 3x3");
 			}
 
 			
@@ -314,7 +314,7 @@ void test_implementation_dilation3(struct morpho_set *dilation_set, bool logging
 			if (perm % (max / PROGRESS_FACTOR) == 0)
 				print_progress(perm, max);
 			if(logging){
-				print_vui8matrix(vX, -1, 1, -1, 1, -1, 1, "%u", "Test matrix 3x3");
+				print_vui8matrix(vX, -1, 1, -1, 1, "%u", "Test matrix 3x3");
 			}
 
 			if (perm == min) {assert(vec_morpho_produces_one(dilation_set, vX) == false);/*printf("False\n");*/}

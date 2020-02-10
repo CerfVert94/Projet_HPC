@@ -23,7 +23,51 @@
 #include <math.h>
 
 
+void create_false_inputs(p_image *t0, p_image *t1, uint8 ***X, uint8 ***Y, uint8 ***Z, p_vimage *v_t0, p_vimage *v_t1, vuint8 ***vX, vuint8 ***vY, vuint8 ***vZ, long size, int *i0, int *i1, int *v0, int *v1);
+void free_false_inputs(p_image t0, p_image t1, uint8 **X, uint8 **Y, uint8 **Z, p_vimage v_t0, p_vimage v_t1, vuint8 **vX, vuint8 **vY, vuint8 **vZ, long size, int i0, int i1, int v0, int v1);
+
+void create_false_inputs(p_image *t0, p_image *t1, uint8 ***X, uint8 ***Y, uint8 ***Z, p_vimage *v_t0, p_vimage *v_t1, vuint8 ***vX, vuint8 ***vY, vuint8 ***vZ, long size, int *i0, int *i1, int *v0, int *v1)
+{
+	
+	*X    = ui8matrix_checker(0 - BORD, size + BORD, 0 - BORD, size + BORD, 3, 1); 
+	*Y    = ui8matrix_checker(0 - BORD, size + BORD, 0 - BORD, size + BORD, 3, 0); 
+	*Z    = ui8matrix        (0 - BORD, size + BORD, 0 - BORD, size + BORD); 
+	
+	*vX   = ui8matrix_to_vui8matrix(*X, 0 - BORD, size + BORD, 0 - BORD, size + BORD, i0, i1, v0, v1);
+	*vY   = ui8matrix_to_vui8matrix(*Y, 0 - BORD, size + BORD, 0 - BORD, size + BORD, i0, i1, v0, v1);
+	*vZ   =              vui8matrix(    0 - BORD, size + BORD, *v0, *v1);
+	*t0   = create_image_from_ui8matrix( *X, 0, size, 0, size);
+	*t1   = create_image_from_ui8matrix( *Y, 0, size, 0, size);
+	*v_t0 = create_vimage_from_ui8matrix(*X, 0, size, 0, size);
+	*v_t1 = create_vimage_from_ui8matrix(*Y, 0, size, 0, size);
+	// printf("create: %d %d %d %d\n", *i0,*i1,*v0,*v1);
+	// print_vui8matrix((*v_t0)->I, (*v_t0)->nrl, (*v_t0)->nrh, (*v_t0)->v0, (*v_t0)->v1, "%u", "Image");getchar();
+	
+
+}
+void free_false_inputs(p_image t0, p_image t1, uint8 **X, uint8 **Y, uint8 **Z, p_vimage v_t0, p_vimage v_t1, vuint8 **vX, vuint8 **vY, vuint8 **vZ, long size, int i0, int i1, int v0, int v1)
+{
+	free_ui8matrix(  X, 0 - BORD, size + BORD, 0 - BORD, size + BORD);
+	free_ui8matrix(  Y, 0 - BORD, size + BORD, 0 - BORD, size + BORD);
+	free_ui8matrix(  Z, 0 - BORD, size + BORD, 0 - BORD, size + BORD);
+	// printf("create: %d %d %d %d\n", i0,i1,v0,v1);
+	free_vui8matrix(vX, i0, i1, v0, v1);
+	free_vui8matrix(vY, i0, i1, v0, v1);
+	free_vui8matrix(vZ, i0, i1, v0, v1);
+	free_image(t0);	
+	free_image(t1);
+	free_vimage(v_t0);
+	free_vimage(v_t1);
+}
+
 void save_benchmark(const char *filename, void *sets, size_t struct_size, int nb_sets, double **results, long min_size, long max_size, long step);
+
+void launch_complete_process_benchmark(const char *filename, struct complete_process_set *cps, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
+    double **results;
+    results = benchmark_of_complete_process(cps, nb_sets, min_size, max_size, step, nb_tests, packet_size);
+    save_benchmark(filename, cps, sizeof(struct complete_process_set), nb_sets, results, min_size, max_size, step);
+}
+
 void launch_morpho_benchmark(const char *filename, struct morpho_set *morphos, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     double **results;
     results = benchmark_of_morpho(morphos, nb_sets, min_size, max_size, step, nb_tests, packet_size);
@@ -114,6 +158,8 @@ unsigned long long get_cpu_cycles_of_sd(struct complete_sd_set *csdset, p_image 
 
 	begin = __rdtsc();
 	csdset->sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, n_coeff, v_min, v_max);
+	end = __rdtsc() - begin;
+	begin = __rdtsc() + end ;
 	csdset->sd_func(t0, t1, n_coeff, v_min, v_max);
 	end = __rdtsc();
 	return end - begin;
@@ -195,6 +241,8 @@ unsigned long long get_cpu_cycles_of_vec_sd(struct complete_sd_set *csdset, p_vi
 
 	begin = __rdtsc();
 	csdset->vec_sd_step0(t0->M, t0->I, t0->V, t0->nrh, t0->nrh, t0->v0, t0->v1, n_coeff, v_min, v_max);
+	end = __rdtsc() - begin;
+	begin = __rdtsc() + end ;
 	csdset->vec_sd_func(t0, t1, n_coeff, v_min, v_max);
 	end = __rdtsc();
 	return end - begin;
@@ -247,7 +295,140 @@ unsigned long long get_min_cpu_cycles_of_vec_sd_step(struct sd_set *sdset, long 
 	return min_cycles;
 }
 
+unsigned long long get_cpu_cycles_of_complete_process(struct complete_process_set *cproc)
+{
+    unsigned long long begin = 0, end = 0, cycles = 0;	
+	uint8 **tempBuffer;
+    p_image t0, t1;
 
+    tempBuffer = cproc->Y;
+    t0 = cproc->t0;
+	t1 = cproc->t1;
+
+	begin = __rdtsc();
+    cproc->sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, N, Vmin, Vmax);
+	end = __rdtsc() - begin;
+	begin = __rdtsc() + end;
+    cproc->sd_func(t0, t1, N, Vmin, Vmax);
+    cproc->morpho_func(t1->E, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch - BORD, tempBuffer, t1->Omega);
+	end = __rdtsc();
+	return end - begin;
+}
+unsigned long long get_cpu_cycles_of_vec_complete_process(struct complete_process_set *cproc)
+{
+    unsigned long long begin = 0, end = 0, cycles = 0;	
+	vuint8 **vTempBuffer;
+    p_vimage t0, t1;
+
+    vTempBuffer = cproc->vY;
+    t0 = cproc->v_t0;
+	t1 = cproc->v_t1;
+	
+	begin = __rdtsc();
+    cproc->vec_sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->v0, t0->v1, N, Vmin, Vmax);
+	end = __rdtsc() - begin;
+	begin = __rdtsc() + end;
+    cproc->vec_sd_func(t0, t1, N, Vmin, Vmax);
+    cproc->vec_morpho_func(t1->E, (int)t1->nrl + BORD, (int)t1->nrh - BORD, (int)t1->ncl + BORD, (int)t1->nch - BORD, t1->v0 + vBORD, t1->v1 - vBORD, vTempBuffer, t1->Omega);
+	end = __rdtsc();
+	return end - begin;
+}
+
+
+unsigned long long get_min_cpu_cycles_of_vec_complete_process(struct complete_process_set *cproc, long packet_size)
+{
+	unsigned long long min_cycles, *cycles;
+	int i;
+
+	if(packet_size <= 0) {
+		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
+
+	
+	for (int i = 0; i < packet_size; i++) 
+		cycles[i] = get_cpu_cycles_of_vec_complete_process(cproc);
+
+	min_cycles = get_min_cycles(cycles, packet_size);
+	free(cycles);
+	return min_cycles;
+}
+unsigned long long get_min_cpu_cycles_of_complete_process(struct complete_process_set *cproc, long packet_size)
+{
+	unsigned long long min_cycles, *cycles;
+	int i;
+
+	if(packet_size <= 0) {
+		fprintf(stderr, "Error : the size of a packet should be at least 1.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	cycles = (unsigned long long *) malloc(sizeof(unsigned long long) * packet_size);
+
+	
+	for (int i = 0; i < packet_size; i++) 
+		cycles[i] = get_cpu_cycles_of_complete_process(cproc);
+
+	min_cycles = get_min_cycles(cycles, packet_size);
+	free(cycles);
+	return min_cycles;
+}
+
+
+double **benchmark_of_complete_process(struct complete_process_set *cproc, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
+{
+	unsigned long long  min_cycles_sum, begin, end;
+	long size, i, idx_test, nrl, nrh, ncl, nch, cnt = 0;
+	double **results;
+	// Initialize to save the benchmark result.
+	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
+	
+	cnt = 0;
+	for (size = ls - 1; size < hs; size += step) {
+		// idx_set = 0;
+		for (i = 0; i < nb_sets; i++) 
+		{
+			create_false_inputs(&cproc[i].t0  , &cproc[i].t1  , &cproc[i].X , &cproc[i].Y , &cproc[i].Z, 
+			                    &cproc[i].v_t0, &cproc[i].v_t1, &cproc[i].vX, &cproc[i].vY, &cproc[i].vZ, 
+								size, &cproc[i].i0, &cproc[i].i1, &cproc[i].j0, &cproc[i].j1);
+
+			
+			
+			cproc[i].nrl = 0; cproc[i].nrh = size;
+			cproc[i].ncl = 0; cproc[i].nch = size;
+	
+			if (cproc[i].instr_type == SCALAR) {
+				begin = __rdtsc();			
+				min_cycles_sum = 0;
+				for (idx_test = 0; idx_test < nb_tests; idx_test++)
+					min_cycles_sum += get_min_cpu_cycles_of_complete_process(&cproc[i], packet_size);
+				end = __rdtsc();
+			}
+			else if (cproc[i].instr_type == SIMD) {
+				begin = __rdtsc();			
+				min_cycles_sum = 0;
+				for (idx_test = 0; idx_test < nb_tests; idx_test++)
+					min_cycles_sum += get_min_cpu_cycles_of_vec_complete_process(&cproc[i], packet_size);
+				end = __rdtsc();
+			}
+			// printf("%llu / %llu\n", min_cycles_sum, (nb_tests * (size + 1) * (size + 1)));
+			results[i][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
+			
+			
+			
+			if ((size + 1) % 500 == 0 || size >= hs - 1) 
+				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles.\n",  cproc[i].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
+
+			free_false_inputs(cproc[i].t0  , cproc[i].t1  , cproc[i].X , cproc[i].Y , cproc[i].Z, 
+			                  cproc[i].v_t0, cproc[i].v_t1, cproc[i].vX, cproc[i].vY, cproc[i].vZ, 
+							  size, cproc[i].i0, cproc[i].i1, cproc[i].j0, cproc[i].j1);
+		}
+		cnt++;
+	}
+	return results;
+}
 
 double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, long hs, long step, int nb_tests, int packet_size)
 {

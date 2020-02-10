@@ -107,6 +107,7 @@ p_vimage create_vimage_from_ui8matrix(uint8 **X, long nrl, long nrh, long ncl, l
 	ncl -= BORD;
 	nch += BORD;
 
+	
 	tmp->nrl = nrl;
 	tmp->nrh = nrh;
 	tmp->ncl = ncl;

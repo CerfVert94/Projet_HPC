@@ -12,7 +12,7 @@ void binary_to_octal_ui8matrix(uint8 **ppInput, long nrl, long nrh, long ncl, lo
 {
     for (long i = nrl; i < nrh + 1; i++){
         for (long j = ncl; j < nch + 1; j++){
-            if (ppInput[i][j] > 127) 
+            if (ppInput[i][j] > 0) 
                 ppInput[i][j] = 255;
             else 
                 ppInput[i][j] = 0;
