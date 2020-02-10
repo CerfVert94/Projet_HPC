@@ -24,6 +24,55 @@
 #include "img_SIMD.h"
 #include "mouvement_SIMD.h"
 #include "util.h"
+#include <omp.h>
+
+
+/*-----------------------------------------------------------------------------------------------*/
+vuint8 SigmaDelta_step1_SIMD_single_vector(vuint8 vM_1, vuint8 vI, uint8 n_coeff, uint8 v_min, uint8 v_max);
+vuint8 SigmaDelta_step2_SIMD_single_vector(vuint8 vM, vuint8 vI, uint8 n_coeff, uint8 v_min, uint8 v_max);
+vuint8 SigmaDelta_step3_SIMD_single_vector(vuint8 vV_1, vuint8 vO, uint8 n_coeff, uint8 v_min, uint8 v_max);
+vuint8 SigmaDelta_step4_SIMD_single_vector(vuint8 vO, vuint8 vV, uint8 n_coeff, uint8 v_min, uint8 v_max);
+void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
+{
+
+	int nrl, nrh, v0, v1;
+
+	vuint8 **M_1 = t0->M, **I_1 = t0->I, **O_1 = t0->O, **V_1 = t0->V, **E_1 = t0->E;
+	vuint8 **M   = t1->M, **I   = t1->I, **O   = t1->O, **V   = t1->V, **E   = t1->E;
+	
+	nrl = (int)t1->nrl; v0 = t1->v0;
+	nrh = (int)t1->nrh; v1 = t1->v1;	
+	// printf("%d %d %d %d\n", nrl, nrh, v0, v1);getchar();
+	
+	for(long i = nrl; i <= nrh; i++) {
+		for(long j = v0; j <= v1; j++) {
+			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);
+			O[i][j] = SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max);
+			V[i][j] = SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max);
+			E[i][j] = SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max);
+		}
+	}
+}
+void SigmaDelta_SIMD_FL_OMP(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
+{
+
+	int nrl, nrh, v0, v1;
+	vuint8 **M_1 = t0->M, **I_1 = t0->I, **O_1 = t0->O, **V_1 = t0->V, **E_1 = t0->E;
+	vuint8 **M   = t1->M, **I   = t1->I, **O   = t1->O, **V   = t1->V, **E   = t1->E;
+	nrl = (int)t1->nrl; v0 = t1->v0;
+	nrh = (int)t1->nrh; v1 = t1->v1;	
+	// printf("%d %d %d %d\n", nrl, nrh, v0, v1);getchar();
+	omp_set_num_threads(omp_get_max_threads());
+	#pragma omp  parallel for default(none) shared(nrl, nrh, v0, v1, M, O, V, E, I, M_1, O_1, V_1, E_1, I_1, n_coeff, v_min, v_max) 
+	for(long i = nrl; i <= nrh; i++) {
+		for(long j = v0; j <= v1; j++) {
+			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);
+			O[i][j] = SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max);
+			V[i][j] = SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max);
+			E[i][j] = SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max);
+		}
+	}
+}
 
 
 
@@ -689,27 +738,6 @@ void SigmaDelta_SIMD(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8
 	SigmaDelta_step4_SIMD(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
 }
 
-void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
-{
-
-	int nrl, nrh, v0, v1;
-
-	vuint8 **M_1 = t0->M, **I_1 = t0->I, **O_1 = t0->O, **V_1 = t0->V, **E_1 = t0->E;
-	vuint8 **M   = t1->M, **I   = t1->I, **O   = t1->O, **V   = t1->V, **E   = t1->E;
-	
-	nrl = (int)t1->nrl; v0 = t1->v0;
-	nrh = (int)t1->nrh; v1 = t1->v1;	
-	// printf("%d %d %d %d\n", nrl, nrh, v0, v1);getchar();
-	
-	for(long i = nrl; i <= nrh; i++) {
-		for(long j = v0; j <= v1; j++) {
-			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);
-			O[i][j] = SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max);
-			V[i][j] = SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max);
-			E[i][j] = SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max);
-		}
-	}
-}
 void test_step0_SIMD() {
 
 	// p_vimage vT_1 = create_vimage("../car3/car_3000.pgm");

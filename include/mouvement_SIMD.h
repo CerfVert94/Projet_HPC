@@ -42,6 +42,7 @@ void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nr
 
 void SigmaDelta_SIMD(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
 void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
+void SigmaDelta_SIMD_FL_OMP(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max);
 void test_step0_SIMD();
 
 #endif /* __MOUVEMENT_SIMD_H__ */

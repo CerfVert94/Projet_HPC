@@ -41,6 +41,8 @@ void ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR (vuint8** X, int nrl, int nrh, l
 void ui8matrix_dilation_dilation_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer, vuint8 **Y);
 void ui8matrix_erosion_erosion_SIMD_FO_RR_row (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer, vuint8 **Y);
 
+
+void ui8matrix_erosion_SIMD_InLU_O3_AddrRR_OMP (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
 void test_functions_morpho_SIMD(); 
 
 #endif /* __MORPHO_SSE2_H__ */
