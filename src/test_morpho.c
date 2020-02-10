@@ -106,8 +106,8 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 			memset_ui8matrix(tempBuffer, 0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
 			copy_ui8matrix_ui8matrix(image, nrl, i, ncl, nch, X);
 
-			zero_vui8matrix(vX,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
-			copy_vui8matrix_vui8matrix(vimage, i0, i, j0, j1, vX);
+			// zero_vui8matrix(vX,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+			// copy_vui8matrix_vui8matrix(vimage, i0, i, j0, j1, vX);
 	
 			for(k = 0; k < nb_sets; k++) {
 				if (morpho_sets[k].instr_type == SIMD) {
@@ -115,7 +115,8 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 					printf("\tTesting for %ld x %ld (%ld x %ld)\n", i + 1, j + 1 , i, v1 + 1);
 					// printf("%d => %d\n", j,  (v1) * card); getchar();
 			
-
+					zero_vui8matrix(vX,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
+					copy_vui8matrix_vui8matrix(vimage, i0, i, j0, j1, vX);
 					zero_vui8matrix(vY            ,  i0 - 2,  i1 + 2,  j0 - 1,  j1 + 1);
 					morpho_sets[k].vec_morpho_func(vX, (int)i0, (int)i, ncl, nch, (int)j0, (int)v1 + 1, vTempBuffer, vY);
 					

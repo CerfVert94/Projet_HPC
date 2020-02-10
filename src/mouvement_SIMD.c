@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <tmmintrin.h>
+#include <pmmintrin.h>
 
 #include "nrdef.h"
 #include "nrutil.h"
@@ -28,15 +30,202 @@
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
-	// copy_ui8matrix_ui8matrix(t0->I, t0->nrl, t0->nrh, t0->ncl, t0->nch, t0->M);
-	copy_vui8matrix_vui8matrix(I, nrl, nrh, v0, v1, M);
-	// memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	long i, j;
-	vuint8 vec1 = init_vuint8(1);
-	for (i = nrl; i <= nrh; i++)
-		for (j = v0; j <= v1; j++)
-			_mm_store_si128((vuint8*) &V[i][j], vec1);
+
+
+	vuint8 vec1 = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+	vuint8 *ptr = &V[nrl][v0];
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	for (i = nrl; i < nrh + 1; i++)
+		for (j = v0; j < v1 + 1; j++)
+			V[i][j] = vec1;
 }
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_and_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j;
+	vuint8 vec1 = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+	vuint8 *ptr = &V[nrl][v0];
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	for (i = nrl; i < nrh + 1; i++)
+		for (j = v0; j < v1 + 1; j++)
+			V[i][j] = _mm_and_si128(vec1, vec1);
+}
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_or_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j;
+	vuint8 vec1 = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	for (i = nrl; i < nrh + 1; i++)
+		for (j = v0; j < v1 + 1; j++)
+			V[i][j] = _mm_or_si128(vec1, vec1);
+}
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_load_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j;
+	vuint8 vec1 = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+	vuint8 *ptr = &V[nrl][v0];
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	for (i = nrl; i < nrh + 1; i++)
+		for (j = v0; j < v1 + 1; j++)
+			V[i][j] = _mm_lddqu_si128(&vec1);
+}
+
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_store_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j;
+	vuint8 vec1 = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+	vuint8 *ptr = &V[nrl][v0];
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	for (i = nrl; i < nrh + 1; i++)
+		for (j = v0; j < v1 + 1; j++)
+			_mm_store_si128(&V[i][j], vec1);
+}
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_memset_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j;
+	uint32 one = 1 << 0 | 1 << 8 | 1 << 16 | 1 << 24;
+	vuint8 *ptr = &V[nrl][v0];
+	size_t len = (nrh - nrl + 1) * (v1 - v0 + 1)  * sizeof(vuint8);
+	
+	memcpy(&M[nrl][v0], &I[nrl][v0], len);
+	memset((uint32*)&V[nrl][v0], one, len);
+}
+
+
+
+
+
+/*-----------------------------------------------------------------------------------------------*/
+vuint8 SigmaDelta_step1_SIMD_single_vector(vuint8 vM_1, vuint8 vI, vuint8 vM, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*-----------------------------------------------------------------------------------------------*/
+
+	vuint8 vRes, vTemp;
+	vuint8 C1, C2, C3;
+
+	vuint8 CMP = _mm_set1_epi8(128);
+	vuint8 ONE = _mm_set1_epi8(0x1);
+	vuint8 vM_1sub, vM_1add;
+
+	vM_1sub = _mm_subs_epu8(vM_1, ONE);
+	vM_1add = _mm_adds_epu8(vM_1, ONE);
+
+	vec_cmplt(vM_1, vI, C1, CMP);
+	C2  = _mm_cmpeq_epi8(vI, vM_1);
+	// [vM_1 < vI => vTemp := vM_1add] or [not (vM_1 < vI) => vTemp := vM_1add]
+	vTemp = _mm_or_si128(_mm_and_si128(C1, vM_1add), _mm_andnot_si128(C1, vM_1sub));
+	// If vM1 == vI, then vM := vM_1. If not vM := vTemp (less than / greater than )
+	vM  = _mm_or_si128(_mm_and_si128(C2, vM_1)   , _mm_andnot_si128(C2, vTemp));
+	return vRes;
+
+	
+}
+/*---------------------------------------------------------------------------------------------*/
+vuint8 SigmaDelta_step2_SIMD_single_vector(vuint8 vM, vuint8 vI, vuint8 vO, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	return vec_subabs(vI, vM);	
+}
+
+
+/*-----------------------------------------------------------------------------------------------*/
+vuint8 SigmaDelta_step3_SIMD_single_vector(vuint8 vV_1, vuint8 vO, vuint8 vV, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*-----------------------------------------------------------------------------------------------*/
+
+	vuint8 vNO, vTemp;
+	vuint8 C1, C2;
+
+	vuint8 CMP = _mm_set1_epi8(128);
+	vuint8 ONE = _mm_set1_epi8(0x1);
+	vuint8 vV_1add, vV_1sub;
+
+
+	vuint8 vuint8_max = _mm_set1_epi8(255);
+	vuint8 vVmax = _mm_set1_epi8(v_max);
+	vuint8 vVmin = _mm_set1_epi8(v_min);
+
+	vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
+	vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
+	
+	vNO = vO;
+	for (int k = 1; k < n_coeff; k++) vNO =_mm_adds_epu8(vNO, vO);
+
+	// V_t0 < n * O_t1
+	vec_cmplt(vV_1, vNO, C1, CMP);
+	// V_t0 == n * O_t1
+	C2  = _mm_cmpeq_epi8(vNO, vV_1);
+
+	vTemp = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_andnot_si128(C1, vV_1sub));
+	vTemp = _mm_or_si128(_mm_and_si128(C2, vV_1)   , _mm_andnot_si128(C2, vTemp));
+	vV  = _mm_max_epu8(_mm_min_epu8(vTemp, vVmax), vVmin);
+	return vV;
+}
+/*-----------------------------------------------------------------------------------------------*/
+vuint8 SigmaDelta_step4_SIMD_single_vector(vuint8 vO, vuint8 vV, vuint8 vE, uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*-----------------------------------------------------------------------------------------------*/
+	vuint8 ZERO = _mm_set1_epi8(0);
+	vuint8 ONE = _mm_set1_epi8(1);
+
+	vuint8 C, CMP = _mm_set1_epi8(128);
+
+	vec_cmplt(vO, vV, C, CMP);
+
+	vE = _mm_or_si128(_mm_and_si128(C, ZERO), _mm_andnot_si128(C, ONE));
+}
+	
+/*-----------------------------------------------------------------------------------------------*/
+void SigmaDelta_step3_SIMD_ver2(vuint8** V_1, vuint8** O, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*-----------------------------------------------------------------------------------------------*/
+
+	vuint8 vV_1, vO, vNO, vV, vTemp;
+	vuint8 C1, C2, C3;
+
+	vuint8 CMP = _mm_set1_epi8(128);
+	vuint8 ONE = _mm_set1_epi8(1);
+	vuint8 vV_1add, vV_1sub;
+	vuint8 vVmax = _mm_set1_epi8(v_max);
+	vuint8 vVmin = _mm_set1_epi8(v_min);
+	
+
+	for(long i = nrl; i <= nrh; i++) {
+		for(long j = v0; j <= v1; j++) {
+			vV_1 = _mm_load_si128((vuint8*) &V_1[i][j]); 
+			vO 	 = _mm_load_si128((vuint8*) &O[i][j]);   
+
+			vV_1sub = _mm_max_epu8(_mm_subs_epu8(vV_1, ONE), vVmin);
+			vV_1add = _mm_min_epu8(_mm_adds_epu8(vV_1, ONE), vVmax);
+			
+			vNO = vO;
+			for (int k = 1; k < n_coeff; k++) vNO =_mm_adds_epu8(vNO, vO);
+
+			// V_t0 < n * O_t1
+			vec_cmplt(vV_1, vNO, C1, CMP);
+			// V_t0 == n * O_t1
+			C2  = _mm_cmpeq_epi8(vNO, vV_1);
+
+
+			vTemp = _mm_or_si128(_mm_and_si128(C1, vV_1add), _mm_andnot_si128(C1, vV_1sub));
+			vTemp = _mm_or_si128(_mm_and_si128(C2, vV_1)   , _mm_andnot_si128(C2, vTemp));
+			vV  = _mm_max_epu8(_mm_min_epu8(vTemp, vVmax), vVmin);
+
+		    _mm_store_si128((vuint8*) &V[i][j], vV);
+
+		}
+	}
+}
+
 
 /*-----------------------------------------------------------------------------------------------*/
 void SigmaDelta_step1_SIMD(vuint8** M_1, vuint8** I, vuint8** M, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
@@ -462,7 +651,7 @@ void SigmaDelta_step3_InLU_O3_SIMD(vuint8** V_1, vuint8** O, vuint8** V, long nr
 void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 
-	vuint8 vO, vV, tE;
+	vuint8 vO, vV, vE;
 
 	vuint8 ZERO = init_vuint8(0);
 	vuint8 ONE = init_vuint8(1);
@@ -481,8 +670,8 @@ void SigmaDelta_step4_SIMD(vuint8** O, vuint8** V, vuint8** E, long nrl, long nr
 			// vO = _mm_add_epi8(vO, CMP);
 			// vV = _mm_add_epi8(vV, CMP);
 
-    		tE = _mm_or_si128(_mm_and_si128(C, ZERO), _mm_andnot_si128(C, ONE));
-            _mm_store_si128(&E[i][j], tE);
+    		vE = _mm_or_si128(_mm_and_si128(C, ZERO), _mm_andnot_si128(C, ONE));
+            _mm_store_si128(&E[i][j], vE);
 		}
 	}
 	
@@ -498,6 +687,47 @@ void SigmaDelta_SIMD(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8
 	SigmaDelta_step4_SIMD(t1->O, t1->V, t1->E, t1->nrl, t1->nrh, t1->v0, t1->v1, n_coeff, v_min, v_max);
 }
 
+void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, uint8 v_max)
+{
+
+	int nrl, nrh, v0, v1;
+
+	vuint8 **M_1 = t0->M, **I_1 = t0->I, **O_1 = t0->O, **V_1 = t0->V, **E_1 = t0->V;
+	vuint8 **M   = t1->M, **I   = t1->I, **O   = t1->O, **V   = t1->V, **E   = t1->V;
+
+	vuint8 vM, vO, vV, vE, vI, vM_1, vO_1, vV_1, vE_1, vI_1, vNO;
+	vuint8 C1, C2, C3, TMP, A, B;
+	vuint8 vRes;
+
+	vuint8 ZERO = _mm_setzero_si128();
+	vuint8 CMP = init_vuint8(128);
+	vuint8 ONE = init_vuint8(1);
+
+	vuint8 vuint8_max = _mm_set1_epi8(0xFF);
+	vuint8 vVmax = _mm_set1_epi8(v_max);
+	vuint8 vVmin = _mm_set1_epi8(v_min);
+	vuint8 vV_1add, vV_1sub;
+	vuint8 vM_1sub, vM_1add;
+	vuint8 vMI_sub, vShift;
+
+	nrl = t1->nrl; v0 = t1->v0;
+	nrh = t1->nrh; v1 = t1->v1;
+	
+	
+
+	for(long i = nrl; i <= nrh; i++) {
+		for(long j = v0; j <= v1; j++) {
+
+
+		}
+	}
+	
+
+
+
+	
+
+}
 void test_step0_SIMD() {
 
 	// p_vimage vT_1 = create_vimage("../car3/car_3000.pgm");

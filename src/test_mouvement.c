@@ -233,7 +233,7 @@ void verify_case_Vec_SigmaDelta_step4(struct sd_set *sd, int num_case, const cha
 
 
 /*---------------------------------------------------*/
-void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct sd_set *sd, bool logging)
+void  test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct sd_set *sd, bool logging)
 /*---------------------------------------------------*/
 {
 	uint8 **X, **Y, **Z;
@@ -244,6 +244,7 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 	int v0 = 0, v1 = 0;
 	int w0 = 0, w1 = 0;
 	printf("Integration test : "LALIGNED_STR" (%-30s / %-30s)\n", sd->func_name,  filename0,  filename1);
+	// printf("1\n");
 	if (sd->instr_type == SCALAR) {
 		X = LoadPGM_ui8matrix(filename0, &nrl0, &nrh0, &ncl0, &nch0);
 		Y = LoadPGM_ui8matrix(filename1, &nrl1, &nrh1, &ncl1, &nch1);
@@ -253,7 +254,7 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 	}
 	else if (sd->instr_type == SIMD) {
 		int i0, i1, j0, j1;
-
+		
 		vX = LoadPGM_vui8matrix(filename0, &i0, &i1, &v0, &v1);
 		vY = LoadPGM_vui8matrix(filename1, &j0, &j1, &w0, &w1);
 		assert(j0 == i0 && j1 == i1 && v0 == w0 && v1 == w1);
@@ -262,6 +263,7 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 		X = vui8matrix_to_ui8matrix(vX, i0, i1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
 		Y = vui8matrix_to_ui8matrix(vY, j0, j1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
 		Z = vui8matrix_to_ui8matrix(vZ, j0, j1, w0, w1, &nrl1, &nrh1, &ncl1, &nch1);
+		
 		free_vui8matrix(vX, i0, i1, v0, v1);
 		free_vui8matrix(vY, i0, i1, v0, v1);
 		free_vui8matrix(vZ, i0, i1, v0, v1);
@@ -273,9 +275,11 @@ void test_integration_SigmaDelta_step0(char *filename0, char *filename1, struct 
 	for (long row = nrl1; row < nrh1 + 1; row++) 
 		for (long col = ncl1; col < nch1 + 1; col++){
 			if (logging) {
+				printf("%ld %ld %ld %ld\n", nrl1, nrh1, ncl1, nch1);
 				printf("[row, col] = [%ld, %ld]\n", row, col);
 				printf("[M_t0 = %u] [I_t0 = %u] => [V_t0 = %u]\n", X[row][col], Y[row][col], Z[row][col]);
 			}
+			// printf("3\n");
 			assert(SD_step0_produces_valid_output(X[row][col], Y[row][col], Z[row][col], logging));
 		}
 	printf("Test passed.\n");

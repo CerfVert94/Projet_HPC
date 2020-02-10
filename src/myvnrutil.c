@@ -78,12 +78,10 @@ uint8** vui8matrix_to_ui8matrix(vuint8** vX, long i0, long i1, int j0, int j1, l
 
     card = card_vuint8();
     *nrl = i0;        *nrh = i1;
-    // *ncl = j0 * card; *nch = (j0 + (j1 - j0 + 1)) * card - 1;
-    // printf("%s : %ld %ld %ld %ld\n", __func__, i0, i1, j0, i1);
-    v2m1D(j0, j1, card, (int*)ncl, (int*)nch);
-    ncl_ = (int)*ncl;
-    nch_ = (int)*nch;
-    // printf("%s : %ld %ld %d %d\n", __func__, i0, i1, ncl_, nch_);
+    
+    v2m1D(j0, j1, card, &ncl_, &nch_);
+    *ncl = ncl_;
+    *nch = nch_;
     
     uint8 **Y = filled_ui8matrix(i0, i1, ncl_, nch_, 0);
 

@@ -265,8 +265,9 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
-		
-		for (idx_set = 0; idx_set < nb_sets; idx_set++) {
+		// idx_set = 0;
+		for (idx_set = 0; idx_set < nb_sets; idx_set++) 
+		{
 			X = ui8matrix_checker(0, size, 0, size, 3, 1); 
 			Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
 			Z = ui8matrix        (0, size, 0, size); 
