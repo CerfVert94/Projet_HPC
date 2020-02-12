@@ -313,7 +313,7 @@ struct morpho_set dilations[] = {
                                 {.func_name = "SigmaDelta_step4_SIMD", .vec_sd_func = SigmaDelta_step4_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 };
     
-    struct complete_sd_set completeSDs[] = {
+    struct complete_sd_set completeSDs[] = {//
                                     // {.func_name = "SigmaDelta_naive", .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SCALAR},                                  
                                     // {.func_name = "SigmaDelta_best", .sd_step0 = SigmaDelta_step0_mem, .sd_func = SigmaDelta_best, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SCALAR},
                                     // {.func_name = "SigmaDelta_SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD, .vec_sd_func = SigmaDelta_SIMD, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SIMD},
@@ -322,20 +322,21 @@ struct morpho_set dilations[] = {
                                   };
     struct morpho_set sequences[] = {
                                         {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
-                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
-                                        {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR"   , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
-                                        {.func_name = "ui8matrix_sequence_drnc_fo"                     , .morpho_func = ui8matrix_sequence_drnc_fo, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
-                                        {.func_name = "ui8matrix_sequence_naive"                       , .morpho_func = ui8matrix_sequence_naive     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
-                                        {.func_name = "ui8matrix_sequence_crnc"                        , .morpho_func = ui8matrix_sequence_crnc, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
-                                        {.func_name = "ui8matrix_sequence_drnc"                        , .morpho_func = ui8matrix_sequence_drnc, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
-                                        {.func_name = "ui8matrix_sequence_drnc_fo_pipeline"            , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
-                                        {.func_name = "ui8matrix_sequence_drnc_fo_pipeline2"           , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline2, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"       , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP"            , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR"                , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        {.func_name = "ui8matrix_sequence_drnc_fo"                                  , .morpho_func = ui8matrix_sequence_drnc_fo, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_naive"                                    , .morpho_func = ui8matrix_sequence_naive     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_crnc"                                     , .morpho_func = ui8matrix_sequence_crnc, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_drnc"                                     , .morpho_func = ui8matrix_sequence_drnc, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_drnc_fo_pipeline"                         , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
+                                        {.func_name = "ui8matrix_sequence_drnc_fo_pipeline2"                        , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline2, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
                                         // {.func_name = "ui8matrix_sequence_drnc_fo_pipeline"            , .morpho_func = ui8matrix_sequence_drnc_fo_pipeline, .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SCALAR}, 
                                         // {.func_name = "ui8matrix_sequence_divide_row_and_conquer_OMP"  , .morpho_func = ui8matrix_sequence_divide_row_and_conquer_OMP   , .instr_type = SCALAR},
                                        };
     struct complete_process_set cps[] = {
-                                        {.func_name = "SD_Naive/Sequential_Morpho_Naive"                 , .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .morpho_func = ui8matrix_sequence_naive, .instr_type= SCALAR},
-                                        {.func_name = "SD_FO+SIMD/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
+                                        // {.func_name = "SD_Naive/Sequential_Morpho_Naive"                 , .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .morpho_func = ui8matrix_sequence_naive, .instr_type= SCALAR},
+                                        // {.func_name = "SD_FO+SIMD/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
                                         {.func_name = "SD_FO+SIMD+OMP/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL_OMP, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
                                         };
 void launch_movement_detection(char *filename_format, int start, int end, char *res_filename_format)
@@ -428,11 +429,11 @@ int main(void)
 
     // test_erosions ("../car3/car_3000.pgm", erosions , 3, false);
     // test_dilations("../car3/car_3000.pgm", dilations, 3, false);
-    test_sequences ("../car3/car_3001.pgm", sequences , 3, false);
+    test_sequences ("../car3/car_3001.pgm", sequences , 2, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , 1, 1, 1, 10, 2000, 1);
     // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , 7, 1, 1, 10, 5000, 10);
-    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 3, 1, 1, 100, 10000, 50);
-    launch_complete_process_benchmark("output/full_benchmark.dat", cps, 3, 1, 1, 100, 2500, 50);
+    launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 1, 1, 1, 100, 10000, 50);
+    // launch_complete_process_benchmark("output/full_benchmark.dat", cps, 1, 1, 1, 600, 800, 10);
     
 
 

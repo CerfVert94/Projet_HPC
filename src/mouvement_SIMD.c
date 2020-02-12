@@ -46,10 +46,10 @@ void SigmaDelta_SIMD_FL(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min, ui
 	
 	for(long i = nrl; i <= nrh; i++) {
 		for(long j = v0; j <= v1; j++) {
-			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);
-			O[i][j] = SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max);
-			V[i][j] = SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max);
-			E[i][j] = SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max);
+			_mm_store_si128(&M[i][j], SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&O[i][j], SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&V[i][j], SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&E[i][j], SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max));
 		}
 	}
 }
@@ -66,10 +66,10 @@ void SigmaDelta_SIMD_FL_OMP(p_vimage t0, p_vimage t1, uint8 n_coeff, uint8 v_min
 	#pragma omp  parallel for default(none) shared(nrl, nrh, v0, v1, M, O, V, E, I, M_1, O_1, V_1, E_1, I_1, n_coeff, v_min, v_max) 
 	for(long i = nrl; i <= nrh; i++) {
 		for(long j = v0; j <= v1; j++) {
-			M[i][j] = SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max);
-			O[i][j] = SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max);
-			V[i][j] = SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max);
-			E[i][j] = SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max);
+			_mm_store_si128(&M[i][j], SigmaDelta_step1_SIMD_single_vector(M_1[i][j], I[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&O[i][j], SigmaDelta_step2_SIMD_single_vector(M  [i][j], I[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&V[i][j], SigmaDelta_step3_SIMD_single_vector(V_1[i][j], O[i][j], n_coeff, v_min, v_max));
+			_mm_store_si128(&E[i][j], SigmaDelta_step4_SIMD_single_vector(O  [i][j], V[i][j], n_coeff, v_min, v_max));
 		}
 	}
 }

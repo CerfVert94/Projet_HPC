@@ -14,6 +14,7 @@
 
 #include "vnrdef.h"
 #include "vnrutil.h"
+#include "myvnrutil.h"
 
 #include "mutil.h"
 
@@ -34,13 +35,13 @@
 #define get_vec_edge(vX, i, v1, mask) _mm_and_si128(vec_right1(vX[i][v1], vX[i][v1]), mask);
 
 void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **Y , vuint8 **Z) {
-	
-	vuint8  *in_row, *out_row;
+vuint8  *in_row, *out_row;
 	vuint8 **in, **mid, **out;
-	int row, col;
-	int d5_row, e3_row, nrl_prime, nrh_prime;
-	const int PRE_D5_NROW = 5;
-	const int PRE_E3_NROW = 3;
+	int d5_row, e3_row, row, col;
+	int nrl_prime, nrh_prime;
+	int thread_num, nb_threads, nrow;
+	const int PRE_D5_NROW = 4;
+	const int PRE_E3_NROW = 1;
 	int card = card_vuint8(); 
 	int last_v    = (nch) / card,  last_vcol = (nch) % card; 
 	// Mask for edge
@@ -48,70 +49,16 @@ void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int n
 	uint8 *mask= (uint8*)&vMask;
 	for (col = 0; col < last_vcol + 1; col++) mask[col] = 0xFF;
 
-
-	nrl_prime = (nrl - 2) + PRE_D5_NROW ;
-	nrh_prime = (nrl - 2) + PRE_D5_NROW + PRE_E3_NROW ;
-
-	in = X; out = Y;
-
-	omp_set_num_threads(omp_get_max_threads());
-
-	// First prologue for D5 (Deprecated / Omitted: Edge handling for E3 (First morpho))
-	ui8matrix_erosion_SIMD_InLU_O3_AddrRR(in, nrl, nrl_prime, ncl, nch, v0, v1, mid, out);
-	// Second prologue for E3 (Last morpho) 
-	
-	d5_row = nrl;
-	for (row = nrl_prime + 1; row < nrh_prime + 1; row ++) {
-		in = X; out = Y;
-		ui8matrix_erosion_SIMD_InLU_O3_AddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
-		in = Y; out = X;
-		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);
-
-		// Handle edge
-		out_row = out[d5_row];
-		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
-		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
-		d5_row++;
+	nrow = (nrh - nrl) + 1;
+	if ((v1 - v0) == 2) {
+		printf("Start %d ~ %d\n", v0, v1);
+		// ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v0, Y, Z);
+		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, 14, 0, 0, Y, Z);
+		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, 1, 1, Y, Z);
+		print_vui8matrix(Z, nrl - 2, nrh + 2, v0, v1, "%4u", "Test\n");
 	}
-	e3_row = nrl;
-	for (row = nrh_prime + 1; row < nrh + 1; row++) {
-		in = X; out = Y;
-		ui8matrix_erosion_SIMD_InLU_O3_AddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
-		
-		in = Y; out = X;
-		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);		
-	
-		// Handle edge
-		out_row = out[d5_row];
-		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
-		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
-
-		in = X; out = Z;
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
-		d5_row++; e3_row++;
-	}
-	
-	// printf("%d %d %d\n", d5_row, e3_row, d5_row - e3_row);
-	// Epilogue for D5 and E3 (Last morpoh) & Edge handling for E3 (Last morpho)
-	// #pragma omp parallel for default(none) firstprivate(nrl, nrh, ncl, nch, v0, v1, e3_row, in, out, out_row, col) shared(mid, d5_row, X, Y, Z, last_v, vMask)
-	for (row = d5_row; row < nrh + 1; row ++) {
-		e3_row = row - 4;
-		in = Y; out = X;
-		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, row, nrh, ncl, nch, v0, v1, mid, out);
-		// Handle edge
-		// #pragma omp barrier
-		out_row = out[row];
-		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
-		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
-
-		in = X; out = Z;
-		ui8matrix_erosion_SIMD_InLU_O3_AddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
-	}
-	// Epilogue for E3 (Last morpho) & Edge handling for E3 (Last morpho)
-	in = X; out = Z;
-	// #pragma omp parallel for default(none) private(out_row, col, d5_row, e3_row) shared(X, Y, Z,in, mid, out, v0, v1, nrl, nrh, ncl, nch, nrl_prime, nrh_prime, last_v, vMask)
-	for (row = e3_row; row < nrh + 1; row ++) {
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);	
+	else {
+		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v1, Y, Z);
 	}
 }
 
@@ -130,34 +77,82 @@ void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl, int nrh, 
 	
 
 	in = X; mid = NULL; out = Y;
-	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); zero_vui8matrix(X, nrl, nrh, v0, v1);
+	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out);/// zero_vui8matrix(X, nrl, nrh, v0, v1);
 
 	
 	in = Y; mid = NULL; out = X;
-	ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); zero_vui8matrix(Z, nrl, nrh, v0, v1);
+	ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); //zero_vui8matrix(Z, nrl, nrh, v0, v1);
 	
 	for (row = nrl - 2; row < nrh + 1 + 2; row++) {
 		out[row][last_v] = _mm_and_si128(out[row][last_v], vMask);
 		for (col = last_v + 1; col < v1 + 1; col++) 
 			out[row][col] = _mm_setzero_si128();
-		// for (col = v0; col < v1 + 1; col++) {
-		// 	print_vui8vector(&out[row][col], 0, 0, 0, 15, " %4u", NULL); printf(" ");
-		// }
-		// printf("\n");
 	}
 
 	in = X; mid = NULL; out = Z;
 	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v1, Y, Z);
 }
 
+void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **Y , vuint8 **Z) {
+	vuint8  *in_row, *out_row;
+	vuint8 **in, **mid, **out;
+	long row, col, nrow, r;
+	int card = card_vuint8(); 
+	int last_v    = (nch) / card; 
+	int last_vcol = (nch) % card; 
+	vuint8 vMask = _mm_setzero_si128(); 
+	uint8 *mask= (uint8*)&vMask;
+	for (col = 0; col < last_vcol + 1; col++) mask[col] = 0xFF;
+	int thread_num, nb_threads; 
+	omp_set_num_threads(omp_get_max_threads());
+
+	nrow = (nrh - nrl) + 1;
+	// printf("%d ~ %d (%d)\n", nrl, nrh, nrow / nb_threads);
+	
+	#pragma omp parallel firstprivate(nrl, nrh) private(in, mid, out) firstprivate(X, Y, Z) shared(nrow)
+	{
+		nb_threads = omp_get_num_threads();
+		thread_num = omp_get_thread_num();
+		nrl = nrl + (thread_num + 0) * (nrow / nb_threads); 
+		if ( thread_num < nb_threads -1 )
+			nrh = (thread_num + 1) * (nrow / nb_threads) - 1;   
+
+
+		in = X; mid = NULL; out = Y;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); 
+		#pragma omp barrier
+		// zero_vui8matrix(X, nrl, nrh, v0, v1);
+		
+		in = Y; mid = NULL; out = X;
+		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); 
+
+		#pragma omp barrier
+		// zero_vui8matrix(Z, nrl, nrh, v0, v1);
+
+		for (row = nrl - 2; row < nrh + 1 + 2; row++) {
+			out[row][last_v] = _mm_and_si128(out[row][last_v], vMask);
+			for (col = last_v + 1; col < v1 + 1; col++) 
+				out[row][col] = _mm_setzero_si128();
+		}
+
+		in = X; mid = NULL; out = Z;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v1, Y, Z);
+	}
+		
+	
+	
+	
+	// print_vui8matrix(Z, nrl, nrh, v0, v1, "%4u", "Test:\n");
+}
+
 void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **Y , vuint8 **Z) {
 	
 	vuint8  *in_row, *out_row;
 	vuint8 **in, **mid, **out;
-	int row, col;
-	int d5_row, e3_row, nrl_prime, nrh_prime;
-	const int PRE_D5_NROW = 5;
-	const int PRE_E3_NROW = 3;
+	int d5_row, e3_row, row, col;
+	int nrl_prime, nrh_prime;
+	const int PRE_D5_NROW = 4;
+	const int PRE_E3_NROW = 1;
 	int card = card_vuint8(); 
 	int last_v    = (nch) / card,  last_vcol = (nch) % card; 
 	// Mask for edge
@@ -165,62 +160,52 @@ void ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl, 
 	uint8 *mask= (uint8*)&vMask;
 	for (col = 0; col < last_vcol + 1; col++) mask[col] = 0xFF;
 
-
-	nrl_prime = (nrl - 2) + PRE_D5_NROW ;
-	nrh_prime = (nrl - 2) + PRE_D5_NROW + PRE_E3_NROW ;
-
+	// Prologue
 	in = X; out = Y;
-
-	// First prologue for D5 (Deprecated / Omitted: Edge handling for E3 (First morpho))
-
+	nrl_prime = nrl + PRE_D5_NROW;
 	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrl_prime, ncl, nch, v0, v1, mid, out);
-
-	// Second prologue for E3 (Last morpho) 
-	for (d5_row = nrl, row = nrl_prime + 1; row < nrh_prime + 1; row ++, d5_row++) {
-		in = X; out = Y;
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
-		in = Y; out = X;
-		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);
-
+	in = Y; out = X;
+	nrl_prime = nrl + PRE_E3_NROW;
+	ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl, nrl_prime, ncl, nch, v0, v1, mid, out);
+	for (d5_row = nrl; d5_row < nrl_prime + 1; d5_row++){
 		// Handle edge
 		out_row = out[d5_row];
 		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
 		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
 	}
-	for (e3_row = nrl, row = nrh_prime + 1; row < nrh + 1; d5_row++, e3_row++, row++) {
-		in = X; out = Y;
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);
+
+	// Story
+	nrl_prime = nrl + PRE_D5_NROW + 1;
+	for (row = nrl_prime; row < nrh + 1; row ++) {
+		e3_row = row - (PRE_D5_NROW + 1);
+		d5_row = row - (PRE_D5_NROW - 1);
+
+
+		in = X; out = Z;
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR  (in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
+		in = X; out = Y;  
+		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR  (in,    row,    row, ncl, nch, v0, v1, mid, out);
 		
 		in = Y; out = X;
 		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, d5_row, d5_row, ncl, nch, v0, v1, mid, out);		
-	
 		// Handle edge
 		out_row = out[d5_row];
 		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
 		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
-
-		in = X; out = Z;
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
 	}
-	
-	// Epilogue for D5 and E3 (Last morpoh) & Edge handling for E3 (Last morpho)
-	for (e3_row = e3_row - 1, row = d5_row; row < nrh + 1; e3_row++, row ++) {
-		in = Y; out = X;
-		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, row, nrh, ncl, nch, v0, v1, mid, out);
-		// Handle edge
-		out_row = out[row];
+	// Epilogue
+	in = Y; out = X;
+	nrl_prime = nrh - 2;
+	ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl_prime, nrh, ncl, nch, v0, v1, mid, out);		
+	// Handle edge
+	for (d5_row = nrl_prime - 1; d5_row < nrh + 1; d5_row++) {
+		out_row = out[d5_row];
 		out_row[last_v] = _mm_and_si128(out_row[last_v], vMask);
 		for (col = last_v + 1; col < v1 + 1; col++) out_row[col] = _mm_setzero_si128();
-
-		in = X; out = Z;
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, e3_row, e3_row, ncl, nch, v0, v1, mid, out);
 	}
-	// Epilogue for E3 (Last morpho) & Edge handling for E3 (Last morpho)
 	in = X; out = Z;
-	for (row = e3_row; row < nrh + 1; row ++) {
-		// HANDLE_EDGE_OF_ROW(in[row]);
-		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, row, row, ncl, nch, v0, v1, mid, out);	
-	}
+	nrl_prime = nrh - 4;
+	ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl_prime, nrh, ncl, nch, v0, v1, mid, out);	
 }
 
 /*------------------------------------------------------------------------------------------*/

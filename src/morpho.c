@@ -32,7 +32,7 @@ void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch,
 	// 	X[row][ncl - 1] = X[row][ncl];
 	// 	X[row][nch + 1] = X[row][nch];
 	// }
-	
+	// display_ui8matrix(X, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "INPUT");
 	ui8matrix_erosion_naive  (X, nrl, nrh, ncl, nch, NULL, Y); memset_ui8matrix(Z, 0, nrl-2, nrh+2, ncl-2, nch+2);
 	// display_ui8matrix(Y, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "E3 (Naive)");
 	// display_ui8matrix(Y, nrl - 2, nrh + 2, -2 + ncl, 32 + 2, "%4u", "Erosion seq_naive");
@@ -60,7 +60,7 @@ void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch,
 	
 	
 	
-	// display_ui8matrix(Z, nrl - 2, nrh + 2, ncl - 2, nch + 2, "%4u", "EDDE");
+	display_ui8matrix(Z, nrl - 2, nrh + 2, ncl, nch , "%4u", "EDDE");
 	// getchar();
 }
 void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
