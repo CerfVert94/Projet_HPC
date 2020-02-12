@@ -307,8 +307,6 @@ unsigned long long get_cpu_cycles_of_complete_process(struct complete_process_se
 
 	begin = __rdtsc();
     cproc->sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, N, Vmin, Vmax);
-	end = __rdtsc() - begin;
-	begin = __rdtsc() + end;
     cproc->sd_func(t0, t1, N, Vmin, Vmax);
     cproc->morpho_func(t1->E, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch - BORD, tempBuffer, t1->Omega);
 	end = __rdtsc();
@@ -326,11 +324,10 @@ unsigned long long get_cpu_cycles_of_vec_complete_process(struct complete_proces
 	
 	begin = __rdtsc();
     cproc->vec_sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->v0, t0->v1, N, Vmin, Vmax);
-	end = __rdtsc() - begin;
-	begin = __rdtsc() + end;
     cproc->vec_sd_func(t0, t1, N, Vmin, Vmax);
     cproc->vec_morpho_func(t1->E, (int)t1->nrl + BORD, (int)t1->nrh - BORD, (int)t1->ncl + BORD, (int)t1->nch - BORD, t1->v0 + vBORD, t1->v1 - vBORD, vTempBuffer, t1->Omega);
 	end = __rdtsc();
+//	printf("\tCycles : %llu\n", end - begin);
 	return end - begin;
 }
 
