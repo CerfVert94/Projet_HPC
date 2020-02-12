@@ -53,9 +53,13 @@ vuint8  *in_row, *out_row;
 	if ((v1 - v0) == 2) {
 		printf("Start %d ~ %d\n", v0, v1);
 		// ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v0, Y, Z);
-		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, 14, 0, 0, Y, Z);
+		print_vui8matrix(X, nrl - 2, nrh + 2, v0, v1, "%4u", "Input 1\n");
+		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, 0, 0, Y, Z);
+		print_vui8matrix(Z, nrl - 2, nrh + 2, v0, v1, "%4u", "Resultat 1\n");
+		print_vui8matrix(X, nrl - 2, nrh + 2, v0, v1, "%4u", "Input 2\n");
 		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, 1, 1, Y, Z);
-		print_vui8matrix(Z, nrl - 2, nrh + 2, v0, v1, "%4u", "Test\n");
+		print_vui8matrix(Z, nrl - 2, nrh + 2, v0, v1, "%4u", "Resultat 2\n");
+		
 	}
 	else {
 		ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v1, Y, Z);
