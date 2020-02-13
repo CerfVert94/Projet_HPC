@@ -77,6 +77,7 @@ void launch_morpho_benchmark(const char *filename, struct morpho_set *morphos, c
 
 void launch_SD_step_benchmark(const char *filename, struct sd_set *sd_steps, const int nb_sets, const int nb_tests,const int packet_size, long min_size, long max_size, long step) {
     double **results;
+	// printf("run\n");
     results = benchmark_of_sd_step(sd_steps, nb_sets, min_size, max_size, step, nb_tests, packet_size);
     save_benchmark(filename, sd_steps, sizeof(struct sd_set), nb_sets, results, min_size, max_size, step);
 }
@@ -304,10 +305,9 @@ unsigned long long get_cpu_cycles_of_complete_process(struct complete_process_se
     tempBuffer = cproc->Y;
     t0 = cproc->t0;
 	t1 = cproc->t1;
+    cproc->sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, N, Vmin, Vmax);
 
-	
-	begin = __rdtsc() + end;
-	cproc->sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->ncl, t0->nch, N, Vmin, Vmax);
+	begin = __rdtsc();
     cproc->sd_func(t0, t1, N, Vmin, Vmax);
     cproc->morpho_func(t1->E, t1->nrl + BORD, t1->nrh - BORD, t1->ncl + BORD, t1->nch - BORD, tempBuffer, t1->Omega);
 	end = __rdtsc();
@@ -322,12 +322,13 @@ unsigned long long get_cpu_cycles_of_vec_complete_process(struct complete_proces
     vTempBuffer = cproc->vY;
     t0 = cproc->v_t0;
 	t1 = cproc->v_t1;
-	
-	begin = __rdtsc() + end;
     cproc->vec_sd_step0(t0->M, t0->I, t0->V, t0->nrl, t0->nrh, t0->v0, t0->v1, N, Vmin, Vmax);
-	cproc->vec_sd_func(t0, t1, N, Vmin, Vmax);
+	
+	begin = __rdtsc();
+    cproc->vec_sd_func(t0, t1, N, Vmin, Vmax);
     cproc->vec_morpho_func(t1->E, (int)t1->nrl + BORD, (int)t1->nrh - BORD, (int)t1->ncl + BORD, (int)t1->nch - BORD, t1->v0 + vBORD, t1->v1 - vBORD, vTempBuffer, t1->Omega);
 	end = __rdtsc();
+//	printf("\tCycles : %llu\n", end - begin);
 	return end - begin;
 }
 
@@ -442,12 +443,12 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 	int i0, i1, v0, v1;
 	// Initialize to save the benchmark result.
 	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
-	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
 		// idx_set = 0;
 		for (idx_set = 0; idx_set < nb_sets; idx_set++) 
 		{
+			
 			X = ui8matrix_checker(0, size, 0, size, 3, 1); 
 			Y = ui8matrix_checker(0, size, 0, size, 3, 0); 
 			Z = ui8matrix        (0, size, 0, size); 
@@ -457,7 +458,6 @@ double **benchmark_of_sd_step(struct sd_set     *sdsets, long nb_sets, long ls, 
 			n_coeff = sdsets[idx_set].n_coeff;
 			v_min   = sdsets[idx_set].v_min;
 			v_max   = sdsets[idx_set].v_max;
-			
 			if (sdsets[idx_set].instr_type == SCALAR) {
 				begin = __rdtsc();			
 				min_cycles_sum = 0;
