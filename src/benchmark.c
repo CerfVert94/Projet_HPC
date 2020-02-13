@@ -529,8 +529,8 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 			}
 
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
-			// if ((size + 1) % 160 == 0 || size >= hs - 1) 
-				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
+			//if ((size + 1) % 10 == 0 || size >= hs - 1) 
+			printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);						
 			free_vui8matrix(vTempBuffer, i0, i1, j0, j1);
 			free_vui8matrix(vX, i0, i1, j0, j1);
 			free_vui8matrix(vY, k0, k1, l0, l1);
@@ -662,24 +662,29 @@ double **benchmark_of_sd(struct complete_sd_set *csdsets, long nb_sets, long ls,
 }
 void save_benchmark(const char *filename, void *sets, size_t struct_size, int nb_sets, double **results, long min_size, long max_size, long step)
 {
-	FILE *file = fopen(filename, "w");
+    FILE *file = fopen(filename, "w");
     if (!file)
         exit_on_error("fopen failed");
     long k = 0;
 	char* set_ptr = (char*)sets;
 
-    fprintf(file, "#%*s ", 4, "Size");
+    fprintf(file, "Size,");
     for (long i = 0; i < nb_sets; i++) {
-		
-		// printf(RALIGNED_STR, (char*)&set_ptr[i * struct_size]);
-        fprintf(file, RALIGNED_STR" ", (char*)&set_ptr[i * struct_size]);
+	if (i < nb_sets - 1 )
+	        fprintf(file, "%s,", (char*)&set_ptr[i * struct_size]);
+	else 
+	        fprintf(file, "%s", (char*)&set_ptr[i * struct_size]);
+	
     }
 
     fputc('\n', file);
     for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%*ld ", 4, size);
+        fprintf(file, "%ld, ", 4, size);
         for (long i = 0; i < nb_sets; i++) {
-            fprintf(file, RALIGNED_DOUBLE" ", results[i][k]);
+		if (i < nb_sets - 1)
+	            fprintf(file, "%2.2lf,", results[i][k]);
+		else
+	            fprintf(file, "%2.2lf", results[i][k]);
          }
         fprintf(file, "\n");
         k++;

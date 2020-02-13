@@ -60,7 +60,7 @@ void ui8matrix_sequence_naive(uint8** X, long nrl, long nrh, long ncl, long nch,
 	
 	
 	
-	display_ui8matrix(Z, nrl - 2, nrh + 2, ncl, nch , "%4u", "EDDE");
+	//display_ui8matrix(Z, nrl - 2, nrh + 2, ncl, nch , "%4u", "EDDE");
 	// getchar();
 }
 void ui8matrix_erosion_naive(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)

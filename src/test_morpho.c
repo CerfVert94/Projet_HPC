@@ -508,16 +508,16 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 
 	assert((nrh - nrl + 1) > 20 && (nch - ncl + 1) > 20);
 	
-    for(temp_nrh = nrl + 10; temp_nrh < nrh + 1; temp_nrh++){
-        for(temp_nch = ncl + 10; temp_nch < nch + 1; temp_nch++){
+    for(temp_nrh = nrh - 20; temp_nrh < nrh + 1; temp_nrh++){
+        for(temp_nch = nch - 20; temp_nch < nch + 1; temp_nch++){
 			// Test Input
-			X 			= ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
+			X 		    = ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 			// Middle Buffer
-			temp_buffer = ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
+			temp_buffer         = ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 			// Test Output
 			Y		    = ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 			// Valid Output
-			Z 			= ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
+			Z 		    = ui8matrix(nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
 
 			// Full zero intialization & copy image 
 			
@@ -535,8 +535,10 @@ void test_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch, co
 					
 					naive_morphos[0].morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);	
 					if (morpho_sets[i].op_type == FUSION) {
-						memcpy_ui8matrix(Z, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD, X);
-						naive_morphos[1].morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
+						
+						memset_ui8matrix(X, 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD);
+						memcpy_ui8matrix(Z   , nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD, X);
+						naive_morphos[0].morpho_func(X, nrl, temp_nrh, ncl, temp_nch, temp_buffer, Z);
 					}
 					memset_ui8matrix(X            , 0, nrl - BORD, temp_nrh + BORD, ncl - BORD, temp_nch + BORD   );
 					copy_ui8matrix_ui8matrix(image   , nrl       , temp_nrh       , ncl       , temp_nch       , X);

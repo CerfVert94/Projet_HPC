@@ -111,7 +111,7 @@ void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int n
 	omp_set_num_threads(omp_get_max_threads());
 
 	nrow = (nrh - nrl) + 1;
-	// printf("%d ~ %d (%d)\n", nrl, nrh, nrow / nb_threads);
+	//printf("%d ~ %d (%d)\n", nrl, nrh, nrow / omp_get_max_threads());
 	
 	#pragma omp parallel firstprivate(nrl, nrh) private(in, mid, out) firstprivate(X, Y, Z) shared(nrow)
 	{
@@ -120,19 +120,17 @@ void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int n
 		nrl = nrl + (thread_num + 0) * (nrow / nb_threads); 
 		if ( thread_num < nb_threads -1 )
 			nrh = (thread_num + 1) * (nrow / nb_threads) - 1;   
-
+		//printf("%d ~ %d (%d)\n", nrl, nrh, nrow / nb_threads);
+	
 
 		in = X; mid = NULL; out = Y;
 		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); 
 		#pragma omp barrier
-		// zero_vui8matrix(X, nrl, nrh, v0, v1);
 		
 		in = Y; mid = NULL; out = X;
 		ui8matrix_dilation5_SIMD_InLU_O3_ValAddrRR(in, nrl, nrh, ncl, nch, v0, v1, mid, out); 
-
 		#pragma omp barrier
-		// zero_vui8matrix(Z, nrl, nrh, v0, v1);
-
+		
 		for (row = nrl - 2; row < nrh + 1 + 2; row++) {
 			out[row][last_v] = _mm_and_si128(out[row][last_v], vMask);
 			for (col = last_v + 1; col < v1 + 1; col++) 
@@ -141,6 +139,8 @@ void ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP(vuint8** X, int nrl, int n
 
 		in = X; mid = NULL; out = Z;
 		ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR(X, nrl, nrh, ncl, nch, v0, v1, Y, Z);
+		#pragma omp barrier
+		
 	}
 		
 	
