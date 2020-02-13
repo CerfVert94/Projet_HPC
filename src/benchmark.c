@@ -503,7 +503,6 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 	
 	// Initialize to save the benchmark result.
 	results = init_benchmark_results(nb_sets, (hs - ls)  + 1, step);
-	
 	cnt = 0;
 	for (size = ls - 1; size < hs; size += step) {
 		
@@ -530,7 +529,7 @@ double **benchmark_of_morpho(struct morpho_set *morphos, long nb_sets, long ls, 
 			}
 
 			results[idx_set][cnt] = ((double)min_cycles_sum / (nb_tests * (size + 1) * (size + 1)));
-			if ((size + 1) % 500 == 0 || size >= hs - 1) 
+			// if ((size + 1) % 160 == 0 || size >= hs - 1) 
 				printf("\t["LALIGNED_STR"] Ran morpho %d * %d times on %ld x %ld matrix during %llu cycles (min : %2.02lf).\n",  morphos[idx_set].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin), results[idx_set][cnt]);			
 			free_vui8matrix(vTempBuffer, i0, i1, j0, j1);
 			free_vui8matrix(vX, i0, i1, j0, j1);

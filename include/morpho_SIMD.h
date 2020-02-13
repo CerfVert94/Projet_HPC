@@ -22,8 +22,10 @@ void ui8matrix_sequence_SIMD_Pipeline2_FO_InLU_O3_ValAddrRR(vuint8** X, int nrl,
 void ui8matrix_erosion_SIMD_divide_row_and_conquer(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
 void ui8matrix_erosion_SIMD_divide_col_and_conquer(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
 void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
-void ui8matrix_erosion_SIMD_InLU_O3_AddrRR (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) ;
+void ui8matrix_erosion_SIMD_InLU_O3_AddrRR (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
 void ui8matrix_erosion_SIMD_col_pipeline(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
+void ui8matrix_erosion_SIMD_col_pipeline_RR(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
+void ui8matrix_erosion_SIMD_col_pipeline_InLU_O3_RR(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y);
 
 void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer, vuint8 **Y);
 void ui8matrix_dilation_SIMD_naive(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer, vuint8 **Y);

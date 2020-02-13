@@ -191,70 +191,72 @@ struct morpho_set dilations[] = {
                                         {.func_name = "ui8matrix_erosion_SIMD_divide_row_and_conquer"  , .vec_morpho_func = ui8matrix_erosion_SIMD_divide_row_and_conquer     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
                                         {.func_name = "ui8matrix_erosion_SIMD_divide_col_and_conquer"  , .vec_morpho_func = ui8matrix_erosion_SIMD_divide_col_and_conquer     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
                                         {.func_name = "ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR"  , .vec_morpho_func = ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_SIMD_InLU_O3_AddrRR"  , .vec_morpho_func = ui8matrix_erosion_SIMD_InLU_O3_AddrRR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR"  , .vec_morpho_func = ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_SIMD_col_pipeline"   , .vec_morpho_func = ui8matrix_erosion_SIMD_col_pipeline     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-
-                                        {.func_name = "ui8matrix_erosion_SIMD_naive"                   , .vec_morpho_func = ui8matrix_erosion_SIMD_naive                      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_SIMD_RR_row"                   , .vec_morpho_func = ui8matrix_erosion_SIMD_RR_row                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_erosion_SIMD_FO"             , .vec_morpho_func = ui8matrix_erosion_erosion_SIMD_FO                 , .pack_type = NO_PACK, .op_type = FUSION, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_erosion_SIMD_FO_RR_row"      , .vec_morpho_func = ui8matrix_erosion_erosion_SIMD_FO_RR_row          , .pack_type = NO_PACK, .op_type = FUSION, .instr_type = SIMD},
-                                        {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive                                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_O1xO1"                , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1                           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR             , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR             , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_NS                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS                 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_NS                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_RR_NS                 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_NS                  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_row_pipeline"               , .morpho_func = ui8matrix_erosion_row_pipeline                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_col_pipeline"               , .morpho_func = ui8matrix_erosion_col_pipeline                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_col_pipeline_RR"            , .morpho_func = ui8matrix_erosion_col_pipeline_RR                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_col_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_col_and_conquer         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_col_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_InLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_col_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_ExLU_O3          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_O1xO1_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1_OMP                                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_OMP                            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_OMP                            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_OMP                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP                   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_OMP          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_InLU_O3_AddrRR"  , .vec_morpho_func = ui8matrix_erosion_SIMD_InLU_O3_AddrRR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR"  , .vec_morpho_func = ui8matrix_erosion_SIMD_InLU_O3_ValAddrRR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_col_pipeline"   , .vec_morpho_func = ui8matrix_erosion_SIMD_col_pipeline     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_col_pipeline_RR"   , .vec_morpho_func = ui8matrix_erosion_SIMD_col_pipeline_RR     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_naive"                   , .vec_morpho_func = ui8matrix_erosion_SIMD_naive                      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_SIMD_RR_row"                   , .vec_morpho_func = ui8matrix_erosion_SIMD_RR_row                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_erosion_SIMD_FO"             , .vec_morpho_func = ui8matrix_erosion_erosion_SIMD_FO                 , .pack_type = NO_PACK, .op_type = FUSION, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_erosion_SIMD_FO_RR_row"      , .vec_morpho_func = ui8matrix_erosion_erosion_SIMD_FO_RR_row          , .pack_type = NO_PACK, .op_type = FUSION, .instr_type = SIMD},
+                                        // {.func_name = "ui8matrix_erosion_naive"                   , .morpho_func = ui8matrix_erosion_naive                                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_O1xO1"                , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1                           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3"                , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_ValAddrRR             , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_ValAddrRR             , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR"      , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_ValAddrRR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR"         , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_NS                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_RR_NS                 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_NS                    , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_RR_NS"          , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_RR_NS                 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_NS"             , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_NS                  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_row_pipeline"               , .morpho_func = ui8matrix_erosion_row_pipeline                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_col_pipeline"               , .morpho_func = ui8matrix_erosion_col_pipeline                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_col_pipeline_RR"            , .morpho_func = ui8matrix_erosion_col_pipeline_RR                       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3"       , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3              , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR"    , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_InLU_O3_RR           , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_ExLU_O3_RR   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3"             , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3      , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR"          , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer"            , .morpho_func = ui8matrix_erosion_divide_col_and_conquer         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer_InLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_InLU_O3 , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_col_and_conquer_ExLU_O3"    , .morpho_func = ui8matrix_erosion_divide_col_and_conquer_ExLU_O3          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_O1xO1_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_O1xO1_OMP                                , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_OMP                            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_OMP                            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_OMP"            , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_OMP                          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP                   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_OMP          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        // {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                        };
     
-    struct sd_set SDs_step0[] = {
+    struct sd_set SDs_step0[] = {//SigmaDelta_step0_InLU_O3_OMP
                                 {.func_name = "SigmaDelta_step0_mem", .sd_func = SigmaDelta_step0_mem, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SCALAR},
                                 {.func_name = "SigmaDelta_step0_naive", .sd_func = SigmaDelta_step0_naive, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SCALAR},
                                 {.func_name = "SigmaDelta_step0_SIMD", .vec_sd_func = SigmaDelta_step0_SIMD, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                {.func_name = "SigmaDelta_step0_SIMD_and_load", .vec_sd_func = SigmaDelta_step0_SIMD_and_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                {.func_name = "SigmaDelta_step0_SIMD_or_load", .vec_sd_func = SigmaDelta_step0_SIMD_or_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                {.func_name = "SigmaDelta_step0_SIMD_load_load", .vec_sd_func = SigmaDelta_step0_SIMD_load_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
-                                {.func_name = "SigmaDelta_step0_SIMD_store_load", .vec_sd_func = SigmaDelta_step0_SIMD_store_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                // {.func_name = "SigmaDelta_step0_SIMD_and_load", .vec_sd_func = SigmaDelta_step0_SIMD_and_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                // {.func_name = "SigmaDelta_step0_SIMD_or_load", .vec_sd_func = SigmaDelta_step0_SIMD_or_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                // {.func_name = "SigmaDelta_step0_SIMD_load_load", .vec_sd_func = SigmaDelta_step0_SIMD_load_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                // {.func_name = "SigmaDelta_step0_SIMD_store_load", .vec_sd_func = SigmaDelta_step0_SIMD_store_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 {.func_name = "SigmaDelta_step0_SIMD_memset_load", .vec_sd_func = SigmaDelta_step0_SIMD_memset_load, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                {.func_name = "SigmaDelta_step0_InLU_O3_OMP", .vec_sd_func = SigmaDelta_step0_SIMD_InLU_O3_OMP, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
+                                {.func_name = "SigmaDelta_step0_InLU_O4_OMP", .vec_sd_func = SigmaDelta_step0_SIMD_InLU_O4_OMP, .n_coeff = N, .v_min = Vmin, .v_max=Vmax, .instr_type = SIMD},
                                 }; 
 
     struct sd_set SDs_step1[] = {
@@ -339,7 +341,7 @@ struct morpho_set dilations[] = {
                                         // {.func_name = "SD_Naive/Sequential_Morpho_Naive"                 , .sd_step0 = SigmaDelta_step0_naive, .sd_func = SigmaDelta_naive, .morpho_func = ui8matrix_sequence_naive, .instr_type= SCALAR},
                                         // {.func_name = "SD_FO+SIMD/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
                                         // {.func_name = "SD_FO+SIMD+OMP/Morpho-Pipeline+FO+InLU_O3+FullRR+SIMD ", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL_OMP, .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR, .instr_type= SIMD},
-                                        {.func_name = "SD_FO+SIMD+OMP/Morpho-FO+InLU_O3+FullRR+SIMD+OMP ", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func =SigmaDelta_SIMD_FL_OMP, .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP, .instr_type= SIMD},
+                                        {.func_name = "SD_FO+SIMD+OMP/Morpho-FO+InLU_O3+FullRR+SIMD+OMP ", .vec_sd_step0 = SigmaDelta_step0_SIMD_InLU_O4_OMP, .vec_sd_func =SigmaDelta_SIMD_FL_OMP, .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP, .instr_type= SIMD},
                                         };
 void launch_movement_detection(char *filename_format, int start, int end, char *res_filename_format)
 {
@@ -419,7 +421,7 @@ int main(void)
     // test_SigmaDelta_step4("../car3/car_3000.pgm", "../car3/car_3001.pgm", SDs_step4, 4, false);
     // test_SigmaDelta("../car3/car_3000.pgm", "../car3/car_3001.pgm", completeSDs, 1, false);
     
-    // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 8, 1, 1, 200, 10000, 100);
+    // launch_SD_step_benchmark("output/benchmark_sdstep0.dat"             , SDs_step0, 10, 1, 1, 100, 10000, 100);
     // launch_SD_step_benchmark("output/benchmark_sdstep1.dat"             , SDs_step1, 4, 1, 1, 200, 5000, 100);
     // launch_SD_step_benchmark("output/benchmark_sdstep2.dat"             , SDs_step2, 6, 1, 1, 200, 5000, 50);
     // launch_SD_step_benchmark("output/benchmark_sdstep3.dat"             , SDs_step3, 5, 1, 1, 200, 5000, 50);
@@ -429,12 +431,12 @@ int main(void)
     
 
 
-    // test_erosions ("../car3/car_3000.pgm", erosions , 3, false);
+    test_erosions ("../car3/car_3000.pgm", erosions , 1, false);
     // test_dilations("../car3/car_3000.pgm", dilations, 3, false);
     // test_sequences ("../car3/car_3001.pgm", sequences , 2, false);
     // launch_morpho_benchmark( "output/benchmark_dilation.dat", dilations  , 1, 1, 1, 10, 2000, 1);
-    // launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , 7, 1, 1, 10, 5000, 10);
-    launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 2, 1, 1, 100, 10000, 50);
+    launch_morpho_benchmark( "output/benchmark_erosion.dat" , erosions   , 3, 1, 1, 10, 4000, 16);
+    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences   , 2, 1, 1, 100, 10000, 50);
     // launch_complete_process_benchmark("output/full_benchmark.dat", cps, 1, 1, 1, 100, 8000, 100);
     
 

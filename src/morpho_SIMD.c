@@ -1127,7 +1127,46 @@ void ui8matrix_erosion_SIMD_col_pipeline(vuint8** X, int nrl, int nrh, long ncl,
 		}
 	}
 }
+void ui8matrix_erosion_SIMD_col_pipeline_RR(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) 
+{
+	long row = nrl, col = v0, x, y;
+	// uint8 **temp = ui8matrix(nrl + (-1), nrh + 1, v0 + (-1), v1 + 1);
+	vuint8 *in_row0, *in_row1, *in_row2, *temp_row, *out_row0;
+	vuint8 x0, x1, x2;
+	// Prologue	
+	for (row = nrl; row < nrh + 1; row++) {
+		in_row0 = X[row - 1];
+		in_row1 = X[row + 0];
+		in_row2 = X[row + 1];
+		temp_row = vTempBuffer[row];
+    	temp_row[v0 - 1] = vector_and3(in_row0[v0 - 1], in_row1[v0 - 1], in_row2[v0 - 1]);
+    	temp_row[v0 + 0] = vector_and3(in_row0[v0 + 0], in_row1[v0 + 0], in_row2[v0 + 0]);
+	}	
+	
 
+	in_row0 = X[nrl - 1];
+	in_row1 = X[nrl + 0];
+	for (row = nrl; row < nrh + 1; row++){
+		temp_row = vTempBuffer[row];
+		
+		in_row2 = X[row + 1];
+
+		out_row0 = Y[row]; 
+		
+		x0 = temp_row[v0 - 1];		// LOAD => A
+		x1 = temp_row[v0 - 0];		// LOAD => B
+		for (col = v0; col < v1 + 1; col ++) {
+			x2 = vector_and3(in_row0[col + 1], in_row1[col + 1], in_row2[col + 1]);
+			out_row0[col + 0] = vector_and3_row1shift( x0, x1, x2); // A | B | C
+			temp_row[col + 1] = x2;
+			_mm_store_si128(&x0, x1);
+			_mm_store_si128(&x1, x2);
+		}
+		in_row0 = in_row1;
+		in_row1 = in_row2;
+
+	}
+}
 
 /*-------------------------------------------------------------------------------------------------*/
 void ui8matrix_dilation_SIMD_RR_row (vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {

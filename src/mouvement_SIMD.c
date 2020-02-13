@@ -82,65 +82,65 @@ void SigmaDelta_step0_SIMD(vuint8** M, vuint8** I, vuint8** V, long nrl, long nr
 	long i, j;
 
 
-	vuint8 vevLT = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
 	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	vuint8 *ptr = &V[nrl][v0];
 	
 	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	for (i = nrl; i < nrh + 1; i++)
 		for (j = v0; j < v1 + 1; j++)
-			V[i][j] = vevLT;
+			V[i][j] = vecVmin;
 }
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD_and_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	long i, j;
-	vuint8 vevLT = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
 	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	vuint8 *ptr = &V[nrl][v0];
 	
 	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	for (i = nrl; i < nrh + 1; i++)
 		for (j = v0; j < v1 + 1; j++)
-			V[i][j] = _mm_and_si128(vevLT, vevLT);
+			V[i][j] = _mm_and_si128(vecVmin, vecVmin);
 }
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD_or_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	long i, j;
-	vuint8 vevLT = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
 	
 	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	for (i = nrl; i < nrh + 1; i++)
 		for (j = v0; j < v1 + 1; j++)
-			V[i][j] = _mm_or_si128(vevLT, vevLT);
+			V[i][j] = _mm_or_si128(vecVmin, vecVmin);
 }
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD_load_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	long i, j;
-	vuint8 vevLT = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
 	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	vuint8 *ptr = &V[nrl][v0];
 	
 	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	for (i = nrl; i < nrh + 1; i++)
 		for (j = v0; j < v1 + 1; j++)
-			V[i][j] = _mm_lddqu_si128(&vevLT);
+			V[i][j] = _mm_lddqu_si128(&vecVmin);
 }
 
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD_store_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
 /*---------------------------------------------------------------------------------------------*/
 	long i, j;
-	vuint8 vevLT = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
 	vuint8 vec0 = _mm_set_epi8(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	vuint8 *ptr = &V[nrl][v0];
 	
 	memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
 	for (i = nrl; i < nrh + 1; i++)
 		for (j = v0; j < v1 + 1; j++)
-			_mm_store_si128(&V[i][j], vevLT);
+			_mm_store_si128(&V[i][j], vecVmin);
 }
 /*---------------------------------------------------------------------------------------------*/
 void SigmaDelta_step0_SIMD_memset_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
@@ -154,6 +154,177 @@ void SigmaDelta_step0_SIMD_memset_load(vuint8** M, vuint8** I, vuint8** V, long 
 	memset((uint32*)&V[nrl][v0], one, len);
 }
 
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_InLU_O8_OMP(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j, order = 8 , r;
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 *ptr = &V[nrl][v0];
+
+	r = (v1 - v0 + 1) % order;
+	// memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+	for (i = nrl; i < nrh + 1; i++) {
+		for (j = v0; j < v1 - r + 1; j += order) {
+			_mm_store_si128(&V[i][j + 0], vecVmin); _mm_store_si128(&M[i][j + 0], I[i][j + 0]);
+			_mm_store_si128(&V[i][j + 1], vecVmin); _mm_store_si128(&M[i][j + 1], I[i][j + 1]);
+			_mm_store_si128(&V[i][j + 2], vecVmin); _mm_store_si128(&M[i][j + 2], I[i][j + 2]);
+			_mm_store_si128(&V[i][j + 3], vecVmin); _mm_store_si128(&M[i][j + 3], I[i][j + 3]);
+			_mm_store_si128(&V[i][j + 4], vecVmin); _mm_store_si128(&M[i][j + 4], I[i][j + 4]);
+			_mm_store_si128(&V[i][j + 5], vecVmin); _mm_store_si128(&M[i][j + 5], I[i][j + 5]);
+			_mm_store_si128(&V[i][j + 6], vecVmin); _mm_store_si128(&M[i][j + 6], I[i][j + 6]);
+			_mm_store_si128(&V[i][j + 7], vecVmin); _mm_store_si128(&M[i][j + 7], I[i][j + 7]);
+		}
+	}
+	switch (r) {
+		case 7 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+			_mm_store_si128(&V[i][v1 - 3], vecVmin); _mm_store_si128(&M[i][v1 - 3], I[i][v1 - 3]);
+			_mm_store_si128(&V[i][v1 - 4], vecVmin); _mm_store_si128(&M[i][v1 - 4], I[i][v1 - 4]);
+			_mm_store_si128(&V[i][v1 - 5], vecVmin); _mm_store_si128(&M[i][v1 - 5], I[i][v1 - 5]);
+			_mm_store_si128(&V[i][v1 - 6], vecVmin); _mm_store_si128(&M[i][v1 - 6], I[i][v1 - 6]);
+		}
+		break;
+		case 6 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+			_mm_store_si128(&V[i][v1 - 3], vecVmin); _mm_store_si128(&M[i][v1 - 3], I[i][v1 - 3]);
+			_mm_store_si128(&V[i][v1 - 4], vecVmin); _mm_store_si128(&M[i][v1 - 4], I[i][v1 - 4]);
+			_mm_store_si128(&V[i][v1 - 5], vecVmin); _mm_store_si128(&M[i][v1 - 5], I[i][v1 - 5]);
+		}
+		break;
+		case 5 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+			_mm_store_si128(&V[i][v1 - 3], vecVmin); _mm_store_si128(&M[i][v1 - 3], I[i][v1 - 3]);
+			_mm_store_si128(&V[i][v1 - 4], vecVmin); _mm_store_si128(&M[i][v1 - 4], I[i][v1 - 4]);
+		}
+		break;
+		case 4 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+			_mm_store_si128(&V[i][v1 - 3], vecVmin); _mm_store_si128(&M[i][v1 - 3], I[i][v1 - 3]);
+		}
+		break;
+		case 3 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+		}
+		break;
+		case 2 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+		}
+		break;
+		case 1 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+		}
+		break;
+		case 0:
+		break;
+	}
+}
+
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_InLU_O4_OMP(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j, order = 4 , r;
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 *ptr = &V[nrl][v0];
+
+	r = (v1 - v0 + 1) % order;
+	// memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+	for (i = nrl; i < nrh + 1; i++) {
+		for (j = v0; j < v1 - r + 1; j += order) {
+			_mm_store_si128(&V[i][j + 0], vecVmin); _mm_store_si128(&M[i][j + 0], I[i][j + 0]);
+			_mm_store_si128(&V[i][j + 1], vecVmin); _mm_store_si128(&M[i][j + 1], I[i][j + 1]);
+			_mm_store_si128(&V[i][j + 2], vecVmin); _mm_store_si128(&M[i][j + 2], I[i][j + 2]);
+			_mm_store_si128(&V[i][j + 3], vecVmin); _mm_store_si128(&M[i][j + 3], I[i][j + 3]);
+		}
+	}
+	switch (r) {
+		case 3 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+			_mm_store_si128(&V[i][v1 - 2], vecVmin); _mm_store_si128(&M[i][v1 - 2], I[i][v1 - 2]);
+		}
+		break;
+		case 2 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+		}
+		break;
+		case 1 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+		}
+		break;
+		case 0:
+		break;
+	}
+}
+
+/*---------------------------------------------------------------------------------------------*/
+void SigmaDelta_step0_SIMD_InLU_O3_OMP(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max) {
+/*---------------------------------------------------------------------------------------------*/
+	long i, j, order = 4 , r;
+	vuint8 vecVmin = _mm_set_epi8(v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min, v_min);
+	vuint8 *ptr = &V[nrl][v0];
+
+	r = (v1 - v0 + 1) % order;
+	// memcpy(&M[nrl][v0], &I[nrl][v0], (nrh - nrl + 1) * (v1 - v0 + 1) *sizeof(vuint8));
+	#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+	for (i = nrl; i < nrh + 1; i++) {
+		for (j = v0; j < v1 - r + 1; j += order) {
+			_mm_store_si128(&V[i][j + 0], vecVmin); _mm_store_si128(&M[i][j + 0], I[i][j + 0]);
+			_mm_store_si128(&V[i][j + 1], vecVmin); _mm_store_si128(&M[i][j + 1], I[i][j + 1]);
+			_mm_store_si128(&V[i][j + 2], vecVmin); _mm_store_si128(&M[i][j + 2], I[i][j + 2]);
+		}
+	}
+	switch (r) {
+		case 2 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+			_mm_store_si128(&V[i][v1 - 1], vecVmin); _mm_store_si128(&M[i][v1 - 1], I[i][v1 - 1]);
+		}
+		break;
+		case 1 :
+		#pragma omp parallel for default(none) private(i, j) shared(nrl, nrh, v0, v1, r, order, vecVmin, M, I, V)
+		for (i = nrl; i < nrh + 1; i++) {
+			_mm_store_si128(&V[i][v1 - 0], vecVmin); _mm_store_si128(&M[i][v1 - 0], I[i][v1 - 0]);
+		}
+		break;
+		case 0:
+		break;
+	}
+}
 
 
 

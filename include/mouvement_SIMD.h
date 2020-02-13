@@ -24,6 +24,9 @@ void SigmaDelta_step0_SIMD_or_load(vuint8** M, vuint8** I, vuint8** V, long nrl,
 void SigmaDelta_step0_SIMD_load_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max);
 void SigmaDelta_step0_SIMD_store_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max);
 void SigmaDelta_step0_SIMD_memset_load(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max);
+void SigmaDelta_step0_SIMD_InLU_O3_OMP(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max);
+void SigmaDelta_step0_SIMD_InLU_O4_OMP(vuint8** M, vuint8** I, vuint8** V, long nrl, long nrh, int v0, int v1 , uint8 n_coeff, uint8 v_min, uint8 v_max);
+
 /* STEP 1 : M Estimation */
 void SigmaDelta_step1_SIMD(vuint8** I, vuint8** M_1, vuint8** M, long nrl, long nrh, int v0, int v1, uint8 n_coeff, uint8 v_min, uint8 v_max); 
 /* STEP 2 : O Computation */

@@ -98,8 +98,8 @@ void test_vec_intergration(uint8 **image, long nrl, long nrh, long ncl, long nch
 	
 	long a0, a1, b0, b1;
 	long i, j, k, l, m;
-    for (i = nrl + 10; i < nrh + 1; i++){
-		for (j =  ncl + 10; j < nch + 1; j++){
+    for (i = nrh - 20; i < nrh + 1; i++){
+		for (j =  nch - 20; j < nch + 1; j++){
 			
 			s2v1D((int)ncl, j, card, &v0, &v1);
 			memset_ui8matrix(X,          0, nrl - 2, nrh + 2, ncl - 2, nch + 2);
