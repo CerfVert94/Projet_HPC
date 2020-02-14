@@ -227,8 +227,8 @@ struct morpho_set dilations[] = {
                                     {.func_name = "SigmaDelta_SIMD_FL_OMP", .vec_sd_step0 = SigmaDelta_step0_SIMD_memset_load, .vec_sd_func = SigmaDelta_SIMD_FL_OMP, .n_coeff = N, .v_min = Vmin, .v_max = Vmax, .instr_type = SIMD},
                                   };
     struct morpho_set sequences[] = {
-                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
-                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"       , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+                                        //{.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP"   , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
+//                                        {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"       , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
                                         {.func_name = "ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR"       , .vec_morpho_func = ui8matrix_sequence_SIMD_Pipeline_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
                                         {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP"            , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR_OMP     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
                                         {.func_name = "ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR"                , .vec_morpho_func = ui8matrix_sequence_SIMD_FO_InLU_O3_ValAddrRR     , .pack_type=NO_PACK , .op_type=NORMAL      , .instr_type = SIMD}, 
@@ -334,13 +334,13 @@ int main(void)
     
 
 
-    test_dilations("../car3/car_3000.pgm", dilations, 53, false);
-    test_erosions ("../car3/car_3000.pgm", erosions , 56, false);
+    //test_dilations("../car3/car_3000.pgm", dilations, 53, false);
+//    test_erosions ("../car3/car_3000.pgm", erosions , 56, false);
     //test_sequences ("../car3/car_3001.pgm", sequences , 10, false);
-    // launch_morpho_benchmark( "output/benchmark_dilation.csv", dilations  , 51, 1, 1,  100, 32000, 32);
-    // launch_morpho_benchmark( "output/benchmark_erosion.csv" , erosions   , 54, 1, 1,  100, 32000, 32);
-    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences , 13, 1, 1,  100, 32000, 32);
-    // launch_complete_process_benchmark("output/full_benchmark.dat", cps   ,  3, 1, 1,  100, 32000, 32);
+  //  launch_morpho_benchmark( "output/benchmark_dilation.csv", dilations  , 51, 1, 1,  100, 32000, 32);
+//    launch_morpho_benchmark( "output/benchmark_erosion.csv" , erosions   , 54, 1, 1,  100, 32000, 32);
+    launch_morpho_benchmark( "output/benchmark_sequence.csv" , sequences , 9, 1, 1,  32, 6100, 32);
+    launch_complete_process_benchmark("output/full_benchmark.csv", cps   ,  4, 1, 1, 32, 6100, 32);
     
 
 
@@ -348,6 +348,7 @@ int main(void)
     
     return 0;    
 }
+
 
 
 

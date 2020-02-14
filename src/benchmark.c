@@ -418,7 +418,7 @@ double **benchmark_of_complete_process(struct complete_process_set *cproc, long 
 			
 			
 			
-			if ((size + 1) % 500 == 0 || size >= hs - 1) 
+//			if ((size + 1) % 500 == 0 || size >= hs - 1) 
 				printf("\t["LALIGNED_STR"] Ran SigmaDelta %d * %d times on %ld x %ld matrix during %llu cycles.\n",  cproc[i].func_name, packet_size, nb_tests, size + 1, size + 1, (end - begin));			
 
 			free_false_inputs(cproc[i].t0  , cproc[i].t1  , cproc[i].X , cproc[i].Y , cproc[i].Z, 
