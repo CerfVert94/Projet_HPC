@@ -78,21 +78,11 @@
 #define SE_NCL -1
 #define SE_NCH  1
 
+#define MAX_THREADS 4/*omfp_get_max_threads()*/
 
-void ui8matrix_sequence_divide_row_and_conquer_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_sequence_row_so_OMP(uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
-	// uint8 **ppPreOutput0, **ppPreOutput1;
-	// ppPreOutput0 = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ppPreOutput1 = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// memset_ui8matrix(ppPreOutput0, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_erosion_divide_row_and_conquer_OMP (X     , nrl, nrh, ncl, nch, ppPreOutput0);
-	// memset_ui8matrix(ppPreOutput1, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_dilation_divide_row_and_conquer_OMP(ppPreOutput0, nrl, nrh, ncl, nch, ppPreOutput1);
-	// memset_ui8matrix(ppPreOutput0, 0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// ui8matrix_dilation_divide_row_and_conquer_OMP(ppPreOutput1, nrl, nrh, ncl, nch, ppPreOutput0);
-	// ui8matrix_erosion_divide_row_and_conquer_OMP (ppPreOutput0, nrl, nrh, ncl, nch, temp_buffer, Y);
-	// free_ui8matrix(ppPreOutput0, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
-	// free_ui8matrix(ppPreOutput1, nrl + SE_NRL, nrh + SE_NRH, ncl + SE_NCL, nch + SE_NCH);
+	
 
 }
 /*******************************************/
@@ -103,7 +93,7 @@ void ui8matrix_dilation_LU3x3_O1xO1_OMP(uint8** X, long nrl, long nrh, long ncl,
 {
 	long row = nrl, col = ncl, x, y;
 	// dilate
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X) private(row, col) 
 	for (row = nrl; row < nrh + 1; row++)
 		for (col = ncl; col < nch + 1; col++)
@@ -119,7 +109,7 @@ void ui8matrix_dilation_LU3x3_InLU_O3_OMP(uint8** X, long nrl, long nrh, long nc
 	uint8 *out_row0;
 	r = (nch + 1)  % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, r) private(row, col, row0, row1, row2, out_row0) 		
 	for (row = nrl; row < nrh + 1; row ++) {
@@ -182,7 +172,7 @@ void ui8matrix_dilation_LU3x3_ExLU_O3_OMP(uint8** X, long nrl, long nrh, long nc
 
 	r = (nrh + 1)  % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, r) private(y0, y1, y2, x0, x1, x2, x3,row, col, row0, row1, row2,row3,row4, out_row0,out_row1, out_row2)
 	for (row = nrl; row < nrh + 1 - r; row += order) {
 		row0 = X[row - 1];
@@ -252,7 +242,7 @@ void ui8matrix_dilation_LU3x3_ComLU_O3_OMP(uint8** X, long nrl, long nrh, long n
 	rr = (nrh + 1) % order;
 	cr = (nch + 1) % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, rr, cr) private(y0, y1, y2, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14,row, col, row0, row1, row2,row3,row4, out_row0,out_row1, out_row2)	schedule(dynamic)
 	for (row = nrl; row < nrh + 1 - rr; row += order) {
 		row0 = X[row - 1];
@@ -352,7 +342,7 @@ void ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh, 
 	r = (nch + 1) % order;
 	nrow = nrh - nrl + 1;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel //shared(X, ncl, nch, Y, nb_threads, r, nrow)
 	{
 		row0 = X[nrl - 1];
@@ -442,7 +432,7 @@ void ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh, 
 	int nb_threads;
 	r = (nrh + 1)  % order;
 	nrow = nrh - nrl + 1;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel 
 	{
 		row0 = X[nrl - 1];
@@ -519,7 +509,7 @@ void ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh,
 	rr = (nrh + 1) % order;
 	cr = (nch + 1) % order;
 	nrow = nrh - nrl + 1;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel 
 	{
 		uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
@@ -690,7 +680,7 @@ void ui8matrix_dilation_row_pipeline_OMP(uint8** X, long nrl, long nrh, long ncl
 }
 */
 /*
-void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_dilation_row_so_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -700,7 +690,7 @@ void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nr
 
 	nrow = nrh - nrl + 1;
 	row = 0;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel shared(temp_buffer, X, Y, ncl, nrl, nch, nrh) 
 	{
 		#pragma omp master 
@@ -761,7 +751,7 @@ void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nr
 	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
 }
 */
-void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_dilation_row_so_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -771,7 +761,7 @@ void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nr
 
 	nrow = nrh - nrl + 1;
 	row = 0;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel shared(temp_buffer, X, Y, ncl, nrl, nch, nrh) 
 	{
 		#pragma omp for nowait private(temp_row, in_row, row, col) schedule(auto)
@@ -801,7 +791,7 @@ void ui8matrix_dilation_divide_row_and_conquer_OMP (uint8** X, long nrl, long nr
 	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
 }
 
-void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_dilation_row_so_ExLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -894,7 +884,7 @@ void ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP (uint8** X, long nrl,
 }
 
 
-void ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_dilation_row_so_InLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -1186,7 +1176,7 @@ void ui8matrix_erosion_LU3x3_O1xO1_OMP(uint8** X, long nrl, long nrh, long ncl, 
 {
 	long row = nrl, col = ncl, x, y;
 	// dilate
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X) private(row, col) 
 	for (row = nrl; row < nrh + 1; row++)
 		for (col = ncl; col < nch + 1; col++)
@@ -1202,7 +1192,7 @@ void ui8matrix_erosion_LU3x3_InLU_O3_OMP(uint8** X, long nrl, long nrh, long ncl
 	uint8 *out_row0;
 	r = (nch + 1)  % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, r) private(row, col, row0, row1, row2, out_row0) 		
 	for (row = nrl; row < nrh + 1; row ++) {
@@ -1265,7 +1255,7 @@ void ui8matrix_erosion_LU3x3_ExLU_O3_OMP(uint8** X, long nrl, long nrh, long ncl
 
 	r = (nrh + 1)  % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, r) private(y0, y1, y2, x0, x1, x2, x3,row, col, row0, row1, row2,row3,row4, out_row0,out_row1, out_row2)
 	for (row = nrl; row < nrh + 1 - r; row += order) {
 		row0 = X[row - 1];
@@ -1335,7 +1325,7 @@ void ui8matrix_erosion_LU3x3_ComLU_O3_OMP(uint8** X, long nrl, long nrh, long nc
 	rr = (nrh + 1) % order;
 	cr = (nch + 1) % order;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel for default(none) shared(nrl, ncl, nrh, nch, Y, X, rr, cr) private(y0, y1, y2, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14,row, col, row0, row1, row2,row3,row4, out_row0,out_row1, out_row2)	schedule(dynamic)
 	for (row = nrl; row < nrh + 1 - rr; row += order) {
 		row0 = X[row - 1];
@@ -1435,7 +1425,7 @@ void ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh, l
 	r = (nch + 1) % order;
 	nrow = nrh - nrl + 1;
 	
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel //shared(X, ncl, nch, Y, nb_threads, r, nrow)
 	{
 		row0 = X[nrl - 1];
@@ -1525,7 +1515,7 @@ void ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh, l
 	int nb_threads;
 	r = (nrh + 1)  % order;
 	nrow = nrh - nrl + 1;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel 
 	{
 		row0 = X[nrl - 1];
@@ -1602,7 +1592,7 @@ void ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP(uint8** X, long nrl, long nrh, 
 	rr = (nrh + 1) % order;
 	cr = (nch + 1) % order;
 	nrow = nrh - nrl + 1;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel 
 	{
 		uint8 y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14;
@@ -1773,7 +1763,7 @@ void ui8matrix_erosion_row_pipeline_OMP(uint8** X, long nrl, long nrh, long ncl,
 }
 */
 /*
-void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_erosion_row_so_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -1783,7 +1773,7 @@ void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh
 
 	nrow = nrh - nrl + 1;
 	row = 0;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel shared(temp_buffer, X, Y, ncl, nrl, nch, nrh) 
 	{
 		#pragma omp master 
@@ -1844,7 +1834,7 @@ void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh
 	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
 }
 */
-void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_erosion_row_so_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -1854,7 +1844,7 @@ void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh
 
 	nrow = nrh - nrl + 1;
 	row = 0;
-	omp_set_num_threads(omp_get_max_threads());
+	omp_set_num_threads(MAX_THREADS);
 	#pragma omp parallel shared(temp_buffer, X, Y, ncl, nrl, nch, nrh) 
 	{
 		#pragma omp for nowait private(temp_row, in_row, row, col) schedule(auto)
@@ -1884,7 +1874,7 @@ void ui8matrix_erosion_divide_row_and_conquer_OMP (uint8** X, long nrl, long nrh
 	// free_ui8matrix(temp, nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
 }
 
-void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_erosion_row_so_ExLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);
@@ -1977,7 +1967,7 @@ void ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP (uint8** X, long nrl, 
 }
 
 
-void ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
+void ui8matrix_erosion_row_so_InLU_O3_OMP (uint8** X, long nrl, long nrh, long ncl, long nch, uint8 **temp_buffer, uint8 **Y)
 {
 	const long order = 3;
 	// uint8 **temp = ui8matrix(nrl + SE_NRL, nrh + SE_NRH, ncl, nch);

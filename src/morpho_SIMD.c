@@ -260,7 +260,7 @@ void ui8matrix_erosion_SIMD_naive(vuint8** X, int nrl, int nrh, long ncl, long n
 
 } 
 /*------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_SIMD_divide_row_and_conquer(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
+void ui8matrix_erosion_SIMD_row_so(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
 
 	long row, col;
@@ -381,7 +381,7 @@ void ui8matrix_erosion_SIMD_pipeline2_LU3x3_InLU_O3_RR (vuint8** X, int nrl, int
 }
 
 /*------------------------------------------------------------------------------------------*/
-void ui8matrix_erosion_SIMD_divide_col_and_conquer(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
+void ui8matrix_erosion_SIMD_col_so(vuint8** X, int nrl, int nrh, long ncl, long nch, int v0, int v1, vuint8 **vTempBuffer , vuint8 **Y) {
 /*------------------------------------------------------------------------------------------*/
 
 	long row, col;
