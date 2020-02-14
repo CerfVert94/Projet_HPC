@@ -678,7 +678,7 @@ void save_benchmark(const char *filename, void *sets, size_t struct_size, int nb
 
     fputc('\n', file);
     for (long size = min_size; size < max_size + 1; size += step) {
-        fprintf(file, "%ld, ", 4, size);
+        fprintf(file, "%ld, ", size);
         for (long i = 0; i < nb_sets; i++) {
 		if (i < nb_sets - 1)
 	            fprintf(file, "%2.2lf,", results[i][k]);
