@@ -175,8 +175,8 @@ struct morpho_set dilations[] = {
                                         {.func_name = "ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_InLU_O3_AddrRR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_ExLU_O3_AddrRR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_dilation_LU3x3_ComLU_O3_AddrRR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
-                                        //{.func_name = "ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
-                                       // {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
+                                        {.func_name = "ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_dilation_pipeline_LU3x3_ExLU_O3_RR_OMP            , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
+                                        {.func_name = "ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_dilation_pipeline2_LU3x3_InLU_O3_RR_OMP         , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_OMP               , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_InLU_O3_OMP               , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
                                         {.func_name = "ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_dilation_divide_row_and_conquer_ExLU_O3_OMP               , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR},
@@ -238,8 +238,8 @@ struct morpho_set dilations[] = {
                                         {.func_name = "ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_InLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                         {.func_name = "ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ExLU_O3_AddrRR_OMP                     , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                         {.func_name = "ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP"     , .morpho_func = ui8matrix_erosion_LU3x3_ComLU_O3_AddrRR_OMP                   , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                        //{.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
-                                       // {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                        {.func_name = "ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP"         , .morpho_func = ui8matrix_erosion_pipeline_LU3x3_ExLU_O3_RR_OMP       , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
+                                       {.func_name = "ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP"      , .morpho_func = ui8matrix_erosion_pipeline2_LU3x3_InLU_O3_RR_OMP        , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                         {.func_name = "ui8matrix_erosion_divide_row_and_conquer_OMP"            , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_OMP          , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                         {.func_name = "ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_InLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
                                         {.func_name = "ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP"    , .morpho_func = ui8matrix_erosion_divide_row_and_conquer_ExLU_O3_OMP  , .pack_type = NO_PACK, .op_type = NORMAL, .instr_type = SCALAR,},
@@ -429,13 +429,13 @@ int main(void)
     
 
 
-    //test_dilations("../car3/car_3000.pgm", dilations, 51, false);
-    //test_erosions ("../car3/car_3000.pgm", erosions , 54, false);
+    test_dilations("../car3/car_3000.pgm", dilations, 53, false);
+    test_erosions ("../car3/car_3000.pgm", erosions , 56, false);
     //test_sequences ("../car3/car_3001.pgm", sequences , 10, false);
-    launch_morpho_benchmark( "output/benchmark_dilation.csv", dilations  , 51, 1, 1,  100, 32000, 32);
-    launch_morpho_benchmark( "output/benchmark_erosion.csv" , erosions   , 54, 1, 1,  100, 32000, 32);
-    launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences , 13, 1, 1,  100, 32000, 32);
-    launch_complete_process_benchmark("output/full_benchmark.dat", cps   ,  3, 1, 1,  100, 32000, 32);
+    // launch_morpho_benchmark( "output/benchmark_dilation.csv", dilations  , 51, 1, 1,  100, 32000, 32);
+    // launch_morpho_benchmark( "output/benchmark_erosion.csv" , erosions   , 54, 1, 1,  100, 32000, 32);
+    // launch_morpho_benchmark( "output/benchmark_sequence.dat" , sequences , 13, 1, 1,  100, 32000, 32);
+    // launch_complete_process_benchmark("output/full_benchmark.dat", cps   ,  3, 1, 1,  100, 32000, 32);
     
 
 
